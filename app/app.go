@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"final-project-enigma/config"
-	"final-project-enigma/model/dto"
-	"final-project-enigma/pkg/validation"
+	"final-project-enigma/dto"
 	"final-project-enigma/router"
+	"final-project-enigma/utils"
 	"flag"
 	"fmt"
 	"os"
@@ -156,10 +156,10 @@ func RunService() {
 	log.Logger = log.Output(logFile)
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("password", validation.ValidatePassword)
-		v.RegisterValidation("nomorHp", validation.ValidateNoHp)
-		v.RegisterValidation("username", validation.ValidateUsername)
-		v.RegisterValidation("pin", validation.ValidatePIN)
+		v.RegisterValidation("password", utils.ValidatePassword)
+		v.RegisterValidation("nomorHp", utils.ValidateNoHp)
+		v.RegisterValidation("username", utils.ValidateUsername)
+		v.RegisterValidation("pin", utils.ValidatePIN)
 	}
 
 	r.Use(logger.SetLogger(
