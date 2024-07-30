@@ -1,7 +1,9 @@
 package entity
 
+import "github.com/google/uuid"
+
 type Role struct {
-	ID       string `gorm:"type:varchar(255);primaryKey" json:"id"`
-	RoleName string `json:"role_name"`
-	Account  Account
+	ID       uuid.UUID `gorm:"primaryKey" json:"id"`
+	RoleName string    `gorm:"not null" json:"role_name"`
+	Accounts []Account
 }

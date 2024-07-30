@@ -2,7 +2,7 @@ package config
 
 import (
 	"final-project-enigma/dto"
-	entity2 "final-project-enigma/entity"
+	"final-project-enigma/entity"
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -24,7 +24,16 @@ func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
 	}
 
 	DB = db
-	err = db.AutoMigrate(&entity2.Role{}, &entity2.User{}, &entity2.Account{})
+	err = db.AutoMigrate(
+		&entity.Role{},
+		&entity.StatusTimeSheet{},
+		&entity.User{},
+		&entity.Account{},
+		&entity.Work{},
+		&entity.TimeSheet{},
+		&entity.TimeSheetDetail{},
+	)
+
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Failed to migrate database")
 	}
