@@ -33,3 +33,15 @@ func (WorkService) CreateWork(request request.WorkRequest) (response.WorkRespons
 		Fee:         result.Fee,
 	}, nil
 }
+
+func (WorkService) GetById(id string) (response.WorkResponse, error) {
+	result, err := workRepository.GetById(id)
+	if err != nil {
+		return response.WorkResponse{}, err
+	}
+	return response.WorkResponse{
+		Id: result.ID,
+		Description: result.Description,
+		Fee: result.Fee,
+	}, nil
+}

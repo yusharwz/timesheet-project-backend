@@ -20,6 +20,7 @@ func NewWorkController(g *gin.RouterGroup) {
 		workGroup.GET("/", func(c *gin.Context) {
 			c.JSON(200, gin.H{"message": "Hello World!"})
 		})
+		workGroup.GET("/:id", controller.GetById)
 	}
 }
 
@@ -40,4 +41,14 @@ func (WorkController) CreateWork(c *gin.Context) {
 
 	response.NewResponseCreated(c, result, "Created new work successfully", "", "")
 
+}
+
+func (WorkController) GetById(c *gin.Context) {
+	id := c.Param("id")
+	result, err := workService.GetById(id)
+	if err != nil {
+		response.NewResponseError(c, err.Error(), "", "")
+		return
+	}
+	response.NewResponseSuccess(c, result, "Success fetch work data", "", "")
 }
