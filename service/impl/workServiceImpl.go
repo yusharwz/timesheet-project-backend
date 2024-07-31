@@ -40,8 +40,24 @@ func (WorkService) GetById(id string) (response.WorkResponse, error) {
 		return response.WorkResponse{}, err
 	}
 	return response.WorkResponse{
-		Id: result.ID,
+		Id:          result.ID,
 		Description: result.Description,
-		Fee: result.Fee,
+		Fee:         result.Fee,
 	}, nil
+}
+
+func (WorkService) GetAllWork(page, size string) ([]response.WorkResponse, string, error) {
+	results, total, err := workRepository.GetAllWork(page, size)
+	if err != nil {
+		return []response.WorkResponse{}, "0", err
+	}
+	responses := make([]response.WorkResponse, 0)
+	for _, v := range results {
+		responses = append(responses, response.WorkResponse{
+			Id:          v.ID,
+			Description: v.Description,
+			Fee:         v.Fee,
+		})
+	}
+	return responses, total, nil
 }

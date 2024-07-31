@@ -18,6 +18,7 @@ func NewWorkController(g *gin.RouterGroup) {
 	{
 		workGroup.POST("/", controller.CreateWork)
 		workGroup.GET("/:id", controller.GetById)
+		workGroup.GET("/", controller.GetAllWork)
 	}
 }
 
@@ -47,4 +48,15 @@ func (WorkController) GetById(c *gin.Context) {
 		return
 	}
 	response.NewResponseSuccess(c, result, "Success fetch work data", "", "")
+}
+
+func (WorkController) GetAllWork(c *gin.Context) {
+	page := c.DefaultQuery("page", "1")
+	size := c.DefaultQuery("size", "10")
+	results, total, err := workService.GetAllWork(page, size)
+	if err != nil {
+		response.NewResponseError(c, err.Error(), "Failed to fetch all work data", "")
+		return
+	}
+	response.NewResponseSuccessPaging(c, results, "Success fetch all work data", "", "", page, size, total)
 }
