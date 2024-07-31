@@ -101,7 +101,7 @@ func RunService() {
 		return
 	}
 
-	conn, err := db.DB()
+	conn, _ := db.DB()
 
 	duration, err := time.ParseDuration(configData.DbConfig.MaxLifeTime)
 	if err != nil {
