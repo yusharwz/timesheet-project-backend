@@ -1,0 +1,43 @@
+package controller
+
+import (
+	"final-project-enigma/dto/request"
+	"final-project-enigma/dto/response"
+	"final-project-enigma/service/impl"
+	"final-project-enigma/utils"
+	"github.com/gin-gonic/gin"
+)
+
+type WorkController struct{}
+
+var workService = impl.NewWorkService()
+
+func NewWorkController(g *gin.RouterGroup) {
+	controller := new(WorkController)
+	workGroup := g.Group("/work")
+	{
+		workGroup.POST("/", controller.CreateWork)
+		workGroup.GET("/", func(c *gin.Context) {
+			c.JSON(200, gin.H{"message": "Hello World!"})
+		})
+	}
+}
+
+func (WorkController) CreateWork(c *gin.Context) {
+	var workRequest request.WorkRequest
+	err := c.ShouldBindJSON(&workRequest)
+	if err != nil {
+		validationError := utils.GetValidationError(err)
+		response.NewResponseBadRequest(c, validationError, "Could not parse request", "", "")
+		return
+	}
+
+	result, err := workService.CreateWork(workRequest)
+	if err != nil {
+		response.NewResponseError(c, err.Error(), "", "")
+		return
+	}
+
+	response.NewResponseCreated(c, result, "Created new work successfully", "", "")
+
+}
