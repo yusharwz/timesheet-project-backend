@@ -14,12 +14,9 @@ var workService = impl.NewWorkService()
 
 func NewWorkController(g *gin.RouterGroup) {
 	controller := new(WorkController)
-	workGroup := g.Group("/work")
+	workGroup := g.Group("/admin/works")
 	{
 		workGroup.POST("/", controller.CreateWork)
-		workGroup.GET("/", func(c *gin.Context) {
-			c.JSON(200, gin.H{"message": "Hello World!"})
-		})
 		workGroup.GET("/:id", controller.GetById)
 	}
 }
@@ -40,7 +37,6 @@ func (WorkController) CreateWork(c *gin.Context) {
 	}
 
 	response.NewResponseCreated(c, result, "Created new work successfully", "", "")
-
 }
 
 func (WorkController) GetById(c *gin.Context) {
