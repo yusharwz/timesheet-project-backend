@@ -17,18 +17,10 @@ var accountService = impl.NewAccountService()
 func NewAccountController(g *gin.RouterGroup) {
 	controller := new(AccountController)
 
-	adminGroup := g.Group("/admin")
-	{
-		adminGroup.GET("/accounts", middleware.JwtAuthWithRoles("admin"), controller.AccountList)
-		adminGroup.GET("/accounts/detail/:id", middleware.JwtAuthWithRoles("admin"), controller.AccountDetail)
-		adminGroup.DELETE("/accounts/delete/:id", middleware.JwtAuthWithRoles("user"), controller.AccountSoftDelete)
-
-	}
-
 	accountGroup := g.Group("/accounts")
 	{
 		accountGroup.GET("/activate", controller.AccountActivation)
-		accountGroup.POST("/login", controller.AccountLogin)
+		accountGroup.PUT("/", middleware.JwtAuthWithRoles("user"), controller.EditAccount)
 	}
 }
 func (AccountController) AccountActivation(ctx *gin.Context) {
@@ -48,9 +40,33 @@ func (AccountController) AccountActivation(ctx *gin.Context) {
 	response.NewResponSucces(ctx, nil, "account has been activated", "01", "01")
 }
 
-func (AccountController) AccountLogin(ctx *gin.Context) {
+// func (AccountController) AccountLogin(ctx *gin.Context) {
 
-	var req request.LoginAccountRequest
+// 	var req request.LoginAccountRequest
+// 	if err := ctx.ShouldBindJSON(&req); err != nil {
+// 		validationError := utils.GetValidationError(err)
+
+// 		if len(validationError) > 0 {
+// 			response.NewResponBadRequest(ctx, validationError, "bad request", "01", "02")
+// 			return
+// 		}
+// 		response.NewResponseError(ctx, "json request body required", "01", "02")
+// 		return
+// 	}
+// 	resp, err := accountService.Login(req)
+// 	if err != nil {
+// 		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+// 		return
+// 	}
+
+// 	response.NewResponSucces(ctx, resp, "logged in", "01", "01")
+// }
+
+func (AccountController) EditAccount(ctx *gin.Context) {
+
+	authHeader := ctx.GetHeader("Authorization")
+
+	var req request.EditAccountRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		validationError := utils.GetValidationError(err)
 
@@ -61,46 +77,11 @@ func (AccountController) AccountLogin(ctx *gin.Context) {
 		response.NewResponseError(ctx, "json request body required", "01", "02")
 		return
 	}
-	resp, err := accountService.Login(req)
+	resp, err := accountService.EditAccount(req, authHeader)
 	if err != nil {
 		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
 		return
 	}
 
-	response.NewResponSucces(ctx, resp, "logged in", "01", "01")
-}
-
-func (AccountController) AccountList(ctx *gin.Context) {
-
-	resp, err := accountService.RetrieveAccountList()
-	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
-		return
-	}
-
-	response.NewResponSucces(ctx, resp, "success get account list", "01", "01")
-}
-
-func (AccountController) AccountDetail(ctx *gin.Context) {
-
-	userID := ctx.Param("id")
-	resp, err := accountService.DetailAccount(userID)
-	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
-		return
-	}
-
-	response.NewResponSucces(ctx, resp, "success get detail account", "01", "01")
-}
-
-func (AccountController) AccountSoftDelete(ctx *gin.Context) {
-
-	userID := ctx.Param("id")
-	err := accountService.SoftDeleteAccount(userID)
-	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
-		return
-	}
-
-	response.NewResponSucces(ctx, nil, "success get detail account", "01", "01")
+	response.NewResponSucces(ctx, resp, "update account success", "01", "01")
 }

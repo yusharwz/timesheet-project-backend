@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"errors"
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
 	"final-project-enigma/entity"
@@ -73,4 +74,23 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 	}
 
 	return resp, nil
+}
+
+func (AuthService) Login(req request.LoginAccountRequest) (resp response.LoginResponse, err error) {
+	resp, err = authRepository.Login(req)
+	if err != nil {
+		return resp, err
+	}
+
+	err = helper.ComparePassword(resp.HashPassword, req.Password)
+	if err != nil {
+		return resp, errors.New("invalid email or password")
+	}
+
+	resp.Token, err = helper.GetTokenJwt(resp.UserId, resp.Username, resp.Email, resp.Role)
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, err
 }

@@ -1,8 +1,13 @@
 package impl
 
 import (
+	"errors"
 	"final-project-enigma/config"
+	"final-project-enigma/dto/request"
+	"final-project-enigma/dto/response"
 	"final-project-enigma/entity"
+
+	"gorm.io/gorm"
 )
 
 type AuthRepository struct{}
@@ -21,8 +26,41 @@ func (AuthRepository) CreateUser(user entity.User) (entity.User, error) {
 
 func (AuthRepository) CreateAccount(account entity.Account) (entity.Account, error) {
 	if err := config.DB.Create(&account); err != nil {
-		return account, err.Error
+		return account, errors.New("username or email is already in use")
 	}
 
 	return account, nil
+}
+
+func (AuthRepository) Login(req request.LoginAccountRequest) (resp response.LoginResponse, err error) {
+	var account entity.Account
+	var role entity.Role
+
+	result := config.DB.Where("email = ?", req.Email).First(&account)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return resp, errors.New("invalid email or password")
+		}
+		return resp, result.Error
+	}
+
+	if err := config.DB.Where("id = ?", account.RoleID).First(&role).Error; err != nil {
+		return resp, err
+	}
+
+	if !account.IsActive {
+		return resp, errors.New("account is not active")
+	}
+
+	if !account.DeletedAt.Time.IsZero() {
+		return resp, errors.New("account has been deleted")
+	}
+
+	resp.HashPassword = account.Password
+	resp.Email = account.Email
+	resp.UserId = account.UserID
+	resp.Username = account.Username
+	resp.Role = role.RoleName
+
+	return resp, nil
 }

@@ -16,9 +16,14 @@ var authService = impl.NewAuthService()
 func NewAuthController(g *gin.RouterGroup) {
 	controller := new(AuthController)
 
-	authGroup := g.Group("/admin")
+	usersGroup := g.Group("/accounts")
 	{
-		authGroup.POST("/register", controller.RegisterAccountRequest)
+		usersGroup.POST("/login", controller.AccountLogin)
+	}
+
+	adminroup := g.Group("/admin")
+	{
+		adminroup.POST("/register", controller.RegisterAccountRequest)
 	}
 }
 
@@ -42,4 +47,26 @@ func (AuthController) RegisterAccountRequest(ctx *gin.Context) {
 	}
 
 	response.NewResponSucces(ctx, nil, "create account succes, please check your email for activated your account", "01", "01")
+}
+
+func (AuthController) AccountLogin(ctx *gin.Context) {
+
+	var req request.LoginAccountRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		validationError := utils.GetValidationError(err)
+
+		if len(validationError) > 0 {
+			response.NewResponBadRequest(ctx, validationError, "bad request", "01", "02")
+			return
+		}
+		response.NewResponseError(ctx, "json request body required", "01", "02")
+		return
+	}
+	resp, err := authService.Login(req)
+	if err != nil {
+		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		return
+	}
+
+	response.NewResponSucces(ctx, resp, "logged in", "01", "01")
 }

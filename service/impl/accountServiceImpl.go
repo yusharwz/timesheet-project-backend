@@ -1,10 +1,9 @@
 package impl
 
 import (
-	"errors"
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
-	"final-project-enigma/helper"
+	"final-project-enigma/middleware"
 	"final-project-enigma/repository/impl"
 )
 
@@ -26,74 +25,32 @@ func (AccountService) AccountActivationUrl(account request.ActivateAccountReques
 	return nil
 }
 
-func (AccountService) Login(req request.LoginAccountRequest) (resp response.LoginResponse, err error) {
-	resp, err = accountRepository.Login(req)
+func (AccountService) EditAccount(req request.EditAccountRequest, authHeader string) (response.AccountDetailResponse, error) {
+
+	userId, err := middleware.GetIdFromToken(authHeader)
 	if err != nil {
-		return resp, err
+		return response.AccountDetailResponse{}, err
 	}
+	req.UserID = userId
 
-	err = helper.ComparePassword(resp.HashPassword, req.Password)
+	err = accountRepository.EditAccount(req)
 	if err != nil {
-		return resp, errors.New("invalid email or password")
+		return response.AccountDetailResponse{}, err
 	}
 
-	resp.Token, err = helper.GetTokenJwt(resp.UserId, resp.Username, resp.Email, resp.Role)
+	account, user, role, err := accountRepository.DetailAccount(req.UserID)
 	if err != nil {
-		return resp, err
+		return response.AccountDetailResponse{}, err
 	}
 
-	return resp, err
-}
-
-func (AccountService) RetrieveAccountList() ([]response.ListAccountResponse, error) {
-
-	accounts, users, err := accountRepository.RetrieveAccountList()
-	if err != nil {
-		return nil, err
-	}
-
-	userMap := make(map[string]string)
-	for _, user := range users {
-		userMap[user.ID] = user.Name
-	}
-
-	var resp []response.ListAccountResponse
-	for _, account := range accounts {
-		var status string
-		if account.IsActive {
-			status = "Active"
-		} else {
-			status = "Inactive"
-		}
-
-		resp = append(resp, response.ListAccountResponse{
-			Username: userMap[account.UserID],
-			Email:    account.Email,
-			Status:   status,
-		})
+	resp := response.AccountDetailResponse{
+		Username: account.Username,
+		Name:     user.Name,
+		Email:    account.Email,
+		Phone:    user.PhoneNumber,
+		Role:     role.RoleName,
+		IsActive: account.IsActive,
 	}
 
 	return resp, nil
-}
-
-func (AccountService) DetailAccount(userID string) (response.AccountDetailResponse, error) {
-	var resp response.AccountDetailResponse
-
-	account, user, role, err := accountRepository.DetailAccount(userID)
-	if err != nil {
-		return resp, err
-	}
-
-	resp.Username = account.Username
-	resp.Name = user.Name
-	resp.Email = account.Email
-	resp.Phone = user.PhoneNumber
-	resp.Role = role.RoleName
-	resp.IsActive = account.IsActive
-
-	return resp, nil
-}
-
-func (AccountService) SoftDeleteAccount(userID string) error {
-	return accountRepository.SoftDeleteAccount(userID)
 }
