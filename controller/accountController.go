@@ -19,8 +19,9 @@ func NewAccountController(g *gin.RouterGroup) {
 
 	adminGroup := g.Group("/admin")
 	{
-		adminGroup.GET("/accounts", middleware.JwtAuthWithRoles("user"), controller.AccountList)
-		adminGroup.GET("/accounts/detail/:id", middleware.JwtAuthWithRoles("user"), controller.AccountDetail)
+		adminGroup.GET("/accounts", middleware.JwtAuthWithRoles("admin"), controller.AccountList)
+		adminGroup.GET("/accounts/detail/:id", middleware.JwtAuthWithRoles("admin"), controller.AccountDetail)
+		adminGroup.DELETE("/accounts/delete/:id", middleware.JwtAuthWithRoles("user"), controller.AccountSoftDelete)
 
 	}
 
@@ -90,4 +91,16 @@ func (AccountController) AccountDetail(ctx *gin.Context) {
 	}
 
 	response.NewResponSucces(ctx, resp, "success get detail account", "01", "01")
+}
+
+func (AccountController) AccountSoftDelete(ctx *gin.Context) {
+
+	userID := ctx.Param("id")
+	err := accountService.SoftDeleteAccount(userID)
+	if err != nil {
+		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		return
+	}
+
+	response.NewResponSucces(ctx, nil, "success get detail account", "01", "01")
 }
