@@ -40,28 +40,6 @@ func (AccountController) AccountActivation(ctx *gin.Context) {
 	response.NewResponseSuccess(ctx, nil, "account has been activated", "01", "01")
 }
 
-// func (AccountController) AccountLogin(ctx *gin.Context) {
-
-// 	var req request.LoginAccountRequest
-// 	if err := ctx.ShouldBindJSON(&req); err != nil {
-// 		validationError := utils.GetValidationError(err)
-
-// 		if len(validationError) > 0 {
-// 			response.NewResponBadRequest(ctx, validationError, "bad request", "01", "02")
-// 			return
-// 		}
-// 		response.NewResponseError(ctx, "json request body required", "01", "02")
-// 		return
-// 	}
-// 	resp, err := accountService.Login(req)
-// 	if err != nil {
-// 		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
-// 		return
-// 	}
-
-// 	response.NewResponSucces(ctx, resp, "logged in", "01", "01")
-// }
-
 func (AccountController) EditAccount(ctx *gin.Context) {
 
 	authHeader := ctx.GetHeader("Authorization")
