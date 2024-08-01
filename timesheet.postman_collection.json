@@ -1,0 +1,162 @@
+{
+	"info": {
+		"_postman_id": "dc2ab484-9791-4e4f-83f7-1549e3128a3b",
+		"name": "timesheet",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30874774"
+	},
+	"item": [
+		{
+			"name": "create",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "deleted",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/timesheets/88941551-a948-4b9c-80d6-47e205b3c383",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"timesheets",
+						"88941551-a948-4b9c-80d6-47e205b3c383"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getall",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "getid",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/timesheets/c6a85e65-56a0-434c-8b26-8a662250ffef",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"timesheets",
+						"c6a85e65-56a0-434c-8b26-8a662250ffef"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "approvebymanager",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/manager/approve/timesheets/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"manager",
+						"approve",
+						"timesheets",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "rejectmanager",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/manager/reject/timesheets/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"manager",
+						"reject",
+						"timesheets",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "approvebenefit",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/benefit/approve/timesheets/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"benefit",
+						"approve",
+						"timesheets",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "rejectbenefit",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/benefit/reject/timesheets/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"benefit",
+						"reject",
+						"timesheets",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
