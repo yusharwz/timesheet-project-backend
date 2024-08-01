@@ -1,9 +1,11 @@
 package impl
 
 import (
+	"errors"
 	"final-project-enigma/config"
 	"final-project-enigma/entity"
-	"fmt"
+	"final-project-enigma/helper"
+	"strconv"
 )
 
 type WorkRepository struct{}
@@ -37,7 +39,18 @@ func (WorkRepository) GetById(id string) (entity.Work, error) {
 	var work entity.Work
 	config.DB.Where("id = ?", id).First(&work)
 	if work.ID == "" {
-		return entity.Work{}, fmt.Errorf("data not found")
+		return entity.Work{}, errors.New("data not found")
 	}
 	return work, nil
+}
+
+func (WorkRepository) GetAllWork(page, size string) ([]entity.Work, string, error) {
+	var works []entity.Work
+	config.DB.Scopes(helper.Paginate(page, size)).Find(&works)
+	if len(works) == 0 {
+		return nil, "0", errors.New("data not found")
+	}
+	var total int64
+	config.DB.Model(&entity.Work{}).Count(&total)
+	return works, strconv.FormatInt(total, 10), nil
 }

@@ -7,4 +7,5 @@ type WorkRepository interface {
 	UpdateWork(work entity.Work) (entity.Work, error)
 	DeleteWork(id string) error
 	GetById(id string) (entity.Work, error)
+	GetAllWork(page, size string) ([]entity.Work, string, error)
 }

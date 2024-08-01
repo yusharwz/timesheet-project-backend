@@ -15,14 +15,14 @@ var workService = impl.NewWorkService()
 
 func NewWorkController(g *gin.RouterGroup) {
 	controller := new(WorkController)
-	workGroup := g.Group("/work")
+	workGroup := g.Group("/admin/works")
 	{
 		workGroup.POST("/", controller.CreateWork)
 		workGroup.PUT("/:id", controller.UpdateWork)
 		workGroup.DELETE("/:id", controller.DeleteWork)
-		workGroup.GET("/", func(c *gin.Context) {
-			c.JSON(200, gin.H{"message": "Hello World!"})
-		})
+		workGroup.GET("/", controller.GetAllWork)
+		workGroup.POST("/", controller.CreateWork)
+		workGroup.GET("/:id", controller.GetById)
 	}
 }
 
@@ -42,6 +42,17 @@ func (WorkController) CreateWork(c *gin.Context) {
 	}
 
 	response.NewResponseCreated(c, result, "Created new work successfully", "", "")
+
+}
+
+func (WorkController) GetById(c *gin.Context) {
+	id := c.Param("id")
+	result, err := workService.GetById(id)
+	if err != nil {
+		response.NewResponseError(c, err.Error(), "", "")
+		return
+	}
+	response.NewResponseSuccess(c, result, "Success fetch work data", "", "")
 }
 
 func (*WorkController) UpdateWork(c *gin.Context) {
@@ -62,6 +73,17 @@ func (*WorkController) UpdateWork(c *gin.Context) {
 	response.NewResponseSuccess(c, result, "Work updated successfully", "WORK", "200")
 }
 
+func (WorkController) GetAllWork(c *gin.Context) {
+	page := c.DefaultQuery("page", "1")
+	size := c.DefaultQuery("size", "10")
+	results, total, err := workService.GetAllWork(page, size)
+	if err != nil {
+		response.NewResponseError(c, err.Error(), "", "")
+		return
+	}
+	response.NewResponseSuccessPaging(c, results, "Success fetch all work data", "", "", page, size, total)
+}
+
 func (WorkController) DeleteWork(c *gin.Context) {
 	id := c.Param("id")
 
@@ -71,14 +93,4 @@ func (WorkController) DeleteWork(c *gin.Context) {
 	}
 
 	response.NewResponseSuccess(c, nil, "Work deleted successfully", "WORK", "200")
-}
-
-func (WorkController) GetById(c *gin.Context) {
-	id := c.Param("id")
-	result, err := workService.GetById(id)
-	if err != nil {
-		response.NewResponseError(c, err.Error(), "", "")
-		return
-	}
-	response.NewResponseSuccess(c, result, "Success fetch work data", "", "")
 }
