@@ -5,6 +5,7 @@ import (
 	"final-project-enigma/config"
 	"final-project-enigma/dto/request"
 	"final-project-enigma/entity"
+	"final-project-enigma/helper"
 )
 
 type AccountRepository struct{}
@@ -63,6 +64,27 @@ func (AccountRepository) EditAccount(req request.EditAccountRequest) error {
 		return err
 	}
 	if err := config.DB.Save(&user).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo AccountRepository) ChangePassword(req request.ChangePasswordRequest) error {
+
+	var account entity.Account
+	if err := config.DB.Where("user_id = ?", req.UserID).First(&account).Error; err != nil {
+		return errors.New("user not found")
+	}
+
+	hashedPassword, err := helper.HashPassword(req.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	account.Password = string(hashedPassword)
+
+	if err := config.DB.Save(&account).Error; err != nil {
 		return err
 	}
 

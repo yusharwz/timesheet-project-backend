@@ -21,6 +21,7 @@ func NewAccountController(g *gin.RouterGroup) {
 	{
 		accountGroup.GET("/activate", controller.AccountActivation)
 		accountGroup.PUT("/", middleware.JwtAuthWithRoles("user"), controller.EditAccount)
+		accountGroup.PUT("/change-password", middleware.JwtAuthWithRoles("user"), controller.ChangePassword)
 	}
 }
 func (AccountController) AccountActivation(ctx *gin.Context) {
@@ -62,4 +63,28 @@ func (AccountController) EditAccount(ctx *gin.Context) {
 	}
 
 	response.NewResponseSuccess(ctx, resp, "update account success", "01", "01")
+}
+
+func (AccountController) ChangePassword(ctx *gin.Context) {
+
+	authHeader := ctx.GetHeader("Authorization")
+
+	var req request.ChangePasswordRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		validationError := utils.GetValidationError(err)
+
+		if len(validationError) > 0 {
+			response.NewResponseBadRequest(ctx, validationError, "bad request", "01", "02")
+			return
+		}
+		response.NewResponseError(ctx, "json request body required", "01", "02")
+		return
+	}
+	err := accountService.ChangePassword(req, authHeader)
+	if err != nil {
+		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		return
+	}
+
+	response.NewResponseSuccess(ctx, "", "update password success", "01", "01")
 }

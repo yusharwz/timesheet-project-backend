@@ -54,3 +54,19 @@ func (AccountService) EditAccount(req request.EditAccountRequest, authHeader str
 
 	return resp, nil
 }
+
+func (AccountService) ChangePassword(req request.ChangePasswordRequest, authHeader string) error {
+
+	userID, err := middleware.GetIdFromToken(authHeader)
+	if err != nil {
+		return err
+	}
+	req.NewPassword = userID
+
+	err = accountRepository.ChangePassword(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
