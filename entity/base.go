@@ -1,8 +1,10 @@
 package entity
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type Base struct {
@@ -10,4 +12,9 @@ type Base struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
+func (base *Base) BeforeCreate(tx *gorm.DB) (err error) {
+    base.ID = uuid.New().String()
+    return
 }

@@ -1,0 +1,6 @@
+{"level":"error","time":"01-08-2024 00:14:11","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/final-project-angular/dto/response/jsonResponse.go:76","message":"json request body required"}
+{"level":"error","time":"01-08-2024 00:20:06","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/final-project-angular/dto/response/jsonResponse.go:76","message":"json request body required"}
+{"level":"error","time":"01-08-2024 00:23:36","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/final-project-angular/dto/response/jsonResponse.go:76","message":"json request body required"}
+{"level":"error","time":"01-08-2024 00:26:36","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/final-project-angular/dto/response/jsonResponse.go:76","message":"json request body required"}
+{"level":"error","time":"01-08-2024 00:28:49","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/final-project-angular/dto/response/jsonResponse.go:76","message":"json request body required"}
+{"level":"error","time":"01-08-2024 00:34:18","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/final-project-angular/dto/response/jsonResponse.go:76","message":"json request body required"}
