@@ -100,5 +100,5 @@ func (AccountController) GetAccountDetailByUserID(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "update password success", "01", "01")
+	response.NewResponseSuccess(ctx, resp, "get data detail success", "01", "01")
 }
