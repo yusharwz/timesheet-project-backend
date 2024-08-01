@@ -1,126 +1,83 @@
 package service
 
 import (
-	"final-project-enigma/dto/request"
-	"final-project-enigma/dto/response"
-	"final-project-enigma/entity"
-	"final-project-enigma/repository"
+    "errors" 
+    "final-project-enigma/entity"
+    "final-project-enigma/repository"
+	"fmt"
 )
 
 type TimeSheetService interface {
-	CreateTimeSheet(tsQ *request.TimeSheetRequest) (*response.TimeSheetResponse, error)
-	FindByIdTimeSheet(id string) (*response.TimeSheetResponse, error)
-	FindAllTimeSheet() (*[]response.TimeSheetResponse, error)
-	UpdateTimeSheet(tsQ *request.TimeSheetRequest) (*response.TimeSheetResponse, error)
-	DeleteTimeSheet(id string) error
+    CreateTimeSheet(ts *entity.TimeSheet) error
+    UpdateTimeSheet(ts *entity.TimeSheet) error
+    DeleteTimeSheet(id string) error
+    GetTimeSheetByID(id string) (*entity.TimeSheet, error)
+    GetAllTimeSheets() (*[]entity.TimeSheet, error)
+    ApproveManagerTimeSheet(id string, userID string) error
+    RejectManagerTimeSheet(id string, userID string) error
+    ApproveBenefitTimeSheet(id string, userID string) error
+    RejectBenefitTimeSheet(id string, userID string) error
 }
 
 type timeSheetService struct {
-	tr repository.TimeSheetRepository
+    repo repository.TimeSheetRepository
 }
 
-func (ts *timeSheetService) CreateTimeSheet(tsQ *request.TimeSheetRequest) (*response.TimeSheetResponse, error) {
-	timeSheet := &entity.TimeSheet{
-		Base: entity.Base{
-			ID: tsQ.UserID,
-		},
-		ConfirmedManagerBy: tsQ.ConfirmedManagerBy,
-		ConfirmedBenefitBy: tsQ.ConfirmedBenefitBy,
-		StatusTimeSheetID:  tsQ.StatusTimeSheetID,
-		UserID:             tsQ.UserID,
-		TimeSheetDetails:   convertToTimeSheetDetails(tsQ.TimeSheetDetails),
-	}
-
-	createdTimeSheet, err := ts.tr.CreateTimeSheet(timeSheet)
-	if err != nil {
-		return nil, err
-	}
-
-	return convertToTimeSheetResponse(createdTimeSheet), nil
-}
-func (ts *timeSheetService) FindByIdTimeSheet(id string) (*response.TimeSheetResponse, error) {
-	timeSheet, err := ts.tr.FindByIdTimeSheet(id)
-	if err != nil {
-		return nil, err
-	}
-
-	return convertToTimeSheetResponse(timeSheet), nil
-}
-func (ts *timeSheetService) FindAllTimeSheet() (*[]response.TimeSheetResponse, error) {
-	timeSheets, err := ts.tr.FindAllTimeSheet()
-	if err != nil {
-		return nil, err
-	}
-
-	var timeSheetResponses []response.TimeSheetResponse
-	for _, timeSheet := range *timeSheets {
-		timeSheetResponses = append(timeSheetResponses, *convertToTimeSheetResponse(&timeSheet))
-	}
-
-	return &timeSheetResponses, nil
-}
-func (ts *timeSheetService) UpdateTimeSheet(tsQ *request.TimeSheetRequest) (*response.TimeSheetResponse, error) {
-	timeSheet := &entity.TimeSheet{
-		Base: entity.Base{
-			ID: tsQ.UserID, // Assuming UserID is being used as an ID, usually it's better to generate a unique ID
-		},
-		ConfirmedManagerBy: tsQ.ConfirmedManagerBy,
-		ConfirmedBenefitBy: tsQ.ConfirmedBenefitBy,
-		StatusTimeSheetID:  tsQ.StatusTimeSheetID,
-		UserID:             tsQ.UserID,
-		TimeSheetDetails:   convertToTimeSheetDetails(tsQ.TimeSheetDetails),
-	}
-
-	updatedTimeSheet, err := ts.tr.UpdateTimeSheet(timeSheet)
-	if err != nil {
-		return nil, err
-	}
-
-	return convertToTimeSheetResponse(updatedTimeSheet), nil
-}
-func (ts *timeSheetService) DeleteTimeSheet(id string) error {
-	return ts.tr.DeleteTimeSheet(id)
+func NewTimeSheetService(repo repository.TimeSheetRepository) TimeSheetService {
+    return &timeSheetService{repo: repo}
 }
 
-func NewTimeSheetServices(tr repository.TimeSheetRepository) TimeSheetService {
-	return &timeSheetService{tr: tr}
+func (s *timeSheetService) CreateTimeSheet(ts *entity.TimeSheet) error {
+	fmt.Println("Error disini")
+    return s.repo.CreateTimeSheet(ts)
 }
 
-// helper code
-func convertToTimeSheetDetails(details []request.TimeSheetDetailRequest) []entity.TimeSheetDetail {
-	var timeSheetDetails []entity.TimeSheetDetail
-	for _, detail := range details {
-		timeSheetDetails = append(timeSheetDetails, entity.TimeSheetDetail{
-			Date:      detail.Date,
-			StartTime: detail.StartTime,
-			EndTime:   detail.EndTime,
-			WorkID:    detail.WorkID,
-		})
-	}
-	return timeSheetDetails
+func (s *timeSheetService) UpdateTimeSheet(ts *entity.TimeSheet) error {
+    existingTs, err := s.repo.GetTimeSheetByID(ts.ID)
+    if err != nil {
+        return err
+    }
+
+    if existingTs.ConfirmedManagerBy != "" || existingTs.ConfirmedBenefitBy != "" {
+        return errors.New("timesheet cannot be updated as it has been approved or rejected")
+    }
+
+    return s.repo.UpdateTimeSheet(ts)
 }
 
-func convertToTimeSheetResponse(ts *entity.TimeSheet) *response.TimeSheetResponse {
-	return &response.TimeSheetResponse{
-		ID:                 ts.ID,
-		ConfirmedManagerBy: ts.ConfirmedManagerBy,
-		ConfirmedBenefitBy: ts.ConfirmedBenefitBy,
-		StatusTimeSheetID:  ts.StatusTimeSheetID,
-		UserID:             ts.UserID,
-		TimeSheetDetails:   convertToTimeSheetDetailResponses(ts.TimeSheetDetails),
-	}
+func (s *timeSheetService) DeleteTimeSheet(id string) error {
+    existingTs, err := s.repo.GetTimeSheetByID(id)
+    if err != nil {
+        return err
+    }
+
+    if existingTs.ConfirmedManagerBy != "" || existingTs.ConfirmedBenefitBy != "" {
+        return errors.New("timesheet cannot be deleted as it has been approved or rejected")
+    }
+
+    return s.repo.DeleteTimeSheet(id)
 }
 
-func convertToTimeSheetDetailResponses(details []entity.TimeSheetDetail) []response.TimeSheetDetailResponse {
-	var responses []response.TimeSheetDetailResponse
-	for _, detail := range details {
-		responses = append(responses, response.TimeSheetDetailResponse{
-			ID:        detail.ID,
-			Date:      detail.Date,
-			StartTime: detail.StartTime,
-			EndTime:   detail.EndTime,
-			WorkID:    detail.WorkID,
-		})
-	}
-	return responses
+func (s *timeSheetService) GetTimeSheetByID(id string) (*entity.TimeSheet, error) {
+    return s.repo.GetTimeSheetByID(id)
+}
+
+func (s *timeSheetService) GetAllTimeSheets() (*[]entity.TimeSheet, error) {
+    return s.repo.GetAllTimeSheets()
+}
+
+func (s *timeSheetService) ApproveManagerTimeSheet(id string, userID string) error {
+    return s.repo.ApproveManagerTimeSheet(id, userID)
+}
+
+func (s *timeSheetService) RejectManagerTimeSheet(id string, userID string) error {
+    return s.repo.RejectManagerTimeSheet(id, userID)
+}
+
+func (s *timeSheetService) ApproveBenefitTimeSheet(id string, userID string) error {
+    return s.repo.ApproveBenefitTimeSheet(id, userID)
+}
+
+func (s *timeSheetService) RejectBenefitTimeSheet(id string, userID string) error {
+    return s.repo.RejectBenefitTimeSheet(id, userID)
 }
