@@ -86,5 +86,5 @@ func (AccountController) ChangePassword(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, "", "update password success", "01", "01")
+	response.NewResponseSuccess(ctx, nil, "update password success", "01", "01")
 }

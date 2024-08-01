@@ -74,7 +74,7 @@ func (repo AccountRepository) ChangePassword(req request.ChangePasswordRequest) 
 
 	var account entity.Account
 	if err := config.DB.Where("user_id = ?", req.UserID).First(&account).Error; err != nil {
-		return errors.New("user not found")
+		return errors.New("failed to change password")
 	}
 
 	hashedPassword, err := helper.HashPassword(req.NewPassword)

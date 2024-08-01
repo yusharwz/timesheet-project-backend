@@ -61,7 +61,7 @@ func (AccountService) ChangePassword(req request.ChangePasswordRequest, authHead
 	if err != nil {
 		return err
 	}
-	req.NewPassword = userID
+	req.UserID = userID
 
 	err = accountRepository.ChangePassword(req)
 	if err != nil {

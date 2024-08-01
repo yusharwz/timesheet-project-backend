@@ -21,7 +21,6 @@ func NewWorkController(g *gin.RouterGroup) {
 		workGroup.PUT("/:id", controller.UpdateWork)
 		workGroup.DELETE("/:id", controller.DeleteWork)
 		workGroup.GET("/", controller.GetAllWork)
-		workGroup.POST("/", controller.CreateWork)
 		workGroup.GET("/:id", controller.GetById)
 	}
 }
