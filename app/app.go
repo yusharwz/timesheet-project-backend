@@ -1,7 +1,6 @@
 package app
 
 import (
-	"database/sql"
 	"errors"
 	"final-project-enigma/config"
 	"final-project-enigma/dto"
@@ -77,12 +76,12 @@ func InitEnv() (dto.ConfigData, error) {
 	return configData, nil
 }
 
-func initializeDomainModule(r *gin.Engine, db *sql.DB, client *resty.Client) {
+func initializeDomainModule(r *gin.Engine, client *resty.Client) {
 	apiGroup := r.Group("/api")
 	v1Group := apiGroup.Group("/v1")
 
 	// checkHealth
-	router.InitRoute(v1Group, db, client)
+	router.InitRoute(v1Group, client)
 }
 
 func RunService() {
@@ -172,11 +171,11 @@ func RunService() {
 
 	client := resty.New()
 
-	initializeDomainModule(r, conn, client)
+	initializeDomainModule(r, client)
 
 	version := "0.0.1"
 	log.Info().Msg(fmt.Sprintf("Service Running version %s", version))
-	addr := flag.String("port", ":"+os.Getenv("PORT"), "Addres to listen and serve")
+	addr := flag.String("port", ":"+os.Getenv("PORT"), "Address to listen and serve")
 	if err := r.Run(*addr); err != nil {
 		log.Error().Msg(err.Error())
 	}

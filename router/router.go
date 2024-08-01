@@ -1,12 +1,12 @@
 package router
 
 import (
-	"database/sql"
-
+	"final-project-enigma/controller"
 	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"
 )
 
-func InitRoute(v1Group *gin.RouterGroup, db *sql.DB, client *resty.Client) {
-
+func InitRoute(g *gin.RouterGroup, client *resty.Client) {
+	// work
+	controller.NewWorkController(g)
 }

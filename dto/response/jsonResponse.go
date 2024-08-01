@@ -40,31 +40,41 @@ type (
 
 	PagingInfo struct {
 		Page      string `json:"page,omitempty"`
+		Size      string `json:"size,omitempty"`
 		TotalData string `json:"totalData,omitempty"`
 	}
 )
 
-func NewResponSuccesPaging(c *gin.Context, result interface{}, message, servisCode, responCode string, page, totalData string) {
+func NewResponseSuccessPaging(c *gin.Context, result interface{}, message, serviceCode, responseCode string, page, size, totalData string) {
 	c.JSON(http.StatusOK, jsonResponseWithPaging{
-		Code:    "200" + servisCode + responCode,
+		Code:    "200" + serviceCode + responseCode,
 		Message: message,
 		Data:    result,
 		Paging: PagingInfo{
 			Page:      page,
+			Size:      size,
 			TotalData: totalData,
 		},
 	})
 }
 
-func NewResponSucces(c *gin.Context, result interface{}, message, servisCode, responCode string) {
+func NewResponseSuccess(c *gin.Context, result interface{}, message, serviceCode, responseCode string) {
 	c.JSON(http.StatusOK, jsonResponse{
-		Code:    "200" + servisCode + responCode,
+		Code:    "200" + serviceCode + responseCode,
 		Message: message,
 		Data:    result,
 	})
 }
 
-func NewResponBadRequest(c *gin.Context, validationField []ValidationField, message, serviceCode, errorCode string) {
+func NewResponseCreated(c *gin.Context, result interface{}, message, serviceCode, responseCode string) {
+	c.JSON(http.StatusOK, jsonResponse{
+		Code:    "201" + serviceCode + responseCode,
+		Message: message,
+		Data:    result,
+	})
+}
+
+func NewResponseBadRequest(c *gin.Context, validationField []ValidationField, message, serviceCode, errorCode string) {
 	c.JSON(http.StatusBadRequest, jsonBadRequestResponse{
 		Code:             "400" + serviceCode + errorCode,
 		Message:          message,

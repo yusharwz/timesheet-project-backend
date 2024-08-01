@@ -32,7 +32,7 @@ func BasicAuth(c *gin.Context) {
 }
 
 var (
-	applicationName  = "incibation-golang"
+	applicationName  = "golang-timesheet"
 	jwtSigningMethod = jwt.SigningMethodHS256
 	jwtSignatureKey  = []byte("incubation-golang")
 )
