@@ -8,6 +8,9 @@ import (
 )
 
 func InitRoute(v1Group *gin.RouterGroup, client *resty.Client) {
-	// work
+	controller.NewAuthController(v1Group)
+	controller.NewAdminController(v1Group)
+	controller.NewAccountController(v1Group)
+
 	controller.NewWorkController(v1Group)
 }

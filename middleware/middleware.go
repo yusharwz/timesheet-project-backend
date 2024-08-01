@@ -32,17 +32,18 @@ func BasicAuth(c *gin.Context) {
 }
 
 var (
-	applicationName  = "incibation-golang"
+	applicationName  = "timesheet-app"
 	jwtSigningMethod = jwt.SigningMethodHS256
 	jwtSignatureKey  = []byte("incubation-golang")
 )
 
-func GenerateTokenJwt(Id, username, roles string, expiredAt int64) (string, error) {
+func GenerateTokenJwt(Id, username, email, roles string, expiredAt int64) (string, error) {
 	loginExpDuration := time.Duration(expiredAt) * time.Hour
 	myExpiresAt := time.Now().Add(loginExpDuration).Unix()
 	claims := dto.JwtClaim{
 		Id:       Id,
 		Username: username,
+		Email:    email,
 		Roles:    roles,
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    applicationName,
