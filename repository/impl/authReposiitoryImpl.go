@@ -17,16 +17,27 @@ func NewAuthRepository() *AuthRepository {
 }
 
 func (AuthRepository) CreateUser(user entity.User) (entity.User, error) {
-	if err := config.DB.Create(&user); err != nil {
-		return user, err.Error
+	err := config.DB.Create(&user)
+	if err.Error != nil {
+		return user, errors.New("failed to create user")
 	}
 
 	return user, nil
 }
 
 func (AuthRepository) CreateAccount(account entity.Account) (entity.Account, error) {
-	if err := config.DB.Create(&account); err != nil {
-		return account, errors.New("username or email is already in use")
+	var existingAccount entity.Account
+
+	if err := config.DB.Where("email = ?", account.Email).First(&existingAccount).Error; err == nil {
+		return account, errors.New("email already in use")
+	}
+
+	if err := config.DB.Where("username = ?", account.Username).First(&existingAccount).Error; err == nil {
+		return account, errors.New("username already in use")
+	}
+
+	if err := config.DB.Create(&account).Error; err != nil {
+		return account, errors.New("failed to create account")
 	}
 
 	return account, nil
