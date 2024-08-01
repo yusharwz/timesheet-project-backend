@@ -37,7 +37,7 @@ func (AccountController) AccountActivation(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponSucces(ctx, nil, "account has been activated", "01", "01")
+	response.NewResponseSuccess(ctx, nil, "account has been activated", "01", "01")
 }
 
 // func (AccountController) AccountLogin(ctx *gin.Context) {
@@ -71,7 +71,7 @@ func (AccountController) EditAccount(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponBadRequest(ctx, validationError, "bad request", "01", "02")
+			response.NewResponseBadRequest(ctx, validationError, "bad request", "01", "02")
 			return
 		}
 		response.NewResponseError(ctx, "json request body required", "01", "02")
@@ -83,5 +83,5 @@ func (AccountController) EditAccount(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponSucces(ctx, resp, "update account success", "01", "01")
+	response.NewResponseSuccess(ctx, resp, "update account success", "01", "01")
 }

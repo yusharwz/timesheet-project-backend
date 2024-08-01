@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"final-project-enigma/dto/response"
 	"fmt"
 	"regexp"
@@ -14,7 +15,8 @@ import (
 func GetValidationError(err error) []response.ValidationField {
 
 	var validationField []response.ValidationField
-	if ve, ok := err.(validator.ValidationErrors); ok {
+	var ve validator.ValidationErrors
+	if errors.As(err, &ve) {
 		for _, validationError := range ve {
 			log.Debug().Msg(fmt.Sprintf("validationError: %v", validationError))
 			myField := convertFieldRequired(validationError.Namespace())
@@ -30,18 +32,18 @@ func GetValidationError(err error) []response.ValidationField {
 func convertFieldRequired(myValue string) string {
 
 	log.Debug().Msg("convertFieldRequired: " + myValue)
-	fieldSegmen := strings.Split(myValue, ".")
+	fieldSegment := strings.Split(myValue, ".")
 
 	myField := ""
-	lenght := len(fieldSegmen)
+	length := len(fieldSegment)
 	i := 1
-	for _, val := range fieldSegmen {
+	for _, val := range fieldSegment {
 		if i == 1 {
 			i++
 			continue
 		}
 
-		if i == lenght {
+		if i == length {
 			myField += strcase.SnakeCase(val)
 			break
 		}
@@ -74,7 +76,7 @@ func formatMessage(err validator.FieldError) string {
 	case "nomorHp":
 		message = "invalid number phone format"
 	case "username":
-		message = "invalid username format, don't use sepcial characters and space"
+		message = "invalid username format, don't use special characters and space"
 	case "pin":
 		message = "only 6 characters of number"
 	}

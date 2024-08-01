@@ -32,7 +32,7 @@ func (AdminController) AccountList(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponSucces(ctx, resp, "success get account list", "01", "01")
+	response.NewResponseSuccess(ctx, resp, "success get account list", "01", "01")
 }
 
 func (AdminController) AccountDetail(ctx *gin.Context) {
@@ -44,7 +44,7 @@ func (AdminController) AccountDetail(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponSucces(ctx, resp, "success get detail account", "01", "01")
+	response.NewResponseSuccess(ctx, resp, "success get detail account", "01", "01")
 }
 
 func (AdminController) AccountSoftDelete(ctx *gin.Context) {
@@ -56,5 +56,5 @@ func (AdminController) AccountSoftDelete(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponSucces(ctx, nil, "delete account success", "01", "01")
+	response.NewResponseSuccess(ctx, nil, "delete account success", "01", "01")
 }

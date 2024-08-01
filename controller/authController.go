@@ -33,7 +33,7 @@ func (AuthController) RegisterAccountRequest(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponBadRequest(ctx, validationError, "bad request", "01", "02")
+			response.NewResponseBadRequest(ctx, validationError, "bad request", "01", "02")
 			return
 		}
 		response.NewResponseError(ctx, "json request body required", "01", "02")
@@ -46,7 +46,7 @@ func (AuthController) RegisterAccountRequest(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponSucces(ctx, nil, "create account succes, please check your email for activated your account", "01", "01")
+	response.NewResponseSuccess(ctx, nil, "create account succes, please check your email for activated your account", "01", "01")
 }
 
 func (AuthController) AccountLogin(ctx *gin.Context) {
@@ -56,7 +56,7 @@ func (AuthController) AccountLogin(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponBadRequest(ctx, validationError, "bad request", "01", "02")
+			response.NewResponseBadRequest(ctx, validationError, "bad request", "01", "02")
 			return
 		}
 		response.NewResponseError(ctx, "json request body required", "01", "02")
@@ -68,5 +68,5 @@ func (AuthController) AccountLogin(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponSucces(ctx, resp, "logged in", "01", "01")
+	response.NewResponseSuccess(ctx, resp, "logged in", "01", "01")
 }
