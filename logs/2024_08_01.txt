@@ -1,1 +1,0 @@
-{"level":"error","time":"01-08-2024 19:33:49","caller":"C:/Users/alvin/OneDrive/Desktop/kerja/golang/golang-timesheet/dto/response/jsonResponse.go:86","message":"data not found"}
