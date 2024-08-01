@@ -70,3 +70,28 @@ func (AccountService) ChangePassword(req request.ChangePasswordRequest, authHead
 
 	return nil
 }
+
+func (AccountService) GetAccountDetail(authHeader string) (response.AccountUserResponse, error) {
+
+	userID, err := middleware.GetIdFromToken(authHeader)
+	if err != nil {
+		return response.AccountUserResponse{}, err
+	}
+
+	account, user, err := accountRepository.GetAccountDetailByUserID(userID)
+	if err != nil {
+		return response.AccountUserResponse{}, err
+	}
+
+	accountUserResp := response.AccountUserResponse{
+		AccountID: account.ID,
+		Email:     account.Email,
+		Username:  account.Username,
+		IsActive:  account.IsActive,
+		UserID:    user.ID,
+		Name:      user.Name,
+		Phone:     user.PhoneNumber,
+	}
+
+	return accountUserResp, nil
+}

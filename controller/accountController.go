@@ -20,6 +20,7 @@ func NewAccountController(g *gin.RouterGroup) {
 	accountGroup := g.Group("/accounts")
 	{
 		accountGroup.GET("/activate", controller.AccountActivation)
+		accountGroup.GET("/profile", middleware.JwtAuthWithRoles("user"), controller.GetAccountDetailByUserID)
 		accountGroup.PUT("/", middleware.JwtAuthWithRoles("user"), controller.EditAccount)
 		accountGroup.PUT("/change-password", middleware.JwtAuthWithRoles("user"), controller.ChangePassword)
 	}
@@ -87,4 +88,17 @@ func (AccountController) ChangePassword(ctx *gin.Context) {
 	}
 
 	response.NewResponseSuccess(ctx, nil, "update password success", "01", "01")
+}
+
+func (AccountController) GetAccountDetailByUserID(ctx *gin.Context) {
+
+	authHeader := ctx.GetHeader("Authorization")
+
+	resp, err := accountService.GetAccountDetail(authHeader)
+	if err != nil {
+		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		return
+	}
+
+	response.NewResponseSuccess(ctx, resp, "update password success", "01", "01")
 }

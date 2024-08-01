@@ -90,3 +90,18 @@ func (repo AccountRepository) ChangePassword(req request.ChangePasswordRequest) 
 
 	return nil
 }
+
+func (AccountRepository) GetAccountDetailByUserID(userID string) (entity.Account, entity.User, error) {
+	var account entity.Account
+	var user entity.User
+
+	if err := config.DB.Where("user_id = ?", userID).First(&account).Error; err != nil {
+		return account, user, err
+	}
+
+	if err := config.DB.Where("id = ?", userID).First(&user).Error; err != nil {
+		return account, user, err
+	}
+
+	return account, user, nil
+}
