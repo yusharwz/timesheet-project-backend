@@ -63,3 +63,15 @@ func (WorkService) DeleteWork(id string) error {
 	}
 	return nil
 }
+
+func (WorkService) GetById(id string) (response.WorkResponse, error) {
+	result, err := workRepository.GetById(id)
+	if err != nil {
+		return response.WorkResponse{}, err
+	}
+	return response.WorkResponse{
+		Id:          result.ID,
+		Description: result.Description,
+		Fee:         result.Fee,
+	}, nil
+}
