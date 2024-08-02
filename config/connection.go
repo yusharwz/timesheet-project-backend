@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"final-project-enigma/dto"
 	"final-project-enigma/entity"
+	"final-project-enigma/helper"
 	"fmt"
 	"github.com/google/uuid"
-
+	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
@@ -129,6 +130,12 @@ func initAdmin(email, password string) {
 	DB.Where("role_name = ?", "admin").First(&adminRole)
 
 	adminUserID := uuid.NewString()
+
+	var err error
+	password, err = helper.HashPassword(password)
+	if err != nil {
+		log.Info().Msg("failed to hash password")
+	}
 
 	newAdminAccount := entity.Account{
 		Base:     entity.Base{ID: adminUserID},

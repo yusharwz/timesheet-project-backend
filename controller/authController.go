@@ -17,7 +17,7 @@ var authService = impl.NewAuthService()
 func NewAuthController(g *gin.RouterGroup) {
 	controller := new(AuthController)
 
-	usersGroup := g.Group("/accounts")
+	usersGroup := g.Group("/")
 	{
 		usersGroup.POST("/login", controller.AccountLogin)
 	}
@@ -47,7 +47,7 @@ func (AuthController) RegisterAccountRequest(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "create account succes, please check your email for activated your account")
+	response.NewResponseSuccess(ctx, nil, "create account success, please check your email for activated your account")
 }
 
 func (AuthController) AccountLogin(ctx *gin.Context) {
