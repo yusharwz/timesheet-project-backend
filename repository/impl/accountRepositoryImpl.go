@@ -18,7 +18,7 @@ func (AccountRepository) AccountActivation(email string) error {
 
 	result := config.DB.Model(&entity.Account{}).Where("email = ?", email).Update("is_active", true)
 	if result.Error != nil {
-		return errors.New("disini")
+		return errors.New("failed to activate account")
 	}
 
 	return nil
@@ -43,14 +43,6 @@ func (AccountRepository) EditAccount(req request.EditAccountRequest) error {
 			return errors.New("email already in use")
 		}
 		account.Email = req.Email
-	}
-
-	if req.Username != "" && req.Username != account.Username {
-		var existingAccount entity.Account
-		if err := config.DB.Where("username = ?", req.Username).First(&existingAccount).Error; err == nil {
-			return errors.New("username already in use")
-		}
-		account.Username = req.Username
 	}
 
 	if req.Name != "" {
@@ -82,7 +74,7 @@ func (repo AccountRepository) ChangePassword(req request.ChangePasswordRequest) 
 		return err
 	}
 
-	account.Password = string(hashedPassword)
+	account.Password = hashedPassword
 
 	if err := config.DB.Save(&account).Error; err != nil {
 		return err

@@ -47,7 +47,6 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 	newAccount := entity.Account{
 		Base:     entity.Base{ID: uuid.NewString()},
 		Email:    req.Email,
-		Username: req.Username,
 		Password: req.Password,
 		IsActive: req.IsActive,
 		RoleID:   req.RoleID,
@@ -62,7 +61,6 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 	resp = response.RegisterAccountResponse{
 		Id:       createdAccount.ID,
 		Email:    createdAccount.Email,
-		Username: createdAccount.Username,
 		IsActive: createdAccount.IsActive,
 		RoleID:   createdAccount.RoleID,
 		UserID:   createdAccount.UserID,

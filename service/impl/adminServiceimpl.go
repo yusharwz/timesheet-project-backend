@@ -52,7 +52,6 @@ func (AdminService) DetailAccount(userID string) (response.AccountDetailResponse
 		return resp, err
 	}
 
-	resp.Username = account.Username
 	resp.Name = user.Name
 	resp.Email = account.Email
 	resp.Phone = user.PhoneNumber

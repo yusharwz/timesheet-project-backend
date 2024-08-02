@@ -28,7 +28,7 @@ type (
 	}
 
 	ValidationField struct {
-		FieldName int    `json:"field"`
+		FieldName string `json:"field"`
 		Message   string `json:"message"`
 	}
 

@@ -3,6 +3,7 @@ package controller
 import (
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
+	"final-project-enigma/middleware"
 	"final-project-enigma/service/impl"
 	"final-project-enigma/utils"
 
@@ -15,7 +16,7 @@ var workService = impl.NewWorkService()
 
 func NewWorkController(g *gin.RouterGroup) {
 	controller := new(WorkController)
-	workGroup := g.Group("/admin/works")
+	workGroup := g.Group("/admin/works", middleware.JwtAuthWithRoles("admin"))
 	{
 		workGroup.POST("/", controller.CreateWork)
 		workGroup.PUT("/:id", controller.UpdateWork)

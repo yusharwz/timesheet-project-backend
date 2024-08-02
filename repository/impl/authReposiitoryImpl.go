@@ -32,10 +32,6 @@ func (AuthRepository) CreateAccount(account entity.Account) (entity.Account, err
 		return account, errors.New("email already in use")
 	}
 
-	if err := config.DB.Where("username = ?", account.Username).First(&existingAccount).Error; err == nil {
-		return account, errors.New("username already in use")
-	}
-
 	if err := config.DB.Create(&account).Error; err != nil {
 		return account, errors.New("failed to create account")
 	}
@@ -70,7 +66,6 @@ func (AuthRepository) Login(req request.LoginAccountRequest) (resp response.Logi
 	resp.HashPassword = account.Password
 	resp.Email = account.Email
 	resp.UserId = account.UserID
-	resp.Username = account.Username
 	resp.Role = role.RoleName
 
 	return resp, nil
