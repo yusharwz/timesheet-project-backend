@@ -25,7 +25,7 @@ func SendEmail(email, code string) (bool, error) {
 	return true, nil
 }
 
-func SendEmailActivedAccount(email, code, unique string) error {
+func SendEmailActivatedAccount(email, code, unique string) error {
 
 	url := fmt.Sprintf("http://localhost:8080/api/v1/accounts/activate?e=%s&unique=%s", email, unique)
 
