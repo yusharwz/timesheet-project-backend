@@ -35,9 +35,8 @@ func (AdminService) RetrieveAccountList() ([]response.ListAccountResponse, error
 		}
 
 		resp = append(resp, response.ListAccountResponse{
-			Username: userMap[account.UserID],
-			Email:    account.Email,
-			Status:   status,
+			Email:  account.Email,
+			Status: status,
 		})
 	}
 
@@ -57,6 +56,9 @@ func (AdminService) DetailAccount(userID string) (response.AccountDetailResponse
 	resp.Phone = user.PhoneNumber
 	resp.Role = role.RoleName
 	resp.IsActive = account.IsActive
+	resp.CreatedAt = account.CreatedAt
+	resp.UpdatedAt = account.UpdatedAt
+	resp.DeletedAt = account.DeletedAt
 
 	return resp, nil
 }
