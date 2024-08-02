@@ -20,7 +20,12 @@ func NewAuthService() *AuthService {
 	return &AuthService{}
 }
 
-func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp response.RegisterAccountResponse, err error) {
+func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (response.RegisterAccountResponse, error) {
+	var resp response.RegisterAccountResponse
+
+	newUser := entity.User{
+		Base: entity.Base{ID: uuid.NewString()},
+	}
 
 	code, err := helper.GenerateCode()
 	if err != nil {
@@ -33,6 +38,9 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 	}
 
 	role, err := authRepository.GetRole(req.RoleName)
+	if err != nil {
+		return resp, err
+	}
 
 	newAccount := entity.Account{
 		Base:     entity.Base{ID: uuid.NewString()},
@@ -40,6 +48,7 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 		Password: hashedPassword,
 		IsActive: false,
 		RoleID:   role.ID,
+		UserID:   newUser.ID,
 	}
 
 	_, createdAccount, err := authRepository.Register(newUser, newAccount)
