@@ -25,9 +25,9 @@ func SendEmail(email, code string) (bool, error) {
 	return true, nil
 }
 
-func SendEmailActivedAccount(email, fullname, code, unique string) error {
+func SendEmailActivedAccount(email, code, unique string) error {
 
-	url := fmt.Sprintf("https://api.yusharwz.my.id/api/v1/auth/activate-account?email=%s&fullname=%s&unique=%s&code=%s", email, fullname, unique, code)
+	url := fmt.Sprintf("http://localhost:8080/api/v1/accounts/activate?e=%s&unique=%s", email, unique)
 
 	emailPort, _ := strconv.Atoi(os.Getenv("EMAIL_PORT"))
 
@@ -35,7 +35,7 @@ func SendEmailActivedAccount(email, fullname, code, unique string) error {
 	m.SetHeader("From", os.Getenv("EMAIL_ADDRESS"))
 	m.SetHeader("To", email)
 	m.SetHeader("Subject", "Activation  Account")
-	m.SetBody("text/plain", "Click link to activated your account: \n"+url)
+	m.SetBody("text/plain", "Click link to activated your account: \n"+url+"\n \nThis is information about your account for Login after activation: \nEmail: "+email+"\nPassword: "+code)
 
 	d := gomail.NewDialer(os.Getenv("EMAIL_HOST"), emailPort, os.Getenv("EMAIL_ADDRESS"), os.Getenv("EMAIL_PASSWORD"))
 
