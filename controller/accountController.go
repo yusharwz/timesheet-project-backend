@@ -35,11 +35,11 @@ func (AccountController) AccountActivation(ctx *gin.Context) {
 
 	err := accountService.AccountActivationUrl(params)
 	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "account has been activated", "01", "01")
+	response.NewResponseSuccess(ctx, nil, "account has been activated")
 }
 
 func (AccountController) EditAccount(ctx *gin.Context) {
@@ -51,19 +51,19 @@ func (AccountController) EditAccount(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponseBadRequest(ctx, validationError, "bad request", "01", "02")
+			response.NewResponseBadRequest(ctx, validationError, "bad request")
 			return
 		}
-		response.NewResponseError(ctx, "json request body required", "01", "02")
+		response.NewResponseError(ctx, "json request body required")
 		return
 	}
 	resp, err := accountService.EditAccount(req, authHeader)
 	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "update account success", "01", "01")
+	response.NewResponseSuccess(ctx, resp, "update account success")
 }
 
 func (AccountController) ChangePassword(ctx *gin.Context) {
@@ -75,19 +75,19 @@ func (AccountController) ChangePassword(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponseBadRequest(ctx, validationError, "bad request", "01", "02")
+			response.NewResponseBadRequest(ctx, validationError, "bad request")
 			return
 		}
-		response.NewResponseError(ctx, "json request body required", "01", "02")
+		response.NewResponseError(ctx, "json request body required")
 		return
 	}
 	err := accountService.ChangePassword(req, authHeader)
 	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "update password success", "01", "01")
+	response.NewResponseSuccess(ctx, nil, "update password success")
 }
 
 func (AccountController) GetAccountDetailByUserID(ctx *gin.Context) {
@@ -96,9 +96,9 @@ func (AccountController) GetAccountDetailByUserID(ctx *gin.Context) {
 
 	resp, err := accountService.GetAccountDetail(authHeader)
 	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "get data detail success", "01", "01")
+	response.NewResponseSuccess(ctx, resp, "get data detail success")
 }
