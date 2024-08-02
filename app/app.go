@@ -46,9 +46,15 @@ func InitEnv() (dto.ConfigData, error) {
 	dbMaxConn := os.Getenv("MAX_CONN")
 	dbMaxLifeTime := os.Getenv("MAX_LIFE_TIME")
 	logMode := os.Getenv("LOG_MODE")
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	adminEmail := os.Getenv("ADMIN_EMAIL")
 
 	if dbHost == "" || dbPort == "" || dbUser == "" || dbPass == "" || dbName == "" || dbMaxIdle == "" || dbMaxConn == "" || dbMaxLifeTime == "" || logMode == "" {
 		return configData, errors.New("DB config is not set")
+	}
+
+	if adminPassword == "" || adminEmail == "" {
+		return configData, errors.New("admin config is not set")
 	}
 
 	var err error
@@ -69,6 +75,8 @@ func InitEnv() (dto.ConfigData, error) {
 	configData.DbConfig.Database = dbName
 	configData.DbConfig.MaxLifeTime = dbMaxLifeTime
 	configData.DbConfig.LogMode, err = strconv.Atoi(logMode)
+	configData.AdminConfig.Email = adminEmail
+	configData.AdminConfig.Password = adminPassword
 	if err != nil {
 		return configData, err
 	}

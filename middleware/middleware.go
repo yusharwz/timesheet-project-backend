@@ -19,12 +19,12 @@ func BasicAuth(c *gin.Context) {
 
 	user, password, ok := c.Request.BasicAuth()
 	if !ok {
-		response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+		response.NewResponseUnauthorized(c, "Invalid token")
 		c.Abort()
 		return
 	}
 	if user != userAuth || password != passAuth {
-		response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+		response.NewResponseUnauthorized(c, "Invalid token")
 		c.Abort()
 		return
 	}
@@ -64,7 +64,7 @@ func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if !strings.Contains(authHeader, "Bearer") {
-			response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+			response.NewResponseUnauthorized(c, "Invalid token")
 			c.Abort()
 			return
 		}
@@ -75,12 +75,12 @@ func JWTAuth() gin.HandlerFunc {
 			return jwtSignatureKey, nil
 		})
 		if err != nil {
-			response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+			response.NewResponseUnauthorized(c, "Invalid token")
 			c.Abort()
 			return
 		}
 		if !token.Valid {
-			response.NewResponseForbidden(c, "Invalid token", "01", "03")
+			response.NewResponseForbidden(c, "Invalid token")
 			c.Abort()
 			return
 		}
@@ -92,7 +92,7 @@ func JwtAuthWithRoles(userId ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if !strings.Contains(authHeader, "Bearer") {
-			response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+			response.NewResponseUnauthorized(c, "Invalid token")
 			c.Abort()
 			return
 		}
@@ -104,13 +104,13 @@ func JwtAuthWithRoles(userId ...string) gin.HandlerFunc {
 		})
 
 		if err != nil {
-			response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+			response.NewResponseUnauthorized(c, "Invalid token")
 			c.Abort()
 			return
 		}
 
 		if !token.Valid {
-			response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+			response.NewResponseUnauthorized(c, "Invalid token")
 			c.Abort()
 			return
 		}
@@ -127,7 +127,7 @@ func JwtAuthWithRoles(userId ...string) gin.HandlerFunc {
 		}
 
 		if !validRole {
-			response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+			response.NewResponseUnauthorized(c, "Invalid token")
 			c.Abort()
 			return
 		}

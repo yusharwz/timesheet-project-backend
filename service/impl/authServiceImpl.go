@@ -7,6 +7,7 @@ import (
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
 	"final-project-enigma/repository/impl"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -19,12 +20,7 @@ func NewAuthService() *AuthService {
 	return &AuthService{}
 }
 
-func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (response.RegisterAccountResponse, error) {
-	var resp response.RegisterAccountResponse
-
-	newUser := entity.User{
-		Base: entity.Base{ID: uuid.NewString()},
-	}
+func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp response.RegisterAccountResponse, err error) {
 
 	code, err := helper.GenerateCode()
 	if err != nil {
@@ -36,13 +32,14 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (response
 		return resp, err
 	}
 
+	role, err := authRepository.GetRole(req.RoleName)
+
 	newAccount := entity.Account{
 		Base:     entity.Base{ID: uuid.NewString()},
 		Email:    req.Email,
 		Password: hashedPassword,
 		IsActive: false,
-		RoleID:   req.RoleID,
-		UserID:   newUser.ID,
+		RoleID:   role.ID,
 	}
 
 	_, createdAccount, err := authRepository.Register(newUser, newAccount)
@@ -51,14 +48,10 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (response
 	}
 
 	resp = response.RegisterAccountResponse{
-		Id:       createdAccount.ID,
-		Email:    createdAccount.Email,
-		IsActive: createdAccount.IsActive,
-		RoleID:   createdAccount.RoleID,
-		UserID:   createdAccount.UserID,
+		Email: createdAccount.Email,
 	}
 
-	err = helper.SendEmailActivedAccount(resp.Email, code, hashedPassword)
+	err = helper.SendEmailActivatedAccount(resp.Email, code, hashedPassword)
 	if err != nil {
 		return resp, err
 	}
@@ -71,6 +64,8 @@ func (AuthService) Login(req request.LoginAccountRequest) (resp response.LoginRe
 	if err != nil {
 		return resp, err
 	}
+
+	fmt.Println(resp)
 
 	err = helper.ComparePassword(resp.HashPassword, req.Password)
 	if err != nil {

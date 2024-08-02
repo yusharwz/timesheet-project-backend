@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"final-project-enigma/dto"
 	"final-project-enigma/entity"
+	"final-project-enigma/helper"
 	"fmt"
-
+	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
@@ -47,11 +49,17 @@ func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
 	}
 
 	logger.Info().Msg("Successfully Connected to DB")
+
+	logger.Info().Msg("Initializing table role")
+	initRoles()
+
+	logger.Info().Msg("Initializing admin account")
+	initAdmin(in.AdminConfig.Email, in.AdminConfig.Password)
+
 	return db, nil
 }
 
 // auto create DB
-
 func autoCreateDb(config dto.ConfigData, logger zerolog.Logger) error {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
 		config.DbConfig.Host, config.DbConfig.User, config.DbConfig.Pass, config.DbConfig.DbPort)
@@ -77,4 +85,71 @@ func autoCreateDb(config dto.ConfigData, logger zerolog.Logger) error {
 	}
 
 	return nil
+}
+
+// init roles
+func initRoles() {
+	roles := []entity.Role{
+		{
+			ID:       uuid.NewString(),
+			RoleName: "admin",
+		},
+		{
+			ID:       uuid.NewString(),
+			RoleName: "user",
+		},
+		{
+			ID:       uuid.NewString(),
+			RoleName: "manager",
+		},
+		{
+			ID:       uuid.NewString(),
+			RoleName: "benefit",
+		},
+	}
+	var existsRole entity.Role
+	for _, role := range roles {
+		DB.Where("role_name = ?", role.RoleName).First(&existsRole)
+		if existsRole.ID == "" {
+			DB.Create(&role)
+		}
+	}
+}
+
+// init admin
+func initAdmin(email, password string) {
+	var adminAccount entity.Account
+	DB.Where("email = ? AND password = ?", email, password).First(&adminAccount)
+	if adminAccount.ID != "" {
+		adminAccount.Email = email
+		adminAccount.Password = password
+		DB.Save(adminAccount)
+		return
+	}
+	var adminRole entity.Role
+	DB.Where("role_name = ?", "admin").First(&adminRole)
+
+	adminUserID := uuid.NewString()
+
+	var err error
+	password, err = helper.HashPassword(password)
+	if err != nil {
+		log.Info().Msg("failed to hash password")
+	}
+
+	newAdminAccount := entity.Account{
+		Base:     entity.Base{ID: adminUserID},
+		Email:    email,
+		Password: password,
+		IsActive: true,
+		RoleID:   adminRole.ID,
+		UserID:   adminUserID,
+	}
+	adminUser := entity.User{
+		Base:    entity.Base{ID: uuid.NewString()},
+		Name:    "Admin",
+		Account: newAdminAccount,
+	}
+	DB.Create(&adminUser)
+	return
 }

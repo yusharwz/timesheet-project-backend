@@ -4,8 +4,9 @@ import "github.com/dgrijalva/jwt-go"
 
 type (
 	ConfigData struct {
-		DbConfig  DbConfig
-		AppConfig AppConfig
+		DbConfig    DbConfig
+		AppConfig   AppConfig
+		AdminConfig AdminConfig
 	}
 
 	DbConfig struct {
@@ -22,6 +23,11 @@ type (
 
 	AppConfig struct {
 		Port string
+	}
+
+	AdminConfig struct {
+		Email    string
+		Password string
 	}
 
 	JwtClaim struct {

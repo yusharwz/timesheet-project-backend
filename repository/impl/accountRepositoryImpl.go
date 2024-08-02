@@ -18,7 +18,7 @@ func (AccountRepository) AccountActivation(email string) error {
 
 	result := config.DB.Model(&entity.Account{}).Where("email = ?", email).Update("is_active", true)
 	if result.Error != nil {
-		return errors.New("disini")
+		return errors.New("failed to activate account")
 	}
 
 	return nil
@@ -74,7 +74,7 @@ func (repo AccountRepository) ChangePassword(req request.ChangePasswordRequest) 
 		return err
 	}
 
-	account.Password = string(hashedPassword)
+	account.Password = hashedPassword
 
 	if err := config.DB.Save(&account).Error; err != nil {
 		return err
