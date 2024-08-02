@@ -61,11 +61,11 @@ func (ctrl *TimeSheetController) UpdateTimeSheet(c *gin.Context) {
 	c.JSON(http.StatusOK, request)
 }
 
-func (c *TimeSheetController) DeleteTimeSheet(ctx *gin.Context) {
+func (ctrl *TimeSheetController) DeleteTimeSheet(ctx *gin.Context) {
 	id := ctx.Param("id")
 	log.Printf("Received request to delete time sheet with ID: %s", id)
 
-	err := c.service.DeleteTimeSheet(id)
+	err := ctrl.service.DeleteTimeSheet(id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

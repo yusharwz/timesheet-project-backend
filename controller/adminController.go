@@ -28,11 +28,11 @@ func (AdminController) AccountList(ctx *gin.Context) {
 
 	resp, err := adminService.RetrieveAccountList()
 	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "success get account list", "01", "01")
+	response.NewResponseSuccess(ctx, resp, "success get account list")
 }
 
 func (AdminController) AccountDetail(ctx *gin.Context) {
@@ -40,11 +40,11 @@ func (AdminController) AccountDetail(ctx *gin.Context) {
 	userID := ctx.Param("id")
 	resp, err := adminService.DetailAccount(userID)
 	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "success get detail account", "01", "01")
+	response.NewResponseSuccess(ctx, resp, "success get detail account")
 }
 
 func (AdminController) AccountSoftDelete(ctx *gin.Context) {
@@ -52,9 +52,9 @@ func (AdminController) AccountSoftDelete(ctx *gin.Context) {
 	userID := ctx.Param("id")
 	err := adminService.SoftDeleteAccount(userID)
 	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "delete account success", "01", "01")
+	response.NewResponseSuccess(ctx, nil, "delete account success")
 }
