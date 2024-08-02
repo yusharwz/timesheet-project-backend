@@ -13,4 +13,4 @@ go run .
 ```
 
 ## For documentation
-[timesheet.postman_collection.json](timesheet.postman_collection.json)
+[go-timesheet.postman_collection.json](go-timesheet.postman_collection.json)

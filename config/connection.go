@@ -53,7 +53,7 @@ func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
 	initRoles()
 
 	logger.Info().Msg("Initializing admin account")
-	initAdmin(in.AdminConfig.Password, in.AdminConfig.Email)
+	initAdmin(in.AdminConfig.Email, in.AdminConfig.Password)
 
 	return db, nil
 }
@@ -116,9 +116,9 @@ func initRoles() {
 }
 
 // init admin
-func initAdmin(password, email string) {
+func initAdmin(email, password string) {
 	var adminAccount entity.Account
-	DB.Where("username = ? AND password = ?", password).First(&adminAccount)
+	DB.Where("email = ? AND password = ?", email, password).First(&adminAccount)
 	if adminAccount.ID != "" {
 		adminAccount.Email = email
 		adminAccount.Password = password
