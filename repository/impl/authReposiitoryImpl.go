@@ -16,27 +16,38 @@ func NewAuthRepository() *AuthRepository {
 	return &AuthRepository{}
 }
 
-func (AuthRepository) CreateUser(user entity.User) (entity.User, error) {
-	err := config.DB.Create(&user)
-	if err.Error != nil {
-		return user, errors.New("failed to create user")
+func (AuthRepository) Register(user entity.User, account entity.Account) (entity.User, entity.Account, error) {
+
+	tx := config.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Create(&user).Error; err != nil {
+		tx.Rollback()
+		return user, account, errors.New("failed to create user")
 	}
 
-	return user, nil
-}
-
-func (AuthRepository) CreateAccount(account entity.Account) (entity.Account, error) {
 	var existingAccount entity.Account
-
-	if err := config.DB.Where("email = ?", account.Email).First(&existingAccount).Error; err == nil {
-		return account, errors.New("email already in use")
+	if err := tx.Where("email = ?", account.Email).First(&existingAccount).Error; err == nil {
+		tx.Rollback()
+		return user, account, errors.New("email already in use")
 	}
 
-	if err := config.DB.Create(&account).Error; err != nil {
-		return account, errors.New("failed to create account")
+	account.UserID = user.ID
+	if err := tx.Create(&account).Error; err != nil {
+		tx.Rollback()
+		return user, account, errors.New("failed to create account")
 	}
 
-	return account, nil
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return user, account, errors.New("transaction commit failed")
+	}
+
+	return user, account, nil
 }
 
 func (AuthRepository) Login(req request.LoginAccountRequest) (resp response.LoginResponse, err error) {
