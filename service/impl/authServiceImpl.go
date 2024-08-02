@@ -47,7 +47,6 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 	newAccount := entity.Account{
 		Base:     entity.Base{ID: uuid.NewString()},
 		Email:    req.Email,
-		Username: req.Username,
 		Password: req.Password,
 		IsActive: req.IsActive,
 		RoleID:   req.RoleID,
@@ -62,13 +61,12 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 	resp = response.RegisterAccountResponse{
 		Id:       createdAccount.ID,
 		Email:    createdAccount.Email,
-		Username: createdAccount.Username,
 		IsActive: createdAccount.IsActive,
 		RoleID:   createdAccount.RoleID,
 		UserID:   createdAccount.UserID,
 	}
 
-	err = helper.SendEmailActivedAccount(resp.Email, resp.Username, code, hashedPassword)
+	err = helper.SendEmailActivedAccount(resp.Email, code, hashedPassword)
 	if err != nil {
 		return resp, err
 	}
@@ -87,7 +85,7 @@ func (AuthService) Login(req request.LoginAccountRequest) (resp response.LoginRe
 		return resp, errors.New("invalid email or password")
 	}
 
-	resp.Token, err = helper.GetTokenJwt(resp.UserId, resp.Username, resp.Email, resp.Role)
+	resp.Token, err = helper.GetTokenJwt(resp.UserId, resp.Name, resp.Email, resp.Role)
 	if err != nil {
 		return resp, err
 	}

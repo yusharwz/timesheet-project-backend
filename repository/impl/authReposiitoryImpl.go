@@ -32,10 +32,6 @@ func (AuthRepository) CreateAccount(account entity.Account) (entity.Account, err
 		return account, errors.New("email already in use")
 	}
 
-	if err := config.DB.Where("username = ?", account.Username).First(&existingAccount).Error; err == nil {
-		return account, errors.New("username already in use")
-	}
-
 	if err := config.DB.Create(&account).Error; err != nil {
 		return account, errors.New("failed to create account")
 	}
@@ -45,14 +41,23 @@ func (AuthRepository) CreateAccount(account entity.Account) (entity.Account, err
 
 func (AuthRepository) Login(req request.LoginAccountRequest) (resp response.LoginResponse, err error) {
 	var account entity.Account
+	var user entity.User
 	var role entity.Role
 
-	result := config.DB.Where("email = ?", req.Email).First(&account)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+	resultAccount := config.DB.Where("email = ?", req.Email).First(&account)
+	if resultAccount.Error != nil {
+		if errors.Is(resultAccount.Error, gorm.ErrRecordNotFound) {
 			return resp, errors.New("invalid email or password")
 		}
-		return resp, result.Error
+		return resp, resultAccount.Error
+	}
+
+	resultUser := config.DB.Where("id = ?", account.UserID).First(&user)
+	if resultUser.Error != nil {
+		if errors.Is(resultUser.Error, gorm.ErrRecordNotFound) {
+			return resp, errors.New("invalid email or password")
+		}
+		return resp, resultUser.Error
 	}
 
 	if err := config.DB.Where("id = ?", account.RoleID).First(&role).Error; err != nil {
@@ -70,7 +75,7 @@ func (AuthRepository) Login(req request.LoginAccountRequest) (resp response.Logi
 	resp.HashPassword = account.Password
 	resp.Email = account.Email
 	resp.UserId = account.UserID
-	resp.Username = account.Username
+	resp.Name = user.Name
 	resp.Role = role.RoleName
 
 	return resp, nil

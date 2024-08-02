@@ -45,14 +45,6 @@ func (AccountRepository) EditAccount(req request.EditAccountRequest) error {
 		account.Email = req.Email
 	}
 
-	if req.Username != "" && req.Username != account.Username {
-		var existingAccount entity.Account
-		if err := config.DB.Where("username = ?", req.Username).First(&existingAccount).Error; err == nil {
-			return errors.New("username already in use")
-		}
-		account.Username = req.Username
-	}
-
 	if req.Name != "" {
 		user.Name = req.Name
 	}

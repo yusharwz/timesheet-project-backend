@@ -40,13 +40,13 @@ func (AuthController) RegisterAccountRequest(ctx *gin.Context) {
 		return
 	}
 
-	_, err := authService.RegisterAccount(req)
+	resp, err := authService.RegisterAccount(req)
 	if err != nil {
 		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "create account succes, please check your email for activated your account", "01", "01")
+	response.NewResponseSuccess(ctx, resp, "create account succes, please check your email for activated your account", "01", "01")
 }
 
 func (AuthController) AccountLogin(ctx *gin.Context) {

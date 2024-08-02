@@ -44,7 +44,6 @@ func (AccountService) EditAccount(req request.EditAccountRequest, authHeader str
 	}
 
 	resp := response.AccountDetailResponse{
-		Username: account.Username,
 		Name:     user.Name,
 		Email:    account.Email,
 		Phone:    user.PhoneNumber,
@@ -86,7 +85,6 @@ func (AccountService) GetAccountDetail(authHeader string) (response.AccountUserR
 	accountUserResp := response.AccountUserResponse{
 		AccountID: account.ID,
 		Email:     account.Email,
-		Username:  account.Username,
 		IsActive:  account.IsActive,
 		UserID:    user.ID,
 		Name:      user.Name,
