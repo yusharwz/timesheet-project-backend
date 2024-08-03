@@ -3,6 +3,7 @@ package controller
 import (
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
+	"final-project-enigma/middleware"
 	"final-project-enigma/service/impl"
 	"final-project-enigma/utils"
 
@@ -16,14 +17,14 @@ var authService = impl.NewAuthService()
 func NewAuthController(g *gin.RouterGroup) {
 	controller := new(AuthController)
 
-	usersGroup := g.Group("/accounts")
+	usersGroup := g.Group("/")
 	{
 		usersGroup.POST("/login", controller.AccountLogin)
 	}
 
-	adminroup := g.Group("/admin")
+	adminGroup := g.Group("/admin", middleware.JwtAuthWithRoles("admin"))
 	{
-		adminroup.POST("/register", controller.RegisterAccountRequest)
+		adminGroup.POST("/register", controller.RegisterAccountRequest)
 	}
 }
 
@@ -33,20 +34,20 @@ func (AuthController) RegisterAccountRequest(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponseBadRequest(ctx, validationError, "bad request", "01", "02")
+			response.NewResponseBadRequest(ctx, validationError, "bad request")
 			return
 		}
-		response.NewResponseError(ctx, "json request body required", "01", "02")
+		response.NewResponseError(ctx, "json request body required")
 		return
 	}
 
 	resp, err := authService.RegisterAccount(req)
 	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "create account succes, please check your email for activated your account", "01", "01")
+	response.NewResponseSuccess(ctx, resp, "create account success, please check your email for activated your account")
 }
 
 func (AuthController) AccountLogin(ctx *gin.Context) {
@@ -56,17 +57,17 @@ func (AuthController) AccountLogin(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponseBadRequest(ctx, validationError, "bad request", "01", "02")
+			response.NewResponseBadRequest(ctx, validationError, "bad request")
 			return
 		}
-		response.NewResponseError(ctx, "json request body required", "01", "02")
+		response.NewResponseError(ctx, "json request body required")
 		return
 	}
 	resp, err := authService.Login(req)
 	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "logged in", "01", "01")
+	response.NewResponseSuccess(ctx, resp, "logged in")
 }
