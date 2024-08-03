@@ -6,7 +6,6 @@ import (
 	"final-project-enigma/middleware"
 	"final-project-enigma/service/impl"
 	"final-project-enigma/utils"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,7 +40,7 @@ func (AuthController) RegisterAccountRequest(ctx *gin.Context) {
 		return
 	}
 
-	_, err := authService.RegisterAccount(req)
+	resp, err := authService.RegisterAccount(req)
 	if err != nil {
 		response.NewResponseForbidden(ctx, err.Error())
 		return

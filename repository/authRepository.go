@@ -7,8 +7,7 @@ import (
 )
 
 type AuthRepository interface {
-	CreateAccount(account entity.Account) (entity.Account, error)
-	CreateUser(user entity.User) (entity.User, error)
+	Register(user entity.User, account entity.Account) (entity.User, entity.Account, error)
 	Login(req request.LoginAccountRequest) (resp response.LoginResponse, err error)
 	GetRole(roleName string) (entity.Role, error)
 }
