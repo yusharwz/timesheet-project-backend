@@ -1,5 +1,7 @@
 package request
 
+import "mime/multipart"
+
 type (
 	ActivateAccountRequest struct {
 		Email    string
@@ -21,5 +23,10 @@ type (
 	ChangePasswordRequest struct {
 		UserID      string `json:"user_id"`
 		NewPassword string `json:"new_password" binding:"password"`
+	}
+
+	UploadImagesRequest struct {
+		UserID         string         `json:"user_id"`
+		SignatureImage multipart.File `json:"signature"`
 	}
 )

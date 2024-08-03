@@ -7,6 +7,7 @@ import (
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
 	"final-project-enigma/repository/impl"
+
 	"github.com/google/uuid"
 )
 
@@ -31,6 +32,9 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 	}
 
 	role, err := authRepository.GetRole(req.RoleName)
+	if err != nil {
+		return resp, err
+	}
 
 	newAccount := entity.Account{
 		Base:     entity.Base{ID: uuid.NewString()},

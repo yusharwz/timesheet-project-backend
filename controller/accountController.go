@@ -21,6 +21,7 @@ func NewAccountController(g *gin.RouterGroup) {
 	{
 		accountGroup.GET("/activate", controller.AccountActivation)
 		accountGroup.GET("/profile", middleware.JwtAuthWithRoles("user"), controller.GetAccountDetailByUserID)
+		accountGroup.POST("/profile/upload-signature", middleware.JwtAuthWithRoles("admin"), controller.UploadSignature)
 		accountGroup.PUT("/", middleware.JwtAuthWithRoles("user"), controller.EditAccount)
 		accountGroup.PUT("/change-password", middleware.JwtAuthWithRoles("user"), controller.ChangePassword)
 	}
@@ -63,6 +64,29 @@ func (AccountController) EditAccount(ctx *gin.Context) {
 	}
 
 	response.NewResponseSuccess(ctx, resp, "update account success")
+}
+
+func (AccountController) UploadSignature(ctx *gin.Context) {
+	var req request.UploadImagesRequest
+	authHeader := ctx.GetHeader("Authorization")
+	fileHeader, err := ctx.FormFile("image")
+	if err != nil {
+		response.NewResponseError(ctx, "failed to get file")
+		return
+	}
+	file, err := fileHeader.Open()
+	if err != nil {
+		response.NewResponseError(ctx, "failed to open file")
+		return
+	}
+	req.SignatureImage = file
+	resp, err := accountService.UploadSignature(req, authHeader)
+	if err != nil {
+		response.NewResponseError(ctx, err.Error())
+		return
+	}
+	response.NewResponseSuccess(ctx, resp, "Success upload image")
+
 }
 
 func (AccountController) ChangePassword(ctx *gin.Context) {

@@ -1,11 +1,17 @@
 package impl
 
 import (
+	"context"
 	"errors"
 	"final-project-enigma/config"
 	"final-project-enigma/dto/request"
+	"final-project-enigma/dto/response"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
+	"os"
+
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 )
 
 type AccountRepository struct{}
@@ -14,9 +20,9 @@ func NewAccountRepository() *AccountRepository {
 	return &AccountRepository{}
 }
 
-func (AccountRepository) AccountActivation(email string) error {
+func (AccountRepository) AccountActivation(email, password string) error {
 
-	result := config.DB.Model(&entity.Account{}).Where("email = ?", email).Update("is_active", true)
+	result := config.DB.Model(&entity.Account{}).Where("email, password = ?, ?", email, password).Update("is_active", true)
 	if result.Error != nil {
 		return errors.New("failed to activate account")
 	}
@@ -60,6 +66,27 @@ func (AccountRepository) EditAccount(req request.EditAccountRequest) error {
 	}
 
 	return nil
+}
+
+func (AccountRepository) UserUploadSignatureIMG(req request.UploadImagesRequest) (response.UploadImageResponse, error) {
+	cldService, _ := cloudinary.NewFromURL(os.Getenv("CLOUDINARY_URL"))
+	ctx := context.Background()
+
+	var resp response.UploadImageResponse
+
+	uploadResponse, err := cldService.Upload.Upload(ctx, req.SignatureImage, uploader.UploadParams{})
+	if err != nil {
+		return resp, err
+	}
+
+	resp.ImageURL = uploadResponse.SecureURL
+
+	err = config.DB.Model(&entity.User{}).Where("id = ?", req.UserID).Update("signature", resp.ImageURL).Error
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, nil
 }
 
 func (repo AccountRepository) ChangePassword(req request.ChangePasswordRequest) error {

@@ -18,4 +18,8 @@ type (
 		Name      string `json:"name"`
 		Phone     string `json:"phone"`
 	}
+
+	UploadImageResponse struct {
+		ImageURL string `json:"image_url"`
+	}
 )

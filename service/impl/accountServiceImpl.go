@@ -17,7 +17,7 @@ func NewAccountService() *AccountService {
 
 func (AccountService) AccountActivationUrl(account request.ActivateAccountRequest) error {
 
-	err := accountRepository.AccountActivation(account.Email)
+	err := accountRepository.AccountActivation(account.Email, account.Password)
 	if err != nil {
 		return err
 	}
@@ -49,6 +49,22 @@ func (AccountService) EditAccount(req request.EditAccountRequest, authHeader str
 		Phone:    user.PhoneNumber,
 		Role:     role.RoleName,
 		IsActive: account.IsActive,
+	}
+
+	return resp, nil
+}
+
+func (AccountService) UploadSignature(req request.UploadImagesRequest, authHeader string) (resp response.UploadImageResponse, err error) {
+
+	userID, err := middleware.GetIdFromToken(authHeader)
+	if err != nil {
+		return resp, err
+	}
+	req.UserID = userID
+
+	resp, err = accountRepository.UserUploadSignatureIMG(req)
+	if err != nil {
+		return resp, err
 	}
 
 	return resp, nil
