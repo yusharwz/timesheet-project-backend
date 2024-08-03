@@ -8,6 +8,7 @@ import (
 	"final-project-enigma/helper"
 	"final-project-enigma/repository/impl"
 	"fmt"
+
 	"github.com/google/uuid"
 )
 
@@ -71,7 +72,7 @@ func (AuthService) Login(req request.LoginAccountRequest) (resp response.LoginRe
 		return resp, errors.New("invalid email or password")
 	}
 
-	resp.Token, err = helper.GetTokenJwt(resp.UserId, resp.Username, resp.Email, resp.Role)
+	resp.Token, err = helper.GetTokenJwt(resp.UserId, resp.Name, resp.Email, resp.Role)
 	if err != nil {
 		return resp, err
 	}
