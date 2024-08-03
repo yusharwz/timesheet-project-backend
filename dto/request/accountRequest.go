@@ -3,7 +3,6 @@ package request
 type (
 	ActivateAccountRequest struct {
 		Email    string
-		Username string
 		Password string
 	}
 

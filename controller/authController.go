@@ -6,7 +6,6 @@ import (
 	"final-project-enigma/middleware"
 	"final-project-enigma/service/impl"
 	"final-project-enigma/utils"
-
 	"github.com/gin-gonic/gin"
 )
 

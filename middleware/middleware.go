@@ -5,6 +5,7 @@ import (
 	"final-project-enigma/dto"
 	"final-project-enigma/dto/response"
 	"fmt"
+	"github.com/joho/godotenv"
 	"os"
 	"strings"
 	"time"
@@ -34,20 +35,30 @@ func BasicAuth(c *gin.Context) {
 var (
 	applicationName  = "timesheet-app"
 	jwtSigningMethod = jwt.SigningMethodHS256
-	jwtSignatureKey  = []byte("incubation-golang")
+	jwtSignatureKey  []byte
 )
 
-func GenerateTokenJwt(Id, username, email, roles string, expiredAt int64) (string, error) {
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		return
+	}
+	jwtSignatureKey = []byte(os.Getenv("JWT_SECRET"))
+}
+
+func GenerateTokenJwt(Id, name, email, roles string, expiredAt int64) (string, error) {
 	loginExpDuration := time.Duration(expiredAt) * time.Hour
-	myExpiresAt := time.Now().Add(loginExpDuration).Unix()
+	issuedAt := time.Now()
+	myExpiresAt := issuedAt.Add(loginExpDuration).Unix()
 	claims := dto.JwtClaim{
 		Id:       Id,
-		Username: username,
+		Username: name,
 		Email:    email,
 		Roles:    roles,
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    applicationName,
 			ExpiresAt: myExpiresAt,
+			IssuedAt:  issuedAt.Unix(),
 		},
 	}
 
