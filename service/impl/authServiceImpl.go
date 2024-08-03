@@ -7,8 +7,6 @@ import (
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
 	"final-project-enigma/repository/impl"
-	"fmt"
-
 	"github.com/google/uuid"
 )
 
@@ -64,8 +62,6 @@ func (AuthService) Login(req request.LoginAccountRequest) (resp response.LoginRe
 	if err != nil {
 		return resp, err
 	}
-
-	fmt.Println(resp)
 
 	err = helper.ComparePassword(resp.HashPassword, req.Password)
 	if err != nil {

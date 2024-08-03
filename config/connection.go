@@ -11,7 +11,6 @@ import (
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -58,6 +57,7 @@ func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
 	if err != nil {
 		logger.Info().Msg(err.Error())
 	}
+	logger.Info().Msg("admin account successfully initialized")
 
 	return db, nil
 }
@@ -116,6 +116,7 @@ func initRoles(logger zerolog.Logger) {
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				DB.Create(&role)
+				logger.Info().Msg(fmt.Sprintf("Role %s created", role.RoleName))
 			} else {
 				logger.Info().Msg(fmt.Sprintf("failed to execute query %s", result.Error))
 			}
@@ -128,13 +129,21 @@ func initRoles(logger zerolog.Logger) {
 // init admin
 func initAdmin(email, password string) error {
 	var adminAccount entity.Account
-	DB.Where("email = ?", email).First(&adminAccount)
-	if adminAccount.ID != "" {
-		adminAccount.Email = email
-		adminAccount.Password = password
-		DB.Save(adminAccount)
-		return errors.New("admin account already initialized")
+	err := DB.Where("email = ?", email).First(&adminAccount).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return createAdminIfNotFound(email, password)
 	}
+	password, err = helper.HashPassword(password)
+	if err != nil {
+		return errors.New("failed to hash password")
+	}
+	adminAccount.Email = email
+	adminAccount.Password = password
+	DB.Save(adminAccount)
+	return errors.New("admin account already initialized")
+}
+
+func createAdminIfNotFound(email, password string) error {
 	var adminRole entity.Role
 	DB.Where("role_name = ?", "admin").First(&adminRole)
 
@@ -143,7 +152,7 @@ func initAdmin(email, password string) error {
 	var err error
 	password, err = helper.HashPassword(password)
 	if err != nil {
-		log.Info().Msg("failed to hash password")
+		return errors.New("failed to hash password")
 	}
 
 	newAdminAccount := entity.Account{
@@ -159,6 +168,9 @@ func initAdmin(email, password string) error {
 		Name:    "Admin",
 		Account: newAdminAccount,
 	}
-	DB.Create(&adminUser)
+	result := DB.Create(&adminUser)
+	if result.Error != nil {
+		return errors.New("admin account failed to create")
+	}
 	return nil
 }

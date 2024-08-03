@@ -41,7 +41,7 @@ func (AuthController) RegisterAccountRequest(ctx *gin.Context) {
 		return
 	}
 
-	resp, err := authService.RegisterAccount(req)
+	_, err := authService.RegisterAccount(req)
 	if err != nil {
 		response.NewResponseForbidden(ctx, err.Error())
 		return
