@@ -56,8 +56,9 @@ func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
 	err = initAdmin(in.AdminConfig.Email, in.AdminConfig.Password)
 	if err != nil {
 		logger.Info().Msg(err.Error())
+	} else {
+		logger.Info().Msg("admin account successfully initialized")
 	}
-	logger.Info().Msg("admin account successfully initialized")
 
 	return db, nil
 }

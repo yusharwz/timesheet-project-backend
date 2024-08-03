@@ -30,7 +30,6 @@ func (AccountController) AccountActivation(ctx *gin.Context) {
 	var params request.ActivateAccountRequest
 
 	params.Email = ctx.Query("e")
-	params.Username = ctx.Query("un")
 	params.Password = ctx.Query("unique")
 
 	err := accountService.AccountActivationUrl(params)
