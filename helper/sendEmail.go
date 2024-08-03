@@ -26,8 +26,8 @@ func SendEmail(email, code string) (bool, error) {
 }
 
 func SendEmailActivatedAccount(email, code, unique string) error {
-
-	url := fmt.Sprintf("http://localhost:8080/api/v1/accounts/activate?e=%s&unique=%s", email, unique)
+	host := os.Getenv("HOST")
+	url := fmt.Sprintf("%s/api/v1/accounts/activate?e=%s&unique=%s", host, email, unique)
 
 	emailPort, _ := strconv.Atoi(os.Getenv("EMAIL_PORT"))
 
@@ -46,7 +46,8 @@ func SendEmailActivatedAccount(email, code, unique string) error {
 }
 
 func SendEmailForgotPin(email, username, code, unique string) error {
-	url := fmt.Sprintf("https://api.yusharwz.my.id/api/v1/auth/reset-pin?email=%s&username=%s&unique=%s&code=%s", email, username, unique, code)
+	host := os.Getenv("HOST")
+	url := fmt.Sprintf("%s/api/v1/auth/reset-pin?email=%s&username=%s&unique=%s&code=%s", host, email, username, unique, code)
 
 	emailPort, _ := strconv.Atoi(os.Getenv("EMAIL_PORT"))
 

@@ -2,18 +2,17 @@ package config
 
 import (
 	"database/sql"
+	"errors"
 	"final-project-enigma/dto"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
@@ -51,10 +50,14 @@ func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
 	logger.Info().Msg("Successfully Connected to DB")
 
 	logger.Info().Msg("Initializing table role")
-	initRoles()
+	initRoles(logger)
 
 	logger.Info().Msg("Initializing admin account")
-	initAdmin(in.AdminConfig.Email, in.AdminConfig.Password)
+	err = initAdmin(in.AdminConfig.Email, in.AdminConfig.Password)
+	if err != nil {
+		logger.Info().Msg(err.Error())
+	}
+	logger.Info().Msg("admin account successfully initialized")
 
 	return db, nil
 }
@@ -88,7 +91,7 @@ func autoCreateDb(config dto.ConfigData, logger zerolog.Logger) error {
 }
 
 // init roles
-func initRoles() {
+func initRoles(logger zerolog.Logger) {
 	roles := []entity.Role{
 		{
 			ID:       uuid.NewString(),
@@ -107,25 +110,40 @@ func initRoles() {
 			RoleName: "benefit",
 		},
 	}
-	var existsRole entity.Role
 	for _, role := range roles {
-		DB.Where("role_name = ?", role.RoleName).First(&existsRole)
-		if existsRole.ID == "" {
-			DB.Create(&role)
+		var existsRole entity.Role
+		result := DB.Where("role_name = ?", role.RoleName).First(&existsRole)
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				DB.Create(&role)
+				logger.Info().Msg(fmt.Sprintf("Role %s created", role.RoleName))
+			} else {
+				logger.Info().Msg(fmt.Sprintf("failed to execute query %s", result.Error))
+			}
+		} else {
+			logger.Info().Msg(fmt.Sprintf("Role %s already exists, proceeding without creating it", role.RoleName))
 		}
 	}
 }
 
 // init admin
-func initAdmin(email, password string) {
+func initAdmin(email, password string) error {
 	var adminAccount entity.Account
-	DB.Where("email = ? AND password = ?", email, password).First(&adminAccount)
-	if adminAccount.ID != "" {
-		adminAccount.Email = email
-		adminAccount.Password = password
-		DB.Save(adminAccount)
-		return
+	err := DB.Where("email = ?", email).First(&adminAccount).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return createAdminIfNotFound(email, password)
 	}
+	password, err = helper.HashPassword(password)
+	if err != nil {
+		return errors.New("failed to hash password")
+	}
+	adminAccount.Email = email
+	adminAccount.Password = password
+	DB.Save(adminAccount)
+	return errors.New("admin account already initialized")
+}
+
+func createAdminIfNotFound(email, password string) error {
 	var adminRole entity.Role
 	DB.Where("role_name = ?", "admin").First(&adminRole)
 
@@ -134,7 +152,7 @@ func initAdmin(email, password string) {
 	var err error
 	password, err = helper.HashPassword(password)
 	if err != nil {
-		log.Info().Msg("failed to hash password")
+		return errors.New("failed to hash password")
 	}
 
 	newAdminAccount := entity.Account{
@@ -150,6 +168,9 @@ func initAdmin(email, password string) {
 		Name:    "Admin",
 		Account: newAdminAccount,
 	}
-	DB.Create(&adminUser)
-	return
+	result := DB.Create(&adminUser)
+	if result.Error != nil {
+		return errors.New("admin account failed to create")
+	}
+	return nil
 }
