@@ -47,7 +47,7 @@ func (AuthController) RegisterAccountRequest(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "create account success, please check your email for activated your account")
+	response.NewResponseSuccess(ctx, resp, "create account success, please check your email for activated your account")
 }
 
 func (AuthController) AccountLogin(ctx *gin.Context) {
