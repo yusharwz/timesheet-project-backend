@@ -3,6 +3,8 @@ package impl
 import (
 	"final-project-enigma/config"
 	"final-project-enigma/entity"
+	"final-project-enigma/helper"
+	"strconv"
 	"time"
 )
 
@@ -12,19 +14,25 @@ func NewAdminRepository() *AccountRepository {
 	return &AccountRepository{}
 }
 
-func (AccountRepository) RetrieveAccountList() ([]entity.Account, []entity.User, error) {
-	var accounts []entity.Account
+func (AccountRepository) RetrieveAccountList(paging, rowsPerPage int) ([]entity.User, string, error) {
+	//var accounts []entity.Account
 	var users []entity.User
 
-	if err := config.DB.Find(&accounts).Error; err != nil {
-		return nil, nil, err
+	//if err := config.DB.Find(&accounts).Error; err != nil {
+	//	return nil, nil, err
+	//}
+	//
+	//if err := config.DB.Find(&users).Error; err != nil {
+	//	return nil, nil, err
+	//}
+
+	if err := config.DB.Scopes(helper.Paginate(paging, rowsPerPage)).Joins("Account").Find(&users).Error; err != nil {
+		return nil, "0", err
 	}
 
-	if err := config.DB.Find(&users).Error; err != nil {
-		return nil, nil, err
-	}
-
-	return accounts, users, nil
+	var totalRows int64
+	config.DB.Model(&entity.User{}).Count(&totalRows)
+	return users, strconv.FormatInt(totalRows, 10), nil
 }
 
 func (AccountRepository) DetailAccount(userID string) (entity.Account, entity.User, entity.Role, error) {

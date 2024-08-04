@@ -38,7 +38,7 @@ func (AccountController) AccountActivation(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "account has been activated")
+	response.NewResponseSuccess(ctx, nil)
 }
 
 func (AccountController) EditAccount(ctx *gin.Context) {
@@ -50,7 +50,7 @@ func (AccountController) EditAccount(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponseBadRequest(ctx, validationError, "bad request")
+			response.NewResponseBadRequest(ctx, validationError)
 			return
 		}
 		response.NewResponseError(ctx, "json request body required")
@@ -62,7 +62,7 @@ func (AccountController) EditAccount(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "update account success")
+	response.NewResponseSuccess(ctx, resp)
 }
 
 func (AccountController) ChangePassword(ctx *gin.Context) {
@@ -74,7 +74,7 @@ func (AccountController) ChangePassword(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponseBadRequest(ctx, validationError, "bad request")
+			response.NewResponseBadRequest(ctx, validationError)
 			return
 		}
 		response.NewResponseError(ctx, "json request body required")
@@ -86,7 +86,7 @@ func (AccountController) ChangePassword(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "update password success")
+	response.NewResponseSuccess(ctx, nil)
 }
 
 func (AccountController) GetAccountDetailByUserID(ctx *gin.Context) {
@@ -99,5 +99,5 @@ func (AccountController) GetAccountDetailByUserID(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "get data detail success")
+	response.NewResponseSuccess(ctx, resp)
 }

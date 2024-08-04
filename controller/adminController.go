@@ -25,14 +25,15 @@ func NewAdminController(g *gin.RouterGroup) {
 }
 
 func (AdminController) AccountList(ctx *gin.Context) {
-
-	resp, err := adminService.RetrieveAccountList()
+	paging := ctx.DefaultQuery("paging", "1")
+	rowsPerPage := ctx.DefaultQuery("rowsPerPage", "10")
+	resp, totalRows, totalPage, err := adminService.RetrieveAccountList(paging, rowsPerPage)
 	if err != nil {
 		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "success get account list")
+	response.NewResponseSuccessPaging(ctx, resp, paging, rowsPerPage, totalRows, totalPage)
 }
 
 func (AdminController) AccountDetail(ctx *gin.Context) {
@@ -44,7 +45,7 @@ func (AdminController) AccountDetail(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "success get detail account")
+	response.NewResponseSuccess(ctx, resp)
 }
 
 func (AdminController) AccountSoftDelete(ctx *gin.Context) {
@@ -56,5 +57,5 @@ func (AdminController) AccountSoftDelete(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "delete account success")
+	response.NewResponseSuccess(ctx, nil)
 }
