@@ -3,7 +3,7 @@ package request
 import "time"
 
 type TimeSheetRequest struct {
-	TimeSheetDetails []TimeSheetDetailRequest `json:"time_sheet_details"`
+	TimeSheetDetails []TimeSheetDetailRequest `json:"timeSheetDetails"`
 }
 
 type TimeSheetDetailRequest struct {

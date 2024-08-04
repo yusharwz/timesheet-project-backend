@@ -13,12 +13,12 @@ func NewTimeSheetRepository() *TimeSheetRepository {
 	return &TimeSheetRepository{}
 }
 
-func (TimeSheetRepository) CreateTimeSheet(ts entity.TimeSheet) (entity.TimeSheet, error) {
-	err := config.DB.Create(&ts).Error
+func (TimeSheetRepository) CreateTimeSheet(timesheet entity.TimeSheet) (entity.TimeSheet, error) {
+	err := config.DB.Create(&timesheet).Error
 	if err != nil {
 		return entity.TimeSheet{}, err
 	}
-	return ts, nil
+	return timesheet, nil
 }
 
 func (TimeSheetRepository) UpdateTimeSheet(ts *entity.TimeSheet) error {

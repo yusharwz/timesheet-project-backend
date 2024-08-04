@@ -25,16 +25,14 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 		return response.TimeSheetResponse{}, err
 	}
 
-	timeSheetId := uuid.NewString()
 	timeSheetDetails := make([]entity.TimeSheetDetail, 0)
 	for _, value := range req.TimeSheetDetails {
 		timeSheetDetails = append(timeSheetDetails, entity.TimeSheetDetail{
-			Base:        entity.Base{ID: uuid.NewString()},
-			Date:        value.Date,
-			StartTime:   value.StartTime,
-			EndTime:     value.EndTime,
-			TimeSheetID: timeSheetId,
-			WorkID:      value.WorkID,
+			Base:      entity.Base{ID: uuid.NewString()},
+			Date:      value.Date,
+			StartTime: value.StartTime,
+			EndTime:   value.EndTime,
+			WorkID:    value.WorkID,
 		})
 	}
 
@@ -44,7 +42,7 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 	}
 
 	timeSheet := entity.TimeSheet{
-		Base:              entity.Base{ID: timeSheetId},
+		Base:              entity.Base{ID: uuid.NewString()},
 		StatusTimeSheetID: status.ID,
 		UserID:            userID,
 		TimeSheetDetails:  timeSheetDetails,
