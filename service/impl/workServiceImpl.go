@@ -7,6 +7,7 @@ import (
 	"final-project-enigma/dto/response"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
+	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"strconv"
 
@@ -15,7 +16,7 @@ import (
 
 type WorkService struct{}
 
-var workRepository = impl.NewWorkRepository()
+var workRepository repository.WorkRepository = impl.NewWorkRepository()
 
 func NewWorkService() *WorkService {
 	return &WorkService{}

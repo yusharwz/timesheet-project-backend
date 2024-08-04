@@ -1,6 +1,5 @@
 package entity
 
-
 type TimeSheet struct {
 	Base
 	ConfirmedManagerBy string            `json:"id_manager"`

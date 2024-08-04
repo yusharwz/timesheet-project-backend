@@ -10,11 +10,11 @@ import (
 
 type AdminRepository struct{}
 
-func NewAdminRepository() *AccountRepository {
-	return &AccountRepository{}
+func NewAdminRepository() *AdminRepository {
+	return &AdminRepository{}
 }
 
-func (AccountRepository) RetrieveAccountList(paging, rowsPerPage int) ([]entity.User, string, error) {
+func (AdminRepository) RetrieveAccountList(paging, rowsPerPage int) ([]entity.User, string, error) {
 	//var accounts []entity.Account
 	var users []entity.User
 
@@ -35,7 +35,7 @@ func (AccountRepository) RetrieveAccountList(paging, rowsPerPage int) ([]entity.
 	return users, strconv.FormatInt(totalRows, 10), nil
 }
 
-func (AccountRepository) DetailAccount(userID string) (entity.Account, entity.User, entity.Role, error) {
+func (AdminRepository) DetailAccount(userID string) (entity.Account, entity.User, entity.Role, error) {
 	var account entity.Account
 	var user entity.User
 	var role entity.Role
@@ -55,7 +55,7 @@ func (AccountRepository) DetailAccount(userID string) (entity.Account, entity.Us
 	return account, user, role, nil
 }
 
-func (AccountRepository) SoftDeleteAccount(userID string) error {
+func (AdminRepository) SoftDeleteAccount(userID string) error {
 	var account entity.Account
 	var user entity.User
 

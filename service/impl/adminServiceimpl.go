@@ -4,13 +4,14 @@ import (
 	"errors"
 	"final-project-enigma/dto/response"
 	"final-project-enigma/helper"
+	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"strconv"
 )
 
 type AdminService struct{}
 
-var adminRepository = impl.NewAdminRepository()
+var adminRepository repository.AdminRepository = impl.NewAdminRepository()
 
 func NewAdminService() *AdminService {
 	return &AdminService{}

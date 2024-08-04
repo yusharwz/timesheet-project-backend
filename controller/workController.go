@@ -4,6 +4,7 @@ import (
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
 	"final-project-enigma/middleware"
+	"final-project-enigma/service"
 	"final-project-enigma/service/impl"
 	"final-project-enigma/utils"
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 
 type WorkController struct{}
 
-var workService = impl.NewWorkService()
+var workService service.WorkService = impl.NewWorkService()
 
 func NewWorkController(g *gin.RouterGroup) {
 	controller := new(WorkController)

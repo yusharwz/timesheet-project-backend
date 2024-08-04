@@ -10,5 +10,5 @@ type WorkService interface {
 	UpdateWork(id string, request request.WorkRequest) (response.WorkResponse, error)
 	DeleteWork(id string) error
 	GetById(id string) (response.WorkResponse, error)
-	GetAllWork(paging, rowsPerPage int) ([]response.WorkResponse, string, string, error)
+	GetAllWork(paging, rowsPerPage string) ([]response.WorkResponse, string, string, error)
 }

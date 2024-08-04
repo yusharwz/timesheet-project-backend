@@ -1,16 +1,18 @@
 package response
 
-import "time"
+import (
+	"time"
+)
 
 type TimeSheetResponse struct {
 	ID                 string                    `json:"id"`
-	UserID             string                    `json:"user_id"`
-	StatusTimeSheetID  string                    `json:"status_time_sheet_id"`
-	ConfirmedManagerBy string                    `json:"id_manager"`
-	ConfirmedBenefitBy string                    `json:"id_benefit"`
-	CreatedAt          time.Time                 `json:"created_at"`
-	UpdatedAt          time.Time                 `json:"updated_at"`
-	TimeSheetDetails   []TimeSheetDetailResponse `json:"time_sheet_details"`
+	CreatedAt          time.Time                 `json:"createdAt"`
+	UpdatedAt          time.Time                 `json:"updatedAt"`
+	StatusByManager    string                    `json:"statusByManager"`
+	StatusByBenefit    string                    `json:"statusByBenefit"`
+	ConfirmedManagerBy ConfirmedByResponse       `json:"confirmedManagerBy"`
+	ConfirmedBenefitBy ConfirmedByResponse       `json:"confirmedBenefitBy"`
+	TimeSheetDetails   []TimeSheetDetailResponse `json:"timeSheetDetails"`
 }
 
 type TimeSheetDetailResponse struct {
@@ -19,4 +21,11 @@ type TimeSheetDetailResponse struct {
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
 	WorkID    string    `json:"work_id"`
+}
+
+type ConfirmedByResponse struct {
+	ID           string `json:"userId"`
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+	SignatureUrl string `json:"signatureUrl"`
 }

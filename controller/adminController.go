@@ -3,6 +3,7 @@ package controller
 import (
 	"final-project-enigma/dto/response"
 	"final-project-enigma/middleware"
+	"final-project-enigma/service"
 	"final-project-enigma/service/impl"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,7 @@ import (
 
 type AdminController struct{}
 
-var adminService = impl.NewAdminService()
+var adminService service.AdminService = impl.NewAdminService()
 
 func NewAdminController(g *gin.RouterGroup) {
 	controller := new(AdminController)

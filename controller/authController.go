@@ -4,6 +4,7 @@ import (
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
 	"final-project-enigma/middleware"
+	"final-project-enigma/service"
 	"final-project-enigma/service/impl"
 	"final-project-enigma/utils"
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 
 type AuthController struct{}
 
-var authService = impl.NewAuthService()
+var authService service.AuthService = impl.NewAuthService()
 
 func NewAuthController(g *gin.RouterGroup) {
 	controller := new(AuthController)

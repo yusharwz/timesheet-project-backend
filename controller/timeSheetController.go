@@ -1,71 +1,89 @@
 package controller
 
 import (
+	"final-project-enigma/dto/request"
+	"final-project-enigma/dto/response"
 	"final-project-enigma/entity"
+	"final-project-enigma/middleware"
 	"final-project-enigma/service"
+	"final-project-enigma/service/impl"
+	"final-project-enigma/utils"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type TimeSheetController struct {
-	service service.TimeSheetService
-}
+type TimeSheetController struct{}
+
+var timeSheetService service.TimeSheetService = impl.NewTimeSheetService()
 
 func NewTimesheetController(g *gin.RouterGroup) {
 	controller := new(TimeSheetController)
-	timesheetGroup := g.Group("/timesheets")
+	timesheetGroup := g.Group("/timesheets", middleware.JwtAuthWithRoles("user"))
 	{
-		timesheetGroup.POST("/", controller.CreateTimeSheet)
-		timesheetGroup.PUT("/:id", controller.UpdateTimeSheet)
-		timesheetGroup.DELETE("/:id", controller.DeleteTimeSheet)
-		timesheetGroup.GET("/:id", controller.GetTimeSheetByID)
-		timesheetGroup.GET("/", controller.GetAllTimeSheets)
+		timesheetGroup.POST("/", middleware.JwtAuthWithRoles("user"), controller.CreateTimeSheet)
+		timesheetGroup.PUT("/:id", middleware.JwtAuthWithRoles("user"), controller.UpdateTimeSheet)
+		timesheetGroup.DELETE("/:id", middleware.JwtAuthWithRoles("user"), controller.DeleteTimeSheet)
 
+	}
+	g.GET("/timesheets/:id", controller.GetTimeSheetByID)
+	g.GET("/timesheets", controller.GetAllTimeSheets)
+	managerGroup := g.Group("/manager", middleware.JwtAuthWithRoles("manager"))
+	{
+		managerGroup.POST("approve/timesheets/:id", controller.ApproveManagerTimeSheet)
+		managerGroup.POST("reject/timesheets/:id", controller.RejectManagerTimeSheet)
+	}
+	benefitGroup := g.Group("benefit", middleware.JwtAuthWithRoles("benefit"))
+	{
+		benefitGroup.POST("approve/timesheets/:id", controller.ApproveBenefitTimeSheet)
+		benefitGroup.POST("reject/timesheets/:id", controller.RejectBenefitTimeSheet)
 	}
 }
 
-func (ctrl *TimeSheetController) CreateTimeSheet(c *gin.Context) {
-	var request entity.TimeSheet
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+func (TimeSheetController) CreateTimeSheet(c *gin.Context) {
+	var req request.TimeSheetRequest
+	authHeader := c.GetHeader("Authorization")
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validation := utils.GetValidationError(err)
+		response.NewResponseBadRequest(c, validation)
 		return
 	}
 
-	err := ctrl.service.CreateTimeSheet(&request)
+	res, err := timeSheetService.CreateTimeSheet(req, authHeader)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.NewResponseError(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, request)
+	response.NewResponseCreated(c, res)
 }
 
-func (ctrl *TimeSheetController) UpdateTimeSheet(c *gin.Context) {
+func (TimeSheetController) UpdateTimeSheet(c *gin.Context) {
 	id := c.Param("id")
 
-	var request entity.TimeSheet
-	if err := c.ShouldBindJSON(&request); err != nil {
+	var req entity.TimeSheet
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	request.ID = id
-	err := ctrl.service.UpdateTimeSheet(&request)
+	req.ID = id
+	err := timeSheetService.UpdateTimeSheet(&req)
 	if err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, request)
+	c.JSON(http.StatusOK, req)
 }
 
-func (ctrl *TimeSheetController) DeleteTimeSheet(ctx *gin.Context) {
+func (TimeSheetController) DeleteTimeSheet(ctx *gin.Context) {
 	id := ctx.Param("id")
 	log.Printf("Received request to delete time sheet with ID: %s", id)
 
-	err := ctrl.service.DeleteTimeSheet(id)
+	err := timeSheetService.DeleteTimeSheet(id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -74,10 +92,10 @@ func (ctrl *TimeSheetController) DeleteTimeSheet(ctx *gin.Context) {
 	ctx.Status(http.StatusNoContent)
 }
 
-func (ctrl *TimeSheetController) GetTimeSheetByID(c *gin.Context) {
+func (TimeSheetController) GetTimeSheetByID(c *gin.Context) {
 	id := c.Param("id")
 
-	timeSheet, err := ctrl.service.GetTimeSheetByID(id)
+	timeSheet, err := timeSheetService.GetTimeSheetByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -86,21 +104,21 @@ func (ctrl *TimeSheetController) GetTimeSheetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, timeSheet)
 }
 
-func (ctrl *TimeSheetController) GetAllTimeSheets(c *gin.Context) {
-	timeSheets, err := ctrl.service.GetAllTimeSheets()
+func (TimeSheetController) GetAllTimeSheets(c *gin.Context) {
+	timeSheets, err := timeSheetService.GetAllTimeSheets()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.NewResponseError(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, timeSheets)
+	response.NewResponseSuccess(c, timeSheets)
 }
 
-func (ctrl *TimeSheetController) ApproveManagerTimeSheet(c *gin.Context) {
+func (TimeSheetController) ApproveManagerTimeSheet(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.Query("user_id")
 
-	err := ctrl.service.ApproveManagerTimeSheet(id, userID)
+	err := timeSheetService.ApproveManagerTimeSheet(id, userID)
 	if err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
@@ -109,11 +127,11 @@ func (ctrl *TimeSheetController) ApproveManagerTimeSheet(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "Manager approved"})
 }
 
-func (ctrl *TimeSheetController) RejectManagerTimeSheet(c *gin.Context) {
+func (TimeSheetController) RejectManagerTimeSheet(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.Query("user_id")
 
-	err := ctrl.service.RejectManagerTimeSheet(id, userID)
+	err := timeSheetService.RejectManagerTimeSheet(id, userID)
 	if err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
@@ -122,11 +140,11 @@ func (ctrl *TimeSheetController) RejectManagerTimeSheet(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "Manager rejected"})
 }
 
-func (ctrl *TimeSheetController) ApproveBenefitTimeSheet(c *gin.Context) {
+func (TimeSheetController) ApproveBenefitTimeSheet(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.Query("user_id")
 
-	err := ctrl.service.ApproveBenefitTimeSheet(id, userID)
+	err := timeSheetService.ApproveBenefitTimeSheet(id, userID)
 	if err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
@@ -135,11 +153,11 @@ func (ctrl *TimeSheetController) ApproveBenefitTimeSheet(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "Benefit approved"})
 }
 
-func (ctrl *TimeSheetController) RejectBenefitTimeSheet(c *gin.Context) {
+func (TimeSheetController) RejectBenefitTimeSheet(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.Query("user_id")
 
-	err := ctrl.service.RejectBenefitTimeSheet(id, userID)
+	err := timeSheetService.RejectBenefitTimeSheet(id, userID)
 	if err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
