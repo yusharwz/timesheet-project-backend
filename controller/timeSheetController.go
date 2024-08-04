@@ -15,7 +15,7 @@ type TimeSheetController struct {
 
 func NewTimesheetController(g *gin.RouterGroup) {
 	controller := new(TimeSheetController)
-	timesheetGroup := g.Group("/timesheet")
+	timesheetGroup := g.Group("/timesheets")
 	{
 		timesheetGroup.POST("/", controller.CreateTimeSheet)
 		timesheetGroup.PUT("/:id", controller.UpdateTimeSheet)
