@@ -163,10 +163,26 @@ func RunService() {
 	log.Logger = log.Output(logFile)
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("password", utils.ValidatePassword)
-		v.RegisterValidation("nomorHp", utils.ValidateNoHp)
-		v.RegisterValidation("username", utils.ValidateUsername)
-		v.RegisterValidation("pin", utils.ValidatePIN)
+		err := v.RegisterValidation("password", utils.ValidatePassword)
+		if err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
+		err = v.RegisterValidation("nomorHp", utils.ValidateNoHp)
+		if err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
+		err = v.RegisterValidation("username", utils.ValidateUsername)
+		if err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
+		err = v.RegisterValidation("pin", utils.ValidatePIN)
+		if err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
 	}
 
 	r.Use(logger.SetLogger(

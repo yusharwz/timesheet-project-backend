@@ -13,12 +13,18 @@ func SetupTestDB() (*gorm.DB, func()) {
 	}
 
 	// Auto migrate all your models
-	db.AutoMigrate(&entity.TimeSheet{}, &entity.StatusTimeSheet{}, &entity.TimeSheetDetail{})
+	err = db.AutoMigrate(&entity.TimeSheet{}, &entity.StatusTimeSheet{}, &entity.TimeSheetDetail{})
+	if err != nil {
+		return nil, nil
+	}
 
 	// Cleanup function to close the database connection
 	cleanup := func() {
 		sqlDB, _ := db.DB()
-		sqlDB.Close()
+		err := sqlDB.Close()
+		if err != nil {
+			return
+		}
 	}
 
 	return db, cleanup

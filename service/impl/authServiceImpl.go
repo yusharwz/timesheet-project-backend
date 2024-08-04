@@ -31,6 +31,9 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 	}
 
 	role, err := authRepository.GetRole(req.RoleName)
+	if err != nil {
+		return resp, err
+	}
 
 	newAccount := entity.Account{
 		Base:     entity.Base{ID: uuid.NewString()},
