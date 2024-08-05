@@ -86,7 +86,7 @@ func (AuthRepository) Login(req request.LoginAccountRequest) (resp response.Logi
 	return resp, nil
 }
 
-func (AuthRepository) GetRole(roleName string) (entity.Role, error) {
+func (AuthRepository) GetRoleByName(roleName string) (entity.Role, error) {
 	var role entity.Role
 	result := config.DB.Where("role_name = ?", roleName).First(&role)
 	if result.Error != nil {
@@ -96,4 +96,13 @@ func (AuthRepository) GetRole(roleName string) (entity.Role, error) {
 		return entity.Role{}, result.Error
 	}
 	return role, nil
+}
+
+func (AuthRepository) GetRoleById(id string) (*entity.Role, error) {
+	var role entity.Role
+	err := config.DB.Where("id = ?", id).First(&role).Error
+	if err != nil {
+		return nil, err
+	}
+	return &role, nil
 }

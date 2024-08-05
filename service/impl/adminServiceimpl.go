@@ -6,12 +6,14 @@ import (
 	"final-project-enigma/helper"
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
+	"final-project-enigma/service"
 	"strconv"
 )
 
 type AdminService struct{}
 
 var adminRepository repository.AdminRepository = impl.NewAdminRepository()
+var authService service.AuthService = NewAuthService()
 
 func NewAdminService() *AdminService {
 	return &AdminService{}
@@ -31,22 +33,23 @@ func (AdminService) RetrieveAccountList(paging, rowsPerPage string) ([]response.
 		return nil, "0", "0", err
 	}
 
-	//userMap := make(map[string]string)
-	//for _, user := range users {
-	//	userMap[user.ID] = user.Name
-	//}
-
 	var resp []response.ListAccountResponse
 	for _, user := range users {
 		var status string
 		if user.Account.IsActive {
-			status = "Active"
+			status = "active"
 		} else {
-			status = "Inactive"
+			status = "inactive"
 		}
-
+		result, err := authService.GetRoleById(user.Account.RoleID)
+		if err != nil {
+			return nil, "0", "0", err
+		}
 		resp = append(resp, response.ListAccountResponse{
+			ID:     user.ID,
 			Email:  user.Account.Email,
+			Name:   user.Name,
+			Role:   result.RoleName,
 			Status: status,
 		})
 	}
@@ -77,4 +80,19 @@ func (AdminService) DetailAccount(userID string) (response.AccountDetailResponse
 
 func (AdminService) SoftDeleteAccount(userID string) error {
 	return adminRepository.SoftDeleteAccount(userID)
+}
+
+func (AdminService) GetAllRole() (*[]response.RoleResponse, error) {
+	roles, err := adminRepository.GetAllRole()
+	if err != nil {
+		return nil, err
+	}
+	var responseList = make([]response.RoleResponse, 0)
+	for _, role := range *roles {
+		responseList = append(responseList, response.RoleResponse{
+			ID:       role.ID,
+			RoleName: role.RoleName,
+		})
+	}
+	return &responseList, nil
 }

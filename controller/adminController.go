@@ -16,12 +16,12 @@ var adminService service.AdminService = impl.NewAdminService()
 func NewAdminController(g *gin.RouterGroup) {
 	controller := new(AdminController)
 
-	adminGroup := g.Group("/admin")
+	adminGroup := g.Group("/admin", middleware.JwtAuthWithRoles("admin"))
 	{
-		adminGroup.GET("/accounts", middleware.JwtAuthWithRoles("admin"), controller.AccountList)
-		adminGroup.GET("/accounts/detail/:id", middleware.JwtAuthWithRoles("admin"), controller.AccountDetail)
-		adminGroup.DELETE("/accounts/delete/:id", middleware.JwtAuthWithRoles("admin"), controller.AccountSoftDelete)
-
+		adminGroup.GET("/accounts", controller.AccountList)
+		adminGroup.GET("/accounts/detail/:id", controller.AccountDetail)
+		adminGroup.DELETE("/accounts/delete/:id", controller.AccountSoftDelete)
+		adminGroup.GET("/roles", controller.GetAllRole)
 	}
 }
 
@@ -59,4 +59,13 @@ func (AdminController) AccountSoftDelete(ctx *gin.Context) {
 	}
 
 	response.NewResponseSuccess(ctx, nil)
+}
+
+func (AdminController) GetAllRole(c *gin.Context) {
+	results, err := adminService.GetAllRole()
+	if err != nil {
+		response.NewResponseError(c, err.Error())
+		return
+	}
+	response.NewResponseSuccess(c, results)
 }
