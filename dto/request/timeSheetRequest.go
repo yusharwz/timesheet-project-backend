@@ -25,3 +25,8 @@ type UpdateTimeSheetDetailRequest struct {
 	EndTime   time.Time `json:"endTime" binding:"required"`
 	WorkID    string    `json:"workId" binding:"required"`
 }
+
+type UpdateTimeSheetStatusRequest struct {
+	TimeSheetID         string
+	TimeSheetStatusName string `json:"status" binding:"required"`
+}

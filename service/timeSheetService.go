@@ -15,4 +15,5 @@ type TimeSheetService interface {
 	RejectManagerTimeSheet(id string, userID string) error
 	ApproveBenefitTimeSheet(id string, userID string) error
 	RejectBenefitTimeSheet(id string, userID string) error
+	UpdateTimeSheetStatus(req request.UpdateTimeSheetStatusRequest) error
 }
