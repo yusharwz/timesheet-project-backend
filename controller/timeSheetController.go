@@ -191,13 +191,7 @@ func (TimeSheetController) RejectBenefitTimeSheet(c *gin.Context) {
 
 func (TimeSheetController) SubmitTimeSheet(c *gin.Context) {
 	var req request.UpdateTimeSheetStatusRequest
-	req.TimeSheetID = c.Param("timesheet_id")
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		validation := utils.GetValidationError(err)
-		response.NewResponseBadRequest(c, validation)
-		return
-	}
+	req.TimeSheetID = c.Param("id")
 
 	err := timeSheetService.UpdateTimeSheetStatus(req)
 	if err != nil {

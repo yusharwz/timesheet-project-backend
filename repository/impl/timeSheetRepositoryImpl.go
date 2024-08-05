@@ -96,7 +96,7 @@ func (TimeSheetRepository) UpdateTimeSheetStatus(req request.UpdateTimeSheetStat
 	var timeSheet entity.TimeSheet
 	var timeSheetsStatus entity.StatusTimeSheet
 
-	if err := config.DB.Where("status_name = ?", req.TimeSheetStatusName).First(&timeSheetsStatus).Error; err != nil {
+	if err := config.DB.Where("status_name = ?", "pending").First(&timeSheetsStatus).Error; err != nil {
 		return err
 	}
 
