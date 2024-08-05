@@ -1,46 +1,58 @@
 package impl
 
 import (
+	"errors"
 	"final-project-enigma/dto/response"
+	"final-project-enigma/helper"
+	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
+	"strconv"
 )
 
 type AdminService struct{}
 
-var adminRepository = impl.NewAdminRepository()
+var adminRepository repository.AdminRepository = impl.NewAdminRepository()
 
 func NewAdminService() *AdminService {
 	return &AdminService{}
 }
 
-func (AdminService) RetrieveAccountList() ([]response.ListAccountResponse, error) {
-
-	accounts, users, err := adminRepository.RetrieveAccountList()
+func (AdminService) RetrieveAccountList(paging, rowsPerPage string) ([]response.ListAccountResponse, string, string, error) {
+	pagingInt, err := strconv.Atoi(paging)
 	if err != nil {
-		return nil, err
+		return nil, "0", "0", errors.New("invalid query for paging")
+	}
+	rowsPerPageInt, err := strconv.Atoi(rowsPerPage)
+	if err != nil {
+		return nil, "0", "0", errors.New("invalid query for rows per page")
+	}
+	users, totalRows, err := adminRepository.RetrieveAccountList(pagingInt, rowsPerPageInt)
+	if err != nil {
+		return nil, "0", "0", err
 	}
 
-	userMap := make(map[string]string)
-	for _, user := range users {
-		userMap[user.ID] = user.Name
-	}
+	//userMap := make(map[string]string)
+	//for _, user := range users {
+	//	userMap[user.ID] = user.Name
+	//}
 
 	var resp []response.ListAccountResponse
-	for _, account := range accounts {
+	for _, user := range users {
 		var status string
-		if account.IsActive {
+		if user.Account.IsActive {
 			status = "Active"
 		} else {
 			status = "Inactive"
 		}
 
 		resp = append(resp, response.ListAccountResponse{
-			Email:  account.Email,
+			Email:  user.Account.Email,
 			Status: status,
 		})
 	}
 
-	return resp, nil
+	totalPage := helper.GetTotalPage(totalRows, rowsPerPageInt)
+	return resp, totalRows, strconv.Itoa(totalPage), nil
 }
 
 func (AdminService) DetailAccount(userID string) (response.AccountDetailResponse, error) {

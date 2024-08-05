@@ -25,19 +25,14 @@ func (AuthRepository) Register(user entity.User, account entity.Account) (entity
 		}
 	}()
 
-	if err := tx.Create(&user).Error; err != nil {
-		tx.Rollback()
-		return user, account, errors.New("failed to create user")
-	}
-
 	var existingAccount entity.Account
 	if err := tx.Where("email = ?", account.Email).First(&existingAccount).Error; err == nil {
 		tx.Rollback()
 		return user, account, errors.New("email already in use")
 	}
 
-	account.UserID = user.ID
-	if err := tx.Create(&account).Error; err != nil {
+	user.Account = account
+	if err := tx.Create(&user).Error; err != nil {
 		tx.Rollback()
 		return user, account, errors.New("failed to create account")
 	}
@@ -85,6 +80,7 @@ func (AuthRepository) Login(req request.LoginAccountRequest) (resp response.Logi
 
 	resp.HashPassword = account.Password
 	resp.Email = account.Email
+	resp.Name = user.Name
 	resp.UserId = account.UserID
 	resp.Role = role.RoleName
 

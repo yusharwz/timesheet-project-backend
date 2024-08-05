@@ -1,10 +1,16 @@
 package request
 
+import "mime/multipart"
+
 type (
 	ActivateAccountRequest struct {
 		Email    string
-		Username string
 		Password string
+	}
+
+	UploadImagesRequest struct {
+		UserID         string         `json:"userId"`
+		SignatureImage multipart.File `json:"signature"`
 	}
 
 	LoginAccountRequest struct {
@@ -20,7 +26,6 @@ type (
 	}
 
 	ChangePasswordRequest struct {
-		UserID      string `json:"user_id"`
-		NewPassword string `json:"new_password" binding:"password"`
+		NewPassword string `json:"newPassword" binding:"password"`
 	}
 )

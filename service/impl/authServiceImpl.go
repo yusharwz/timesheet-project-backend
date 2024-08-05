@@ -18,12 +18,7 @@ func NewAuthService() *AuthService {
 	return &AuthService{}
 }
 
-func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (response.RegisterAccountResponse, error) {
-	var resp response.RegisterAccountResponse
-
-	newUser := entity.User{
-		Base: entity.Base{ID: uuid.NewString()},
-	}
+func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp response.RegisterAccountResponse, err error) {
 
 	code, err := helper.GenerateCode()
 	if err != nil {
@@ -46,16 +41,22 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (response
 		Password: hashedPassword,
 		IsActive: false,
 		RoleID:   role.ID,
-		UserID:   newUser.ID,
 	}
 
-	_, createdAccount, err := authRepository.Register(newUser, newAccount)
+	user := entity.User{
+		Base: entity.Base{ID: uuid.NewString()},
+		Name: req.Name,
+	}
+
+	createdUser, createdAccount, err := authRepository.Register(user, newAccount)
 	if err != nil {
 		return resp, err
 	}
 
 	resp = response.RegisterAccountResponse{
-		Email: createdAccount.Email,
+		Email:    createdAccount.Email,
+		Name:     createdUser.Name,
+		RoleName: role.RoleName,
 	}
 
 	err = helper.SendEmailActivatedAccount(resp.Email, code, hashedPassword)

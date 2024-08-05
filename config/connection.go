@@ -52,12 +52,16 @@ func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
 	logger.Info().Msg("Initializing table role")
 	initRoles(logger)
 
+	logger.Info().Msg("Initializing table status timesheet")
+	initStatusTimeSheet(logger)
+
 	logger.Info().Msg("Initializing admin account")
 	err = initAdmin(in.AdminConfig.Email, in.AdminConfig.Password)
 	if err != nil {
 		logger.Info().Msg(err.Error())
+	} else {
+		logger.Info().Msg("admin account successfully initialized")
 	}
-	logger.Info().Msg("admin account successfully initialized")
 
 	return db, nil
 }
@@ -173,4 +177,40 @@ func createAdminIfNotFound(email, password string) error {
 		return errors.New("admin account failed to create")
 	}
 	return nil
+}
+
+// init timesheet status
+func initStatusTimeSheet(logger zerolog.Logger) {
+	statuses := []entity.StatusTimeSheet{
+		{
+			ID:         uuid.NewString(),
+			StatusName: "created",
+		},
+		{
+			ID:         uuid.NewString(),
+			StatusName: "pending",
+		},
+		{
+			ID:         uuid.NewString(),
+			StatusName: "approved",
+		},
+		{
+			ID:         uuid.NewString(),
+			StatusName: "rejected",
+		},
+	}
+	for _, status := range statuses {
+		var existsStatus entity.StatusTimeSheet
+		result := DB.Where("status_name = ?", status.StatusName).First(&existsStatus)
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				DB.Create(&status)
+				logger.Info().Msg(fmt.Sprintf("Role %s created", status.StatusName))
+			} else {
+				logger.Info().Msg(fmt.Sprintf("failed to execute query %s", result.Error))
+			}
+		} else {
+			logger.Info().Msg(fmt.Sprintf("Role %s already exists, proceeding without creating it", status.StatusName))
+		}
+	}
 }

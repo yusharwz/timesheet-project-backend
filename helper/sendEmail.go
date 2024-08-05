@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"strconv"
@@ -26,8 +27,10 @@ func SendEmail(email, code string) (bool, error) {
 }
 
 func SendEmailActivatedAccount(email, code, unique string) error {
-	host := os.Getenv("HOST")
-	url := fmt.Sprintf("%s/api/v1/accounts/activate?e=%s&unique=%s", host, email, unique)
+	host := os.Getenv("HOST_FRONTEND")
+	t := fmt.Sprintf("e=%s&unique=%s", email, unique)
+	t = base64.StdEncoding.EncodeToString([]byte(t))
+	url := fmt.Sprintf("%s/accounts/activation?t=%s", host, t)
 
 	emailPort, _ := strconv.Atoi(os.Getenv("EMAIL_PORT"))
 
