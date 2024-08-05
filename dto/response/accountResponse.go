@@ -11,15 +11,16 @@ type (
 	}
 
 	AccountUserResponse struct {
-		AccountID string `json:"account_id"`
-		Email     string `json:"email"`
-		IsActive  bool   `json:"is_active"`
-		UserID    string `json:"user_id"`
-		Name      string `json:"name"`
-		Phone     string `json:"phone"`
+		AccountID    string `json:"accountId"`
+		Email        string `json:"email"`
+		IsActive     bool   `json:"isActive"`
+		UserID       string `json:"userId"`
+		Name         string `json:"name"`
+		Phone        string `json:"phone"`
+		SignatureURL string `json:"signatureUrl"`
 	}
 
 	UploadImageResponse struct {
-		ImageURL string `json:"image_url"`
+		ImageURL string `json:"imageUrl"`
 	}
 )

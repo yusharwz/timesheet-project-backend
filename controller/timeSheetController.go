@@ -3,7 +3,6 @@ package controller
 import (
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
-	"final-project-enigma/entity"
 	"final-project-enigma/middleware"
 	"final-project-enigma/service"
 	"final-project-enigma/service/impl"
@@ -19,13 +18,13 @@ type TimeSheetController struct{}
 var timeSheetService service.TimeSheetService = impl.NewTimeSheetService()
 
 func NewTimesheetController(g *gin.RouterGroup) {
-	controller := new(TimeSheetController)
+	controller := &TimeSheetController{}
 	timesheetGroup := g.Group("/timesheets", middleware.JwtAuthWithRoles("user"))
 	{
-		timesheetGroup.POST("/", middleware.JwtAuthWithRoles("user"), controller.CreateTimeSheet)
-		timesheetGroup.PUT("/:id", middleware.JwtAuthWithRoles("user"), controller.UpdateTimeSheet)
-		timesheetGroup.DELETE("/:id", middleware.JwtAuthWithRoles("user"), controller.DeleteTimeSheet)
-
+		timesheetGroup.POST("/", controller.CreateTimeSheet)
+		timesheetGroup.PUT("/:id", controller.UpdateTimeSheet)
+		timesheetGroup.DELETE("/:id", controller.DeleteTimeSheet)
+		timesheetGroup.PUT(":id/submit", controller.SubmitTimeSheet)
 	}
 	g.GET("/timesheets/:id", controller.GetTimeSheetByID)
 	g.GET("/timesheets", controller.GetAllTimeSheets)
@@ -62,21 +61,23 @@ func (TimeSheetController) CreateTimeSheet(c *gin.Context) {
 
 func (TimeSheetController) UpdateTimeSheet(c *gin.Context) {
 	id := c.Param("id")
+	authHeader := c.GetHeader("Authorization")
 
-	var req entity.TimeSheet
+	var req request.UpdateTimeSheetRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		validation := utils.GetValidationError(err)
+		response.NewResponseBadRequest(c, validation)
 		return
 	}
 
 	req.ID = id
-	err := timeSheetService.UpdateTimeSheet(&req)
+	res, err := timeSheetService.UpdateTimeSheet(req, authHeader)
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		response.NewResponseError(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, req)
+	response.NewResponseSuccess(c, res)
 }
 
 func (TimeSheetController) DeleteTimeSheet(ctx *gin.Context) {
@@ -97,11 +98,11 @@ func (TimeSheetController) GetTimeSheetByID(c *gin.Context) {
 
 	timeSheet, err := timeSheetService.GetTimeSheetByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		response.NewResponseError(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, timeSheet)
+	response.NewResponseSuccess(c, timeSheet)
 }
 
 func (TimeSheetController) GetAllTimeSheets(c *gin.Context) {
@@ -164,4 +165,8 @@ func (TimeSheetController) RejectBenefitTimeSheet(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "Benefit rejected"})
+}
+
+func (TimeSheetController) SubmitTimeSheet(c *gin.Context) {
+
 }

@@ -7,10 +7,10 @@ import (
 )
 
 type TimeSheetService interface {
-	CreateTimeSheet(ts request.TimeSheetRequest, authHeader string) (response.TimeSheetResponse, error)
-	UpdateTimeSheet(ts *entity.TimeSheet) error
+	CreateTimeSheet(ts request.TimeSheetRequest, authHeader string) (*response.TimeSheetResponse, error)
+	UpdateTimeSheet(ts request.UpdateTimeSheetRequest, authHeader string) (*response.TimeSheetResponse, error)
 	DeleteTimeSheet(id string) error
-	GetTimeSheetByID(id string) (*entity.TimeSheet, error)
+	GetTimeSheetByID(id string) (*response.TimeSheetResponse, error)
 	GetAllTimeSheets() (*[]entity.TimeSheet, error)
 	ApproveManagerTimeSheet(id string, userID string) error
 	RejectManagerTimeSheet(id string, userID string) error

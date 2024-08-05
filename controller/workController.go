@@ -21,9 +21,9 @@ func NewWorkController(g *gin.RouterGroup) {
 		workGroup.POST("/", controller.CreateWork)
 		workGroup.PUT("/:id", controller.UpdateWork)
 		workGroup.DELETE("/:id", controller.DeleteWork)
-		workGroup.GET("/", controller.GetAllWork)
 		workGroup.GET("/:id", controller.GetById)
 	}
+	g.GET("/admin/works", middleware.JwtAuthWithRoles("user", "admin"), controller.GetAllWork)
 }
 
 func (WorkController) CreateWork(c *gin.Context) {

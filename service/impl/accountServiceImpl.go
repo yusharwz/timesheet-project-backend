@@ -86,26 +86,46 @@ func (AccountService) ChangePassword(req request.ChangePasswordRequest, authHead
 	return nil
 }
 
-func (AccountService) GetAccountDetail(authHeader string) (response.AccountUserResponse, error) {
+func (AccountService) GetAccountDetail(authHeader string) (*response.AccountUserResponse, error) {
 
 	userID, err := middleware.GetIdFromToken(authHeader)
 	if err != nil {
-		return response.AccountUserResponse{}, err
+		return nil, err
 	}
 
 	account, user, err := accountRepository.GetAccountDetailByUserID(userID)
 	if err != nil {
-		return response.AccountUserResponse{}, err
+		return nil, err
 	}
 
 	accountUserResp := response.AccountUserResponse{
-		AccountID: account.ID,
-		Email:     account.Email,
-		IsActive:  account.IsActive,
-		UserID:    user.ID,
-		Name:      user.Name,
-		Phone:     user.PhoneNumber,
+		AccountID:    account.ID,
+		Email:        account.Email,
+		IsActive:     account.IsActive,
+		UserID:       user.ID,
+		Name:         user.Name,
+		Phone:        user.PhoneNumber,
+		SignatureURL: user.Signature,
 	}
 
-	return accountUserResp, nil
+	return &accountUserResp, nil
+}
+
+func (AccountService) GetAccountByID(id string) (*response.AccountUserResponse, error) {
+	account, user, err := accountRepository.GetAccountDetailByUserID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	accountUserResp := response.AccountUserResponse{
+		AccountID:    account.ID,
+		Email:        account.Email,
+		IsActive:     account.IsActive,
+		UserID:       user.ID,
+		Name:         user.Name,
+		Phone:        user.PhoneNumber,
+		SignatureURL: user.Signature,
+	}
+
+	return &accountUserResp, nil
 }

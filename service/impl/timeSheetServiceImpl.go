@@ -5,24 +5,25 @@ import (
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
 	"final-project-enigma/entity"
-	"final-project-enigma/middleware"
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
+	"final-project-enigma/service"
 	"github.com/google/uuid"
 )
 
 type TimeSheetService struct{}
 
 var timeSheetRepository repository.TimeSheetRepository = impl.NewTimeSheetRepository()
+var accountService service.AccountService = NewAccountService()
 
 func NewTimeSheetService() *TimeSheetService {
 	return &TimeSheetService{}
 }
 
-func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader string) (response.TimeSheetResponse, error) {
+func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader string) (*response.TimeSheetResponse, error) {
 	status, err := timeSheetRepository.GetStatusTimeSheetByName("created")
 	if err != nil {
-		return response.TimeSheetResponse{}, err
+		return nil, err
 	}
 
 	timeSheetDetails := make([]entity.TimeSheetDetail, 0)
@@ -36,31 +37,43 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 		})
 	}
 
-	userID, err := middleware.GetIdFromToken(authHeader)
+	user, err := accountService.GetAccountDetail(authHeader)
 	if err != nil {
-		return response.TimeSheetResponse{}, err
+		return nil, err
 	}
 
 	timeSheet := entity.TimeSheet{
 		Base:              entity.Base{ID: uuid.NewString()},
 		StatusTimeSheetID: status.ID,
-		UserID:            userID,
+		UserID:            user.UserID,
 		TimeSheetDetails:  timeSheetDetails,
 	}
 
 	res, err := timeSheetRepository.CreateTimeSheet(timeSheet)
 	if err != nil {
-		return response.TimeSheetResponse{}, err
+		return nil, err
 	}
 
 	timeSheetDetailsResponse := make([]response.TimeSheetDetailResponse, 0)
+	var total int
 	for _, v := range timeSheetDetails {
+		work, err := workRepository.GetById(v.WorkID)
+		if err != nil {
+			return nil, err
+		}
+		duration := int(v.EndTime.Sub(v.StartTime).Hours())
+		if duration < 1 {
+			return nil, errors.New("invalid work duration")
+		}
+		subTotal := work.Fee * duration
+		total += subTotal
 		timeSheetDetailsResponse = append(timeSheetDetailsResponse, response.TimeSheetDetailResponse{
 			ID:        v.ID,
 			Date:      v.Date,
 			StartTime: v.StartTime,
 			EndTime:   v.EndTime,
 			WorkID:    v.WorkID,
+			SubTotal:  subTotal,
 		})
 	}
 
@@ -72,23 +85,102 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 		StatusByBenefit:    "created",
 		ConfirmedManagerBy: response.ConfirmedByResponse{},
 		ConfirmedBenefitBy: response.ConfirmedByResponse{},
-		TimeSheetDetails:   timeSheetDetailsResponse,
+		UserTimeSheetResponse: response.UserTimeSheetResponse{
+			ID:           user.UserID,
+			Name:         user.Name,
+			Email:        user.Email,
+			SignatureUrl: user.SignatureURL,
+		},
+		TimeSheetDetails: timeSheetDetailsResponse,
+		Total:            total,
 	}
 
-	return timeSheetResponse, nil
+	return &timeSheetResponse, nil
 }
 
-func (TimeSheetService) UpdateTimeSheet(ts *entity.TimeSheet) error {
-	existingTs, err := timeSheetRepository.GetTimeSheetByID(ts.ID)
+func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, authHeader string) (*response.TimeSheetResponse, error) {
+	existingTs, err := timeSheetRepository.GetTimeSheetByID(req.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if existingTs.ConfirmedManagerBy != "" || existingTs.ConfirmedBenefitBy != "" {
-		return errors.New("timesheet cannot be updated as it has been approved or rejected")
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("created")
+	if err != nil {
+		return nil, err
 	}
 
-	return timeSheetRepository.UpdateTimeSheet(ts)
+	if existingTs.StatusTimeSheetID != status.ID {
+		return nil, errors.New("timesheet cannot be updated as it has been approved or rejected")
+	}
+
+	timeSheetDetails := make([]entity.TimeSheetDetail, 0)
+	for _, value := range req.TimeSheetDetails {
+		timeSheetDetails = append(timeSheetDetails, entity.TimeSheetDetail{
+			Base:      entity.Base{ID: value.ID},
+			Date:      value.Date,
+			StartTime: value.StartTime,
+			EndTime:   value.EndTime,
+			WorkID:    value.WorkID,
+		})
+	}
+
+	user, err := accountService.GetAccountDetail(authHeader)
+	if err != nil {
+		return nil, err
+	}
+
+	timeSheet := entity.TimeSheet{
+		Base:              entity.Base{ID: req.ID},
+		StatusTimeSheetID: status.ID,
+		UserID:            user.UserID,
+		TimeSheetDetails:  timeSheetDetails,
+	}
+
+	res, err := timeSheetRepository.UpdateTimeSheet(timeSheet)
+	if err != nil {
+		return nil, err
+	}
+	timeSheetDetailsResponse := make([]response.TimeSheetDetailResponse, 0)
+	var total int
+	for _, v := range timeSheetDetails {
+		work, err := workRepository.GetById(v.WorkID)
+		if err != nil {
+			return nil, err
+		}
+		duration := int(v.EndTime.Sub(v.StartTime).Hours())
+		if duration < 1 {
+			return nil, errors.New("invalid work duration")
+		}
+		subTotal := work.Fee * duration
+		total += subTotal
+		timeSheetDetailsResponse = append(timeSheetDetailsResponse, response.TimeSheetDetailResponse{
+			ID:        v.ID,
+			Date:      v.Date,
+			StartTime: v.StartTime,
+			EndTime:   v.EndTime,
+			WorkID:    v.WorkID,
+			SubTotal:  subTotal,
+		})
+	}
+
+	timeSheetResponse := response.TimeSheetResponse{
+		ID:                 res.ID,
+		CreatedAt:          res.CreatedAt,
+		UpdatedAt:          res.UpdatedAt,
+		StatusByManager:    "created",
+		StatusByBenefit:    "created",
+		ConfirmedManagerBy: response.ConfirmedByResponse{},
+		ConfirmedBenefitBy: response.ConfirmedByResponse{},
+		UserTimeSheetResponse: response.UserTimeSheetResponse{
+			ID:           user.UserID,
+			Name:         user.Name,
+			Email:        user.Email,
+			SignatureUrl: user.SignatureURL,
+		},
+		TimeSheetDetails: timeSheetDetailsResponse,
+		Total:            total,
+	}
+	return &timeSheetResponse, nil
 }
 
 func (TimeSheetService) DeleteTimeSheet(id string) error {
@@ -104,8 +196,57 @@ func (TimeSheetService) DeleteTimeSheet(id string) error {
 	return timeSheetRepository.DeleteTimeSheet(id)
 }
 
-func (TimeSheetService) GetTimeSheetByID(id string) (*entity.TimeSheet, error) {
-	return timeSheetRepository.GetTimeSheetByID(id)
+func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse, error) {
+	res, err := timeSheetRepository.GetTimeSheetByID(id)
+	if err != nil {
+		return nil, err
+	}
+	timeSheetDetailsResponse := make([]response.TimeSheetDetailResponse, 0)
+	var total int
+	for _, v := range res.TimeSheetDetails {
+		work, err := workRepository.GetById(v.WorkID)
+		if err != nil {
+			return nil, err
+		}
+		duration := int(v.EndTime.Sub(v.StartTime).Hours())
+		if duration < 1 {
+			return nil, errors.New("invalid work duration")
+		}
+		subTotal := work.Fee * duration
+		total += subTotal
+		timeSheetDetailsResponse = append(timeSheetDetailsResponse, response.TimeSheetDetailResponse{
+			ID:        v.ID,
+			Date:      v.Date,
+			StartTime: v.StartTime,
+			EndTime:   v.EndTime,
+			WorkID:    v.WorkID,
+			SubTotal:  subTotal,
+		})
+	}
+
+	user, err := accountService.GetAccountByID(res.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	timeSheetResponse := response.TimeSheetResponse{
+		ID:                 res.ID,
+		CreatedAt:          res.CreatedAt,
+		UpdatedAt:          res.UpdatedAt,
+		StatusByManager:    "created",
+		StatusByBenefit:    "created",
+		ConfirmedManagerBy: response.ConfirmedByResponse{},
+		ConfirmedBenefitBy: response.ConfirmedByResponse{},
+		UserTimeSheetResponse: response.UserTimeSheetResponse{
+			ID:           user.UserID,
+			Name:         user.Name,
+			Email:        user.Email,
+			SignatureUrl: user.SignatureURL,
+		},
+		TimeSheetDetails: timeSheetDetailsResponse,
+		Total:            total,
+	}
+	return &timeSheetResponse, nil
 }
 
 func (TimeSheetService) GetAllTimeSheets() (*[]entity.TimeSheet, error) {

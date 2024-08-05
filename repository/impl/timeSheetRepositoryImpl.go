@@ -13,16 +13,20 @@ func NewTimeSheetRepository() *TimeSheetRepository {
 	return &TimeSheetRepository{}
 }
 
-func (TimeSheetRepository) CreateTimeSheet(timesheet entity.TimeSheet) (entity.TimeSheet, error) {
+func (TimeSheetRepository) CreateTimeSheet(timesheet entity.TimeSheet) (*entity.TimeSheet, error) {
 	err := config.DB.Create(&timesheet).Error
 	if err != nil {
-		return entity.TimeSheet{}, err
+		return nil, err
 	}
-	return timesheet, nil
+	return &timesheet, nil
 }
 
-func (TimeSheetRepository) UpdateTimeSheet(ts *entity.TimeSheet) error {
-	return config.DB.Save(ts).Error
+func (TimeSheetRepository) UpdateTimeSheet(ts entity.TimeSheet) (*entity.TimeSheet, error) {
+	err := config.DB.Save(&ts).Error
+	if err != nil {
+		return nil, err
+	}
+	return &ts, nil
 }
 
 func (TimeSheetRepository) DeleteTimeSheet(id string) error {

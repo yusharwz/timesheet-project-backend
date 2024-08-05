@@ -5,8 +5,8 @@ import (
 )
 
 type TimeSheetRepository interface {
-	CreateTimeSheet(ts entity.TimeSheet) (entity.TimeSheet, error)
-	UpdateTimeSheet(ts *entity.TimeSheet) error
+	CreateTimeSheet(ts entity.TimeSheet) (*entity.TimeSheet, error)
+	UpdateTimeSheet(ts entity.TimeSheet) (*entity.TimeSheet, error)
 	DeleteTimeSheet(id string) error
 	GetStatusTimeSheetByID(id string) (*entity.StatusTimeSheet, error)
 	GetStatusTimeSheetByName(name string) (*entity.StatusTimeSheet, error)
