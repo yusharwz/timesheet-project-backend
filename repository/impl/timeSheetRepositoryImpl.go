@@ -3,6 +3,7 @@ package impl
 import (
 	"errors"
 	"final-project-enigma/config"
+	"final-project-enigma/dto/request"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
 	"gorm.io/gorm"
@@ -95,4 +96,19 @@ func (TimeSheetRepository) RejectBenefitTimeSheet(id string, userID string) erro
 			"updated_at":           time.Now(),
 			"confirmed_benefit_by": "",
 		}).Error
+}
+
+func (TimeSheetRepository) UpdateTimeSheetStatus(req request.UpdateTimeSheetStatusRequest) error {
+	var timeSheet entity.TimeSheet
+	var timeSheetsStatus entity.StatusTimeSheet
+
+	if err := config.DB.Where("status_name = ?", req.TimeSheetStatusName).First(&timeSheetsStatus).Error; err != nil {
+		return err
+	}
+
+	if err := config.DB.Model(&timeSheet).Where("id = ?", req.TimeSheetID).Update("status_timesheet_id", timeSheetsStatus.ID).Error; err != nil {
+		return err
+	}
+
+	return nil
 }

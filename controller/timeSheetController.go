@@ -8,9 +8,10 @@ import (
 	"final-project-enigma/service"
 	"final-project-enigma/service/impl"
 	"final-project-enigma/utils"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type TimeSheetController struct{}
@@ -189,5 +190,21 @@ func (TimeSheetController) RejectBenefitTimeSheet(c *gin.Context) {
 }
 
 func (TimeSheetController) SubmitTimeSheet(c *gin.Context) {
+	var req request.UpdateTimeSheetStatusRequest
+	req.TimeSheetID = c.Param("timesheet_id")
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validation := utils.GetValidationError(err)
+		response.NewResponseBadRequest(c, validation)
+		return
+	}
+
+	err := timeSheetService.UpdateTimeSheetStatus(req)
+	if err != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "submit successfully"})
 
 }

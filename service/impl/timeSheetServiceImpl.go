@@ -9,9 +9,11 @@ import (
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"final-project-enigma/service"
-	"github.com/google/uuid"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type TimeSheetService struct{}
@@ -151,7 +153,6 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 	if err != nil {
 		return nil, err
 	}
-
 	timeSheetDetailsResponse := make([]response.TimeSheetDetailResponse, 0)
 	var total int
 	for _, v := range timeSheetDetails {
@@ -389,4 +390,20 @@ func (TimeSheetService) ApproveBenefitTimeSheet(id string, userID string) error 
 
 func (TimeSheetService) RejectBenefitTimeSheet(id string, userID string) error {
 	return timeSheetRepository.RejectBenefitTimeSheet(id, userID)
+}
+
+func (TimeSheetService) UpdateTimeSheetStatus(req request.UpdateTimeSheetStatusRequest) error {
+	timeNow := time.Now()
+	day := timeNow.Day()
+
+	if day != 19 && day != 20 {
+		return errors.New("failed to update time sheet status, please only submit on 19 or 20")
+	}
+
+	err := timeSheetRepository.UpdateTimeSheetStatus(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
