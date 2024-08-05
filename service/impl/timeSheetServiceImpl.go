@@ -5,6 +5,7 @@ import (
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
 	"final-project-enigma/entity"
+	"final-project-enigma/helper"
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"final-project-enigma/service"
@@ -278,6 +279,7 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, period, userId, co
 	var err error
 	var pagingInt int
 	var rowsPerPageInt int
+	var totalRows string
 	var results *[]entity.TimeSheet
 
 	pagingInt, err = strconv.Atoi(paging)
@@ -289,7 +291,7 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, period, userId, co
 		return nil, "0", "0", errors.New("invalid query for rows per page")
 	}
 
-	results, err = timeSheetRepository.GetAllTimeSheets(pagingInt, rowsPerPageInt)
+	results, totalRows, err = timeSheetRepository.GetAllTimeSheets(pagingInt, rowsPerPageInt)
 	if err != nil {
 		return nil, "0", "0", err
 	}
@@ -369,7 +371,8 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, period, userId, co
 		})
 	}
 
-	return &timeSheetsResponse, "0", "0", nil
+	totalPage := helper.GetTotalPage(totalRows, rowsPerPageInt)
+	return &timeSheetsResponse, totalRows, strconv.Itoa(totalPage), nil
 }
 
 func (TimeSheetService) ApproveManagerTimeSheet(id string, userID string) error {
