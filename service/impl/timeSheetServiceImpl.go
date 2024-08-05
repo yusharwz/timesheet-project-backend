@@ -9,6 +9,7 @@ import (
 	"final-project-enigma/repository/impl"
 	"final-project-enigma/service"
 	"github.com/google/uuid"
+	"strconv"
 )
 
 type TimeSheetService struct{}
@@ -249,8 +250,27 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 	return &timeSheetResponse, nil
 }
 
-func (TimeSheetService) GetAllTimeSheets() (*[]entity.TimeSheet, error) {
-	return timeSheetRepository.GetAllTimeSheets()
+func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, period, userId, confirm, status string) (*[]response.TimeSheetResponse, string, string, error) {
+	var err error
+	var pagingInt int
+	var rowsPerPageInt int
+
+	pagingInt, err = strconv.Atoi(paging)
+	if err != nil {
+		return nil, "0", "0", errors.New("invalid query for paging")
+	}
+	rowsPerPageInt, err = strconv.Atoi(rowsPerPage)
+	if err != nil {
+		return nil, "0", "0", errors.New("invalid query for rows per page")
+	}
+
+	_, err = timeSheetRepository.GetAllTimeSheets(pagingInt, rowsPerPageInt)
+	if err != nil {
+		return nil, "0", "0", err
+	}
+	timeSheetsResponse := make([]response.TimeSheetResponse, 0)
+
+	return &timeSheetsResponse, "0", "0", nil
 }
 
 func (TimeSheetService) ApproveManagerTimeSheet(id string, userID string) error {

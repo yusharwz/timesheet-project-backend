@@ -3,14 +3,14 @@ package controller
 import (
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
+	"final-project-enigma/helper"
 	"final-project-enigma/middleware"
 	"final-project-enigma/service"
 	"final-project-enigma/service/impl"
 	"final-project-enigma/utils"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
 type TimeSheetController struct{}
@@ -106,13 +106,34 @@ func (TimeSheetController) GetTimeSheetByID(c *gin.Context) {
 }
 
 func (TimeSheetController) GetAllTimeSheets(c *gin.Context) {
-	timeSheets, err := timeSheetService.GetAllTimeSheets()
+	paging := c.DefaultQuery("paging", "1")
+	rowsPerPage := c.DefaultQuery("rowsPerPage", "10")
+	period := c.Query("period")
+	userId := c.Query("userId")
+	confirm := c.Query("confirm")
+	status := c.Query("status")
+
+	var err error
+	var totalRows string
+	var totalPage string
+	var results *[]response.TimeSheetResponse
+
+	if period != "" {
+		err = helper.ParsePeriod(period)
+		if err != nil {
+			validation := utils.GetValidationError(err)
+			response.NewResponseBadRequest(c, validation)
+			return
+		}
+	}
+
+	results, totalRows, totalPage, err = timeSheetService.GetAllTimeSheets(paging, rowsPerPage, period, userId, confirm, status)
 	if err != nil {
 		response.NewResponseError(c, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(c, timeSheets)
+	response.NewResponseSuccessPaging(c, results, paging, rowsPerPage, totalRows, totalPage)
 }
 
 func (TimeSheetController) ApproveManagerTimeSheet(c *gin.Context) {

@@ -30,12 +30,21 @@ go run .
 - select the file above
 
 ## Endpoint that already tested
+
+### Auth
 - [x] **login** [POST] `localhost:8080/api/v1/login`
 - [x] **register** [POST] `localhost:8080/api/v1/admin/register`
+
+### Works
 - [x] **create works** [POST] `localhost:8080/api/v1/admin/works`
 - [x] **get works by id** [GET] `localhost:8080/api/v1/admin/works/:id`
 - [x] **get all works** [GET] `localhost:8080/api/v1/admin/works?paging=&rowsPerPage=`
+
+### Accounts
 - [x] **change password** [PUT] `localhost:8080/api/v1/accounts/change-password`
+- [x] **get detail profile** [GET] `localhost:8080/api/v1/accounts/profile`
+
+### TimeSheets
 - [x] **create timesheet** [POST] `localhost:8080/api/v1/timesheets`
 - [x] **get all timesheet** [GET] `localhost:8080/api/v1/timesheets`
 - [x] **update timesheet** [PUT] `localhost:8080/api/v1/timesheets/:id`

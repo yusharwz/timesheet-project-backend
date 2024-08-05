@@ -15,7 +15,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/api/v1/admin/works",
+							"raw": "localhost:8080/api/v1/admin/works?paging=1&rowsPerPage=2",
 							"host": [
 								"localhost"
 							],
@@ -25,6 +25,16 @@
 								"v1",
 								"admin",
 								"works"
+							],
+							"query": [
+								{
+									"key": "paging",
+									"value": "1"
+								},
+								{
+									"key": "rowsPerPage",
+									"value": "2"
+								}
 							]
 						}
 					},
@@ -122,7 +132,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/api/v1/timesheets",
+							"raw": "localhost:8080/api/v1/timesheets?paging=1&rowsPerPage=10&period=1:2&userId&confirm&status",
 							"host": [
 								"localhost"
 							],
@@ -131,6 +141,33 @@
 								"api",
 								"v1",
 								"timesheets"
+							],
+							"query": [
+								{
+									"key": "paging",
+									"value": "1"
+								},
+								{
+									"key": "rowsPerPage",
+									"value": "10"
+								},
+								{
+									"key": "period",
+									"value": "1:2",
+									"description": "month_start:month_end by number"
+								},
+								{
+									"key": "userId",
+									"value": null
+								},
+								{
+									"key": "confirm",
+									"value": null
+								},
+								{
+									"key": "status",
+									"value": null
+								}
 							]
 						}
 					},
@@ -289,6 +326,27 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "get detail profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/accounts/profile",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"accounts",
+								"profile"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}
@@ -298,7 +356,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUzODQ0ODcsImlhdCI6MTcyMjc5MjQ4NywiaXNzIjoidGltZXNoZWV0LWFwcCIsImlkIjoiYjZhZmY4ODUtZWM0My00YmU5LWJiZDItOTI5OWUxMDE4ZTNiIiwidXNlcm5hbWUiOiJlcGMiLCJlbWFpbCI6ImVwYzQxODA1QHpjY2NrLmNvbSIsInJvbGUiOiJ1c2VyIn0.Y4SG1ShS0L7djIKyl-v9K-fbBkt0-sEvacaFEyGAhbQ",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjU0NDQ2MTUsImlhdCI6MTcyMjg1MjYxNSwiaXNzIjoidGltZXNoZWV0LWFwcCIsImlkIjoiNmYxNTdkMTMtZTQxYi00NTdjLWExNDktMmQ4ZDM4MzkzMTY3IiwidXNlcm5hbWUiOiJBZG1pbiIsImVtYWlsIjoiYWx2aW5kbzU2QGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiJ9.4IHDKvtA9Xk8Po0GKygkmApe7qQ4RBOZ9cnF5mp-jBQ",
 				"type": "string"
 			}
 		]

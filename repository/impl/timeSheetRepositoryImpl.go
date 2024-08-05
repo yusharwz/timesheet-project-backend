@@ -3,6 +3,7 @@ package impl
 import (
 	"final-project-enigma/config"
 	"final-project-enigma/entity"
+	"final-project-enigma/helper"
 	"gorm.io/gorm"
 	"time"
 )
@@ -57,9 +58,9 @@ func (TimeSheetRepository) GetTimeSheetByID(id string) (*entity.TimeSheet, error
 	return &ts, err
 }
 
-func (TimeSheetRepository) GetAllTimeSheets() (*[]entity.TimeSheet, error) {
+func (TimeSheetRepository) GetAllTimeSheets(paging, rowsPerPage int) (*[]entity.TimeSheet, error) {
 	var timeSheets []entity.TimeSheet
-	err := config.DB.Preload("TimeSheetDetails").Find(&timeSheets).Error
+	err := config.DB.Scopes(helper.Paginate(paging, rowsPerPage)).Preload("TimeSheetDetails").Find(&timeSheets).Error
 	return &timeSheets, err
 }
 

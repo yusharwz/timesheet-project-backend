@@ -18,7 +18,7 @@ var accountService service.AccountService = impl.NewAccountService()
 func NewAccountController(g *gin.RouterGroup) {
 	controller := new(AccountController)
 
-	accountGroup := g.Group("/accounts", middleware.JwtAuthWithRoles("user"))
+	accountGroup := g.Group("/accounts", middleware.JwtAuthWithRoles("admin", "user", "manager", "benefit"))
 	{
 		accountGroup.GET("/profile", controller.GetAccountDetailByUserID)
 		accountGroup.POST("/profile/upload-signature", controller.UploadSignature)
