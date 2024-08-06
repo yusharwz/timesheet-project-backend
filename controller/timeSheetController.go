@@ -10,6 +10,7 @@ import (
 	"final-project-enigma/utils"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -109,18 +110,19 @@ func (TimeSheetController) GetTimeSheetByID(c *gin.Context) {
 func (TimeSheetController) GetAllTimeSheets(c *gin.Context) {
 	paging := c.DefaultQuery("paging", "1")
 	rowsPerPage := c.DefaultQuery("rowsPerPage", "10")
+	year := c.Query("year")
 	period := c.Query("period")
 	userId := c.Query("userId")
-	confirm := c.Query("confirm")
 	status := c.Query("status")
 
 	var err error
 	var totalRows string
 	var totalPage string
+	var parsedPeriod []string
 	var results *[]response.TimeSheetResponse
 
 	if period != "" {
-		err = helper.ParsePeriod(period)
+		parsedPeriod, err = helper.ParsePeriod(period)
 		if err != nil {
 			validation := utils.GetValidationError(err)
 			response.NewResponseBadRequest(c, validation)
@@ -128,7 +130,16 @@ func (TimeSheetController) GetAllTimeSheets(c *gin.Context) {
 		}
 	}
 
-	results, totalRows, totalPage, err = timeSheetService.GetAllTimeSheets(paging, rowsPerPage, period, userId, confirm, status)
+	if year != "" {
+		_, err = strconv.Atoi(year)
+		if err != nil {
+			validation := utils.GetValidationError(err)
+			response.NewResponseBadRequest(c, validation)
+			return
+		}
+	}
+
+	results, totalRows, totalPage, err = timeSheetService.GetAllTimeSheets(paging, rowsPerPage, year, userId, status, parsedPeriod)
 	if err != nil {
 		response.NewResponseError(c, err.Error())
 		return
