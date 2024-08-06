@@ -10,19 +10,16 @@
 			"name": "works",
 			"item": [
 				{
-					"name": "get all works",
+					"name": "get all work",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/api/v1/admin/works?paging=1&rowsPerPage=2",
+							"raw": "{{base}}/admin/works?paging=1&rowsPerPage=2",
 							"host": [
-								"localhost"
+								"{{base}}"
 							],
-							"port": "8080",
 							"path": [
-								"api",
-								"v1",
 								"admin",
 								"works"
 							],
@@ -55,14 +52,11 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8080/api/v1/admin/works",
+							"raw": "{{base}}/admin/works",
 							"host": [
-								"localhost"
+								"{{base}}"
 							],
-							"port": "8080",
 							"path": [
-								"api",
-								"v1",
 								"admin",
 								"works"
 							]
@@ -76,17 +70,61 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/api/v1/admin/works/e954d51d-e0af-4d74-9e30-ddab3bcf9ac5",
+							"raw": "{{base}}/admin/works/ab88eadb-3f49-47cb-9dbe-6a0bc92784ba",
 							"host": [
-								"localhost"
+								"{{base}}"
 							],
-							"port": "8080",
 							"path": [
-								"api",
-								"v1",
 								"admin",
 								"works",
-								"e954d51d-e0af-4d74-9e30-ddab3bcf9ac5"
+								"ab88eadb-3f49-47cb-9dbe-6a0bc92784ba"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update work",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"description\": \"Mengajar Angular\",\r\n    \"fee\": 50000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base}}/admin/works/ab88eadb-3f49-47cb-9dbe-6a0bc92784ba",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"admin",
+								"works",
+								"ab88eadb-3f49-47cb-9dbe-6a0bc92784ba"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete work",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/admin/works/cc2f2d99-9a81-4b17-8c3a-42c28dc5d6cb",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"admin",
+								"works",
+								"cc2f2d99-9a81-4b17-8c3a-42c28dc5d6cb"
 							]
 						}
 					},
@@ -132,16 +170,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://sure-pika-easy.ngrok-free.app/api/v1/timesheets",
-							"protocol": "https",
+							"raw": "{{base}}/timesheets?status=created",
 							"host": [
-								"sure-pika-easy",
-								"ngrok-free",
-								"app"
+								"{{base}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"timesheets"
 							],
 							"query": [
@@ -162,18 +195,17 @@
 								},
 								{
 									"key": "period",
-									"value": "1:2",
+									"value": "",
 									"disabled": true
 								},
 								{
 									"key": "userId",
-									"value": "b6aff885-ec43-4be9-bbd2-9299e1018e3b",
+									"value": "",
 									"disabled": true
 								},
 								{
 									"key": "status",
-									"value": "pending",
-									"disabled": true
+									"value": "created"
 								}
 							]
 						}
@@ -230,6 +262,45 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "manager approve",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/manager/approve/timesheets/bd34b5c5-f15d-4701-a9f8-1a122a45e7f1",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"manager",
+								"approve",
+								"timesheets",
+								"bd34b5c5-f15d-4701-a9f8-1a122a45e7f1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "submit timesheet",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/timesheets/00b1cb80-e1a1-4bdb-a75e-14553b147da7/submit",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"timesheets",
+								"00b1cb80-e1a1-4bdb-a75e-14553b147da7",
+								"submit"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -243,7 +314,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"alvindo56@gmail.com\",\r\n    \"password\": \"admin123\"\r\n}",
+							"raw": "{\r\n    \"email\": \"ucoktoll@yahoo.com\",\r\n    \"password\": \"Password@123\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -251,16 +322,11 @@
 							}
 						},
 						"url": {
-							"raw": "https://sure-pika-easy.ngrok-free.app/api/v1/login",
-							"protocol": "https",
+							"raw": "{{base}}/login",
 							"host": [
-								"sure-pika-easy",
-								"ngrok-free",
-								"app"
+								"{{base}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"login"
 							]
 						}
@@ -274,7 +340,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"goj85910@tccho.com\",\r\n    \"name\": \"Aku Benefit\",\r\n    \"role\": \"benefit\"\r\n}",
+							"raw": "{\r\n    \"email\": \"genji@enigma.com\",\r\n    \"name\": \"Aku Genji\",\r\n    \"roleId\": \"015f3ab0-73e1-47a7-af61-f4e23ef64f1d\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -282,14 +348,11 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8080/api/v1/admin/register",
+							"raw": "{{base}}}/admin/register",
 							"host": [
-								"localhost"
+								"{{base}}}"
 							],
-							"port": "8080",
 							"path": [
-								"api",
-								"v1",
 								"admin",
 								"register"
 							]
@@ -308,18 +371,71 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://sure-pika-easy.ngrok-free.app/api/v1/admin/accounts",
-							"protocol": "https",
+							"raw": "{{base}}/admin/accounts",
 							"host": [
-								"sure-pika-easy",
-								"ngrok-free",
-								"app"
+								"{{base}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"admin",
 								"accounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "detail account",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/admin/accounts/detail/b6aff885-ec43-4be9-bbd2-9299e1018e3b",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"admin",
+								"accounts",
+								"detail",
+								"b6aff885-ec43-4be9-bbd2-9299e1018e3b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "soft delete account",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/admin/accounts/delete/c0a83693-2d62-483a-b8c3-4fbb30dea23b",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"admin",
+								"accounts",
+								"delete",
+								"c0a83693-2d62-483a-b8c3-4fbb30dea23b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all role",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/admin/roles",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"admin",
+								"roles"
 							]
 						}
 					},
@@ -345,14 +461,11 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8080/api/v1/accounts/change-password",
+							"raw": "{{base}}/accounts/change-password",
 							"host": [
-								"localhost"
+								"{{base}}"
 							],
-							"port": "8080",
 							"path": [
-								"api",
-								"v1",
 								"accounts",
 								"change-password"
 							]
@@ -366,16 +479,98 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/api/v1/accounts/profile",
+							"raw": "{{base}}/accounts/profile",
 							"host": [
-								"localhost"
+								"{{base}}"
 							],
-							"port": "8080",
 							"path": [
-								"api",
-								"v1",
 								"accounts",
 								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "activate account",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/accounts/activate?e&unique",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"accounts",
+								"activate"
+							],
+							"query": [
+								{
+									"key": "e",
+									"value": null,
+									"description": "email"
+								},
+								{
+									"key": "unique",
+									"value": null,
+									"description": "password"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "upload signature",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/USER/Downloads/signature-aku-benefit.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base}}/accounts/profile/upload-signature",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"accounts",
+								"profile",
+								"upload-signature"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update account",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"alvindo56@gmail.com\",\r\n    \"name\": \"Aku Admin Ganteng\",\r\n    \"phone\": \"089111222333\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base}}/accounts",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"accounts"
 							]
 						}
 					},
@@ -389,7 +584,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjU1MjI1ODAsImlhdCI6MTcyMjkzMDU4MCwiaXNzIjoidGltZXNoZWV0LWFwcCIsImlkIjoiNmYxNTdkMTMtZTQxYi00NTdjLWExNDktMmQ4ZDM4MzkzMTY3IiwidXNlcm5hbWUiOiJBa3UgQWRtaW4iLCJlbWFpbCI6ImFsdmluZG81NkBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4ifQ.rtU12vgIbloN-viYPuCqfyF6YOgxJohCOdN0tFKB6P8",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjU1NTMzMjYsImlhdCI6MTcyMjk2MTMyNiwiaXNzIjoidGltZXNoZWV0LWFwcCIsImlkIjoiMGM4YjBhZTQtZTAyYy00MDI3LTlkMzEtZmE0YjNjNmJmYjI0IiwidXNlcm5hbWUiOiJBa3UgTWFuYWdlciIsImVtYWlsIjoidWNva3RvbGxAeWFob28uY29tIiwicm9sZSI6Im1hbmFnZXIifQ.p5UqsAapmotUvDTAumazoiXRHusf_GBMcbq2tjC1r9w",
 				"type": "string"
 			}
 		]
@@ -414,6 +609,13 @@
 					""
 				]
 			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base",
+			"value": "https://sure-pika-easy.ngrok-free.app/api/v1",
+			"type": "string"
 		}
 	]
 }
