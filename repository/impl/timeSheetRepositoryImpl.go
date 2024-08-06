@@ -3,7 +3,6 @@ package impl
 import (
 	"errors"
 	"final-project-enigma/config"
-	"final-project-enigma/dto/request"
 	"final-project-enigma/entity"
 	"gorm.io/gorm"
 	"strconv"
@@ -66,21 +65,34 @@ func (TimeSheetRepository) GetAllTimeSheets(spec []func(db *gorm.DB) *gorm.DB) (
 	if len(timeSheets) == 0 {
 		return nil, "0", errors.New("data not found")
 	}
-	var totalRows int64
-	config.DB.Model(&entity.TimeSheet{}).Count(&totalRows)
-	return &timeSheets, strconv.FormatInt(totalRows, 10), err
+	return &timeSheets, strconv.Itoa(len(timeSheets)), err
 }
 
 func (TimeSheetRepository) ApproveManagerTimeSheet(id string, userID string) error {
-	return config.DB.Model(&entity.TimeSheet{}).Where("id = ?", id).Update("confirmed_manager_by", userID).Error
-}
-
-func (TimeSheetRepository) RejectManagerTimeSheet(id string, userID string) error {
+	var status *entity.StatusTimeSheet
+	err := config.DB.Where("status_name = ?", "accepted").First(&status).Error
+	if err != nil {
+		return err
+	}
 	return config.DB.Model(&entity.TimeSheet{}).
 		Where("id = ? AND deleted_at IS NULL", id).
 		Updates(map[string]interface{}{
-			"updated_at":           time.Now(),
-			"confirmed_manager_by": "",
+			"confirmed_manager_by": userID,
+			"status_time_sheet_id": status.ID,
+		}).Error
+}
+
+func (TimeSheetRepository) RejectManagerTimeSheet(id string, userID string) error {
+	var status *entity.StatusTimeSheet
+	err := config.DB.Where("status_name = ?", "denied").First(&status).Error
+	if err != nil {
+		return err
+	}
+	return config.DB.Model(&entity.TimeSheet{}).
+		Where("id = ? AND deleted_at IS NULL", id).
+		Updates(map[string]interface{}{
+			"confirmed_manager_by": userID,
+			"status_time_sheet_id": status.ID,
 		}).Error
 }
 
@@ -97,15 +109,19 @@ func (TimeSheetRepository) RejectBenefitTimeSheet(id string, userID string) erro
 		}).Error
 }
 
-func (TimeSheetRepository) UpdateTimeSheetStatus(req request.UpdateTimeSheetStatusRequest) error {
-	var timeSheet entity.TimeSheet
-	var timeSheetsStatus entity.StatusTimeSheet
+func (t TimeSheetRepository) UpdateTimeSheetStatus(id string) error {
+	var ts entity.TimeSheet
+	err := config.DB.Preload("TimeSheetDetails").First(&ts, "id = ?", id).Error
 
-	if err := config.DB.Where("status_name = ?", req.TimeSheetStatusName).First(&timeSheetsStatus).Error; err != nil {
+	status, err := t.GetStatusTimeSheetByName("pending")
+	if err != nil {
 		return err
 	}
 
-	if err := config.DB.Model(&timeSheet).Where("id = ?", req.TimeSheetID).Update("status_timesheet_id", timeSheetsStatus.ID).Error; err != nil {
+	ts.StatusTimeSheetID = status.ID
+
+	_, err = t.UpdateTimeSheet(ts)
+	if err != nil {
 		return err
 	}
 

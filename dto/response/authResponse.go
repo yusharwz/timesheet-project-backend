@@ -9,4 +9,8 @@ type (
 	GetRoleResponse struct {
 		RoleName string `json:"role"`
 	}
+
+	GetAllRoleResponse struct {
+		AllRole []RoleResponse `json:"allRole"`
+	}
 )

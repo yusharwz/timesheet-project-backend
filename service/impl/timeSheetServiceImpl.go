@@ -9,12 +9,11 @@ import (
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"final-project-enigma/service"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type TimeSheetService struct{}
@@ -211,7 +210,12 @@ func (TimeSheetService) DeleteTimeSheet(id string) error {
 		return err
 	}
 
-	if existingTs.ConfirmedManagerBy != "" || existingTs.ConfirmedBenefitBy != "" {
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("created")
+	if err != nil {
+		return err
+	}
+
+	if existingTs.StatusTimeSheetID != status.ID {
 		return errors.New("timesheet cannot be deleted as it has been approved or rejected")
 	}
 
@@ -384,11 +388,33 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 }
 
 func (TimeSheetService) ApproveManagerTimeSheet(id string, userID string) error {
-	return timeSheetRepository.ApproveManagerTimeSheet(id, userID)
+	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
+	if err != nil {
+		return err
+	}
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("pending")
+	if err != nil {
+		return err
+	}
+	if timeSheet.StatusTimeSheetID == status.ID {
+		return timeSheetRepository.ApproveManagerTimeSheet(id, userID)
+	}
+	return errors.New("timesheet not submitted")
 }
 
 func (TimeSheetService) RejectManagerTimeSheet(id string, userID string) error {
-	return timeSheetRepository.RejectManagerTimeSheet(id, userID)
+	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
+	if err != nil {
+		return err
+	}
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("pending")
+	if err != nil {
+		return err
+	}
+	if timeSheet.StatusTimeSheetID == status.ID {
+		return timeSheetRepository.RejectManagerTimeSheet(id, userID)
+	}
+	return errors.New("timesheet not submitted")
 }
 
 func (TimeSheetService) ApproveBenefitTimeSheet(id string, userID string) error {
@@ -399,7 +425,7 @@ func (TimeSheetService) RejectBenefitTimeSheet(id string, userID string) error {
 	return timeSheetRepository.RejectBenefitTimeSheet(id, userID)
 }
 
-func (TimeSheetService) UpdateTimeSheetStatus(req request.UpdateTimeSheetStatusRequest) error {
+func (TimeSheetService) UpdateTimeSheetStatus(id string) error {
 	timeNow := time.Now()
 	day := timeNow.Day()
 
@@ -407,7 +433,7 @@ func (TimeSheetService) UpdateTimeSheetStatus(req request.UpdateTimeSheetStatusR
 		return errors.New("failed to update time sheet status, please only submit on 19 or 20")
 	}
 
-	err := timeSheetRepository.UpdateTimeSheetStatus(req)
+	err := timeSheetRepository.UpdateTimeSheetStatus(id)
 	if err != nil {
 		return err
 	}

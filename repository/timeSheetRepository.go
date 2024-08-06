@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"final-project-enigma/dto/request"
 	"final-project-enigma/entity"
 	"gorm.io/gorm"
 )
@@ -18,5 +17,5 @@ type TimeSheetRepository interface {
 	RejectManagerTimeSheet(id string, userID string) error
 	ApproveBenefitTimeSheet(id string, userID string) error
 	RejectBenefitTimeSheet(id string, userID string) error
-	UpdateTimeSheetStatus(req request.UpdateTimeSheetStatusRequest) error
+	UpdateTimeSheetStatus(id string) error
 }

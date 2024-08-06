@@ -50,7 +50,5 @@ func (WorkRepository) GetAllWork(paging, rowsPerPage int) ([]entity.Work, string
 	if len(works) == 0 {
 		return nil, "0", errors.New("data not found")
 	}
-	var totalRows int64
-	config.DB.Model(&entity.Work{}).Count(&totalRows)
-	return works, strconv.FormatInt(totalRows, 10), nil
+	return works, strconv.Itoa(len(works)), nil
 }

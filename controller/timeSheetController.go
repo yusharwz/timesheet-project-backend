@@ -150,28 +150,38 @@ func (TimeSheetController) GetAllTimeSheets(c *gin.Context) {
 
 func (TimeSheetController) ApproveManagerTimeSheet(c *gin.Context) {
 	id := c.Param("id")
-	userID := c.Query("user_id")
-
-	err := timeSheetService.ApproveManagerTimeSheet(id, userID)
+	authHeader := c.GetHeader("Authorization")
+	userId, err := middleware.GetIdFromToken(authHeader)
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		response.NewResponseError(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "Manager approved"})
+	err = timeSheetService.ApproveManagerTimeSheet(id, userId)
+	if err != nil {
+		response.NewResponseError(c, err.Error())
+		return
+	}
+
+	response.NewResponseSuccess(c, "Approved by manager")
 }
 
 func (TimeSheetController) RejectManagerTimeSheet(c *gin.Context) {
 	id := c.Param("id")
-	userID := c.Query("user_id")
-
-	err := timeSheetService.RejectManagerTimeSheet(id, userID)
+	authHeader := c.GetHeader("Authorization")
+	userId, err := middleware.GetIdFromToken(authHeader)
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		response.NewResponseError(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "Manager rejected"})
+	err = timeSheetService.RejectManagerTimeSheet(id, userId)
+	if err != nil {
+		response.NewResponseError(c, err.Error())
+		return
+	}
+
+	response.NewResponseSuccess(c, "Rejected by manager")
 }
 
 func (TimeSheetController) ApproveBenefitTimeSheet(c *gin.Context) {
@@ -201,21 +211,13 @@ func (TimeSheetController) RejectBenefitTimeSheet(c *gin.Context) {
 }
 
 func (TimeSheetController) SubmitTimeSheet(c *gin.Context) {
-	var req request.UpdateTimeSheetStatusRequest
-	req.TimeSheetID = c.Param("timesheet_id")
+	timeSheetID := c.Param("id")
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		validation := utils.GetValidationError(err)
-		response.NewResponseBadRequest(c, validation)
-		return
-	}
-
-	err := timeSheetService.UpdateTimeSheetStatus(req)
+	err := timeSheetService.UpdateTimeSheetStatus(timeSheetID)
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		response.NewResponseError(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "submit successfully"})
-
+	response.NewResponseSuccess(c, "timesheet submitted")
 }

@@ -21,9 +21,7 @@ func (AdminRepository) RetrieveAccountList(paging, rowsPerPage int) ([]entity.Us
 		return nil, "0", err
 	}
 
-	var totalRows int64
-	config.DB.Model(&entity.User{}).Count(&totalRows)
-	return users, strconv.FormatInt(totalRows, 10), nil
+	return users, strconv.Itoa(len(users)), nil
 }
 
 func (AdminRepository) DetailAccount(userID string) (entity.Account, entity.User, entity.Role, error) {

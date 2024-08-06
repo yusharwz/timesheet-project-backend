@@ -192,11 +192,11 @@ func initStatusTimeSheet(logger zerolog.Logger) {
 		},
 		{
 			ID:         uuid.NewString(),
-			StatusName: "accept",
+			StatusName: "accepted",
 		},
 		{
 			ID:         uuid.NewString(),
-			StatusName: "deny",
+			StatusName: "denied",
 		},
 		{
 			ID:         uuid.NewString(),
