@@ -9,6 +9,7 @@ import (
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"final-project-enigma/service"
+	"gorm.io/gorm"
 	"strconv"
 	"strings"
 	"time"
@@ -94,8 +95,7 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 		ID:                 res.ID,
 		CreatedAt:          res.CreatedAt,
 		UpdatedAt:          res.UpdatedAt,
-		StatusByManager:    "created",
-		StatusByBenefit:    "created",
+		Status:             "created",
 		ConfirmedManagerBy: response.ConfirmedByResponse{},
 		ConfirmedBenefitBy: response.ConfirmedByResponse{},
 		UserTimeSheetResponse: response.UserTimeSheetResponse{
@@ -117,13 +117,12 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 		return nil, err
 	}
 
-	status, err := timeSheetRepository.GetStatusTimeSheetByName("created")
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("approve")
 	if err != nil {
 		return nil, err
 	}
-
 	if existingTs.StatusTimeSheetID != status.ID {
-		return nil, errors.New("timesheet cannot be updated as it has been approved or rejected")
+		return nil, errors.New("timesheet cannot be updated as it has been approve by manager")
 	}
 
 	timeSheetDetails := make([]entity.TimeSheetDetail, 0)
@@ -183,12 +182,15 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 		})
 	}
 
+	statusName, err := timeSheetRepository.GetStatusTimeSheetByID(existingTs.StatusTimeSheetID)
+	if err != nil {
+		return nil, err
+	}
 	timeSheetResponse := response.TimeSheetResponse{
 		ID:                 res.ID,
 		CreatedAt:          res.CreatedAt,
 		UpdatedAt:          res.UpdatedAt,
-		StatusByManager:    "created",
-		StatusByBenefit:    "created",
+		Status:             statusName.StatusName,
 		ConfirmedManagerBy: response.ConfirmedByResponse{},
 		ConfirmedBenefitBy: response.ConfirmedByResponse{},
 		UserTimeSheetResponse: response.UserTimeSheetResponse{
@@ -256,12 +258,15 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 		return nil, err
 	}
 
+	status, err := timeSheetRepository.GetStatusTimeSheetByID(res.StatusTimeSheetID)
+	if err != nil {
+		return nil, err
+	}
 	timeSheetResponse := response.TimeSheetResponse{
 		ID:                 res.ID,
 		CreatedAt:          res.CreatedAt,
 		UpdatedAt:          res.UpdatedAt,
-		StatusByManager:    "created",
-		StatusByBenefit:    "created",
+		Status:             status.StatusName,
 		ConfirmedManagerBy: response.ConfirmedByResponse{},
 		ConfirmedBenefitBy: response.ConfirmedByResponse{},
 		UserTimeSheetResponse: response.UserTimeSheetResponse{
@@ -276,11 +281,12 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 	return &timeSheetResponse, nil
 }
 
-func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, period, userId, confirm, status string) (*[]response.TimeSheetResponse, string, string, error) {
+func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, status string, period []string) (*[]response.TimeSheetResponse, string, string, error) {
 	var err error
 	var pagingInt int
 	var rowsPerPageInt int
 	var totalRows string
+	var spec []func(db *gorm.DB) *gorm.DB
 	var results *[]entity.TimeSheet
 
 	pagingInt, err = strconv.Atoi(paging)
@@ -292,32 +298,34 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, period, userId, co
 		return nil, "0", "0", errors.New("invalid query for rows per page")
 	}
 
-	results, totalRows, err = timeSheetRepository.GetAllTimeSheets(pagingInt, rowsPerPageInt)
+	spec = append(spec, helper.Paginate(pagingInt, rowsPerPageInt))
+	if year != "" && period != nil {
+		spec = append(spec, helper.SelectByPeriod(year, period[0], period[1]))
+	}
+
+	if userId != "" {
+		spec = append(spec, helper.SelectByUserId(userId))
+	}
+
+	if status != "" {
+		result, err := timeSheetRepository.GetStatusTimeSheetByName(status)
+		if err != nil {
+			return nil, "0", "0", err
+		}
+		spec = append(spec, helper.SelectByStatus(result.ID))
+	}
+
+	results, totalRows, err = timeSheetRepository.GetAllTimeSheets(spec)
 	if err != nil {
 		return nil, "0", "0", err
 	}
 	timeSheetsResponse := make([]response.TimeSheetResponse, 0)
 
 	for _, v := range *results {
-		var statusByManager string
-		var statusByBenefit string
-
 		status, err := timeSheetRepository.GetStatusTimeSheetByID(v.StatusTimeSheetID)
 		if err != nil {
 			return nil, "0", "0", err
-		} else if (status.StatusName == "approved" || status.StatusName == "rejected") && v.ConfirmedManagerBy != "" {
-			statusByManager = v.ConfirmedManagerBy
-			statusByBenefit = "pending"
 		}
-
-		if v.ConfirmedManagerBy != "" && v.ConfirmedBenefitBy == "" {
-			statusByManager = status.StatusName
-			statusByBenefit = "pending"
-			if v.ConfirmedBenefitBy != "" {
-				statusByBenefit = status.StatusName
-			}
-		}
-
 		user, err := accountService.GetAccountByID(v.UserID)
 		if err != nil {
 			return nil, "0", "0", err
@@ -357,8 +365,7 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, period, userId, co
 			ID:                 v.ID,
 			CreatedAt:          v.CreatedAt,
 			UpdatedAt:          v.UpdatedAt,
-			StatusByManager:    statusByManager,
-			StatusByBenefit:    statusByBenefit,
+			Status:             status.StatusName,
 			ConfirmedManagerBy: response.ConfirmedByResponse{},
 			ConfirmedBenefitBy: response.ConfirmedByResponse{},
 			UserTimeSheetResponse: response.UserTimeSheetResponse{

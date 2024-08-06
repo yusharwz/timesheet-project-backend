@@ -132,11 +132,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/api/v1/timesheets?paging=1&rowsPerPage=10&period=1:2&userId&confirm&status",
+							"raw": "https://sure-pika-easy.ngrok-free.app/api/v1/timesheets",
+							"protocol": "https",
 							"host": [
-								"localhost"
+								"sure-pika-easy",
+								"ngrok-free",
+								"app"
 							],
-							"port": "8080",
 							"path": [
 								"api",
 								"v1",
@@ -145,28 +147,33 @@
 							"query": [
 								{
 									"key": "paging",
-									"value": "1"
+									"value": "1",
+									"disabled": true
 								},
 								{
 									"key": "rowsPerPage",
-									"value": "10"
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "year",
+									"value": "",
+									"disabled": true
 								},
 								{
 									"key": "period",
 									"value": "1:2",
-									"description": "month_start:month_end by number"
+									"disabled": true
 								},
 								{
 									"key": "userId",
-									"value": null
-								},
-								{
-									"key": "confirm",
-									"value": null
+									"value": "b6aff885-ec43-4be9-bbd2-9299e1018e3b",
+									"disabled": true
 								},
 								{
 									"key": "status",
-									"value": null
+									"value": "pending",
+									"disabled": true
 								}
 							]
 						}
@@ -236,7 +243,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"ucoktoll@yahoo.com\",\r\n    \"password\": \"Fcw4AFsN\"\r\n}",
+							"raw": "{\r\n    \"email\": \"alvindo56@gmail.com\",\r\n    \"password\": \"admin123\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -244,11 +251,13 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8080/api/v1/login",
+							"raw": "https://sure-pika-easy.ngrok-free.app/api/v1/login",
+							"protocol": "https",
 							"host": [
-								"localhost"
+								"sure-pika-easy",
+								"ngrok-free",
+								"app"
 							],
-							"port": "8080",
 							"path": [
 								"api",
 								"v1",
@@ -265,7 +274,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"epc41805@zccck.com\",\r\n    \"name\": \"epc\",\r\n    \"role\": \"user\"\r\n}",
+							"raw": "{\r\n    \"email\": \"goj85910@tccho.com\",\r\n    \"name\": \"Aku Benefit\",\r\n    \"role\": \"benefit\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -292,7 +301,31 @@
 		},
 		{
 			"name": "admin",
-			"item": []
+			"item": [
+				{
+					"name": "get all account",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://sure-pika-easy.ngrok-free.app/api/v1/admin/accounts",
+							"protocol": "https",
+							"host": [
+								"sure-pika-easy",
+								"ngrok-free",
+								"app"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"accounts"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "account",
@@ -356,7 +389,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjU0NDQ2MTUsImlhdCI6MTcyMjg1MjYxNSwiaXNzIjoidGltZXNoZWV0LWFwcCIsImlkIjoiNmYxNTdkMTMtZTQxYi00NTdjLWExNDktMmQ4ZDM4MzkzMTY3IiwidXNlcm5hbWUiOiJBZG1pbiIsImVtYWlsIjoiYWx2aW5kbzU2QGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiJ9.4IHDKvtA9Xk8Po0GKygkmApe7qQ4RBOZ9cnF5mp-jBQ",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjU1MjI1ODAsImlhdCI6MTcyMjkzMDU4MCwiaXNzIjoidGltZXNoZWV0LWFwcCIsImlkIjoiNmYxNTdkMTMtZTQxYi00NTdjLWExNDktMmQ4ZDM4MzkzMTY3IiwidXNlcm5hbWUiOiJBa3UgQWRtaW4iLCJlbWFpbCI6ImFsdmluZG81NkBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4ifQ.rtU12vgIbloN-viYPuCqfyF6YOgxJohCOdN0tFKB6P8",
 				"type": "string"
 			}
 		]

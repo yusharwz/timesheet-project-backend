@@ -5,7 +5,6 @@ import (
 	"final-project-enigma/config"
 	"final-project-enigma/dto/request"
 	"final-project-enigma/entity"
-	"final-project-enigma/helper"
 	"gorm.io/gorm"
 	"strconv"
 	"time"
@@ -61,9 +60,9 @@ func (TimeSheetRepository) GetTimeSheetByID(id string) (*entity.TimeSheet, error
 	return &ts, err
 }
 
-func (TimeSheetRepository) GetAllTimeSheets(paging, rowsPerPage int) (*[]entity.TimeSheet, string, error) {
+func (TimeSheetRepository) GetAllTimeSheets(spec []func(db *gorm.DB) *gorm.DB) (*[]entity.TimeSheet, string, error) {
 	var timeSheets []entity.TimeSheet
-	err := config.DB.Scopes(helper.Paginate(paging, rowsPerPage)).Preload("TimeSheetDetails").Find(&timeSheets).Error
+	err := config.DB.Scopes(spec...).Preload("TimeSheetDetails").Find(&timeSheets).Error
 	if len(timeSheets) == 0 {
 		return nil, "0", errors.New("data not found")
 	}
