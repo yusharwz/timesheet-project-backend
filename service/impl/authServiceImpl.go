@@ -6,13 +6,14 @@ import (
 	"final-project-enigma/dto/response"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
+	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"github.com/google/uuid"
 )
 
 type AuthService struct{}
 
-var authRepository = impl.NewAuthRepository()
+var authRepository repository.AuthRepository = impl.NewAuthRepository()
 
 func NewAuthService() *AuthService {
 	return &AuthService{}
@@ -30,7 +31,7 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 		return resp, err
 	}
 
-	role, err := authRepository.GetRole(req.RoleName)
+	role, err := authRepository.GetRoleById(req.RoleId)
 	if err != nil {
 		return resp, err
 	}
@@ -84,4 +85,13 @@ func (AuthService) Login(req request.LoginAccountRequest) (resp response.LoginRe
 	}
 
 	return resp, err
+}
+
+func (AuthService) GetRoleById(id string) (*response.GetRoleResponse, error) {
+	result, err := authRepository.GetRoleById(id)
+	if err != nil {
+		return nil, err
+	}
+	roleResponse := response.GetRoleResponse{RoleName: result.RoleName}
+	return &roleResponse, nil
 }

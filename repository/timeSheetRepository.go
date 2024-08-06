@@ -12,7 +12,7 @@ type TimeSheetRepository interface {
 	GetStatusTimeSheetByID(id string) (*entity.StatusTimeSheet, error)
 	GetStatusTimeSheetByName(name string) (*entity.StatusTimeSheet, error)
 	GetTimeSheetByID(id string) (*entity.TimeSheet, error)
-	GetAllTimeSheets(paging, rowsPerPage int) (*[]entity.TimeSheet, error)
+	GetAllTimeSheets(paging, rowsPerPage int) (*[]entity.TimeSheet, string, error)
 	ApproveManagerTimeSheet(id string, userID string) error
 	RejectManagerTimeSheet(id string, userID string) error
 	ApproveBenefitTimeSheet(id string, userID string) error

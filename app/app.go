@@ -134,12 +134,10 @@ func RunService() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowAllOrigins: false,
-		AllowOrigins:    []string{"*"},
-		AllowMethods:    []string{"GET", "POST", "PUT", "OPTIONS", "DELETE"},
-		AllowHeaders: []string{
-			"Origin", "Content-Type",
-			"Authorization"},
+		AllowAllOrigins:  false,
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "OPTIONS", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "ngrok-skip-browser-warning"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           120 * time.Second,

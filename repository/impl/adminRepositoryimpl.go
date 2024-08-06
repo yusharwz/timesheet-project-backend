@@ -15,16 +15,7 @@ func NewAdminRepository() *AdminRepository {
 }
 
 func (AdminRepository) RetrieveAccountList(paging, rowsPerPage int) ([]entity.User, string, error) {
-	//var accounts []entity.Account
 	var users []entity.User
-
-	//if err := config.DB.Find(&accounts).Error; err != nil {
-	//	return nil, nil, err
-	//}
-	//
-	//if err := config.DB.Find(&users).Error; err != nil {
-	//	return nil, nil, err
-	//}
 
 	if err := config.DB.Scopes(helper.Paginate(paging, rowsPerPage)).Joins("Account").Find(&users).Error; err != nil {
 		return nil, "0", err
@@ -76,4 +67,12 @@ func (AdminRepository) SoftDeleteAccount(userID string) error {
 	}
 
 	return nil
+}
+
+func (AdminRepository) GetAllRole() (*[]entity.Role, error) {
+	var roles []entity.Role
+	if err := config.DB.Find(&roles).Error; err != nil {
+		return nil, err
+	}
+	return &roles, nil
 }

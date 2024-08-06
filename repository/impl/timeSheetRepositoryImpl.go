@@ -1,13 +1,14 @@
 package impl
 
 import (
+	"errors"
 	"final-project-enigma/config"
 	"final-project-enigma/dto/request"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
-	"time"
-
 	"gorm.io/gorm"
+	"strconv"
+	"time"
 )
 
 type TimeSheetRepository struct{}
@@ -60,10 +61,15 @@ func (TimeSheetRepository) GetTimeSheetByID(id string) (*entity.TimeSheet, error
 	return &ts, err
 }
 
-func (TimeSheetRepository) GetAllTimeSheets(paging, rowsPerPage int) (*[]entity.TimeSheet, error) {
+func (TimeSheetRepository) GetAllTimeSheets(paging, rowsPerPage int) (*[]entity.TimeSheet, string, error) {
 	var timeSheets []entity.TimeSheet
 	err := config.DB.Scopes(helper.Paginate(paging, rowsPerPage)).Preload("TimeSheetDetails").Find(&timeSheets).Error
-	return &timeSheets, err
+	if len(timeSheets) == 0 {
+		return nil, "0", errors.New("data not found")
+	}
+	var totalRows int64
+	config.DB.Model(&entity.TimeSheet{}).Count(&totalRows)
+	return &timeSheets, strconv.FormatInt(totalRows, 10), err
 }
 
 func (TimeSheetRepository) ApproveManagerTimeSheet(id string, userID string) error {
