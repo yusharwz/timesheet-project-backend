@@ -6,4 +6,5 @@ type AdminService interface {
 	RetrieveAccountList(paging, rowsPerPage string) ([]response.ListAccountResponse, string, string, error)
 	DetailAccount(userID string) (response.AccountDetailResponse, error)
 	SoftDeleteAccount(userID string) error
+	GetAllRole() (*[]response.RoleResponse, error)
 }

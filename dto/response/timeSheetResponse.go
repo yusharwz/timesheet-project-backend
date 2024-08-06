@@ -18,12 +18,13 @@ type TimeSheetResponse struct {
 }
 
 type TimeSheetDetailResponse struct {
-	ID        string    `json:"id"`
-	Date      time.Time `json:"date"`
-	StartTime time.Time `json:"startTime"`
-	EndTime   time.Time `json:"endTime"`
-	WorkID    string    `json:"workId"`
-	SubTotal  int       `json:"subTotal"`
+	ID          string    `json:"id"`
+	Date        time.Time `json:"date"`
+	StartTime   time.Time `json:"startTime"`
+	EndTime     time.Time `json:"endTime"`
+	WorkID      string    `json:"workId"`
+	Description string    `json:"description"`
+	SubTotal    int       `json:"subTotal"`
 }
 
 type ConfirmedByResponse struct {

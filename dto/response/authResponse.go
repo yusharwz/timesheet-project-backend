@@ -6,4 +6,7 @@ type (
 		Name     string `json:"name" binding:"required,name"`
 		RoleName string `json:"role"`
 	}
+	GetRoleResponse struct {
+		RoleName string `json:"role"`
+	}
 )

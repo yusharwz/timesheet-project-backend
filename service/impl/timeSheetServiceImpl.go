@@ -5,10 +5,12 @@ import (
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
 	"final-project-enigma/entity"
+	"final-project-enigma/helper"
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"final-project-enigma/service"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,6 +20,7 @@ type TimeSheetService struct{}
 
 var timeSheetRepository repository.TimeSheetRepository = impl.NewTimeSheetRepository()
 var accountService service.AccountService = NewAccountService()
+var workService service.WorkService = NewWorkService()
 
 func NewTimeSheetService() *TimeSheetService {
 	return &TimeSheetService{}
@@ -60,7 +63,8 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 	timeSheetDetailsResponse := make([]response.TimeSheetDetailResponse, 0)
 	var total int
 	for _, v := range timeSheetDetails {
-		work, err := workRepository.GetById(v.WorkID)
+		var fee int
+		work, err := workService.GetById(v.WorkID)
 		if err != nil {
 			return nil, err
 		}
@@ -68,15 +72,21 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 		if duration < 1 {
 			return nil, errors.New("invalid work duration")
 		}
-		subTotal := work.Fee * duration
+		if strings.Contains(strings.ToLower(work.Description), "interview") && duration >= 2 {
+			fee = 50000
+		} else {
+			fee = work.Fee
+		}
+		subTotal := fee * duration
 		total += subTotal
 		timeSheetDetailsResponse = append(timeSheetDetailsResponse, response.TimeSheetDetailResponse{
-			ID:        v.ID,
-			Date:      v.Date,
-			StartTime: v.StartTime,
-			EndTime:   v.EndTime,
-			WorkID:    v.WorkID,
-			SubTotal:  subTotal,
+			ID:          v.ID,
+			Date:        v.Date,
+			StartTime:   v.StartTime,
+			EndTime:     v.EndTime,
+			WorkID:      v.WorkID,
+			Description: work.Description,
+			SubTotal:    subTotal,
 		})
 	}
 
@@ -146,7 +156,8 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 	timeSheetDetailsResponse := make([]response.TimeSheetDetailResponse, 0)
 	var total int
 	for _, v := range timeSheetDetails {
-		work, err := workRepository.GetById(v.WorkID)
+		var fee int
+		work, err := workService.GetById(v.WorkID)
 		if err != nil {
 			return nil, err
 		}
@@ -154,15 +165,21 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 		if duration < 1 {
 			return nil, errors.New("invalid work duration")
 		}
-		subTotal := work.Fee * duration
+		if strings.Contains(strings.ToLower(work.Description), "interview") && duration >= 2 {
+			fee = 50000
+		} else {
+			fee = work.Fee
+		}
+		subTotal := fee * duration
 		total += subTotal
 		timeSheetDetailsResponse = append(timeSheetDetailsResponse, response.TimeSheetDetailResponse{
-			ID:        v.ID,
-			Date:      v.Date,
-			StartTime: v.StartTime,
-			EndTime:   v.EndTime,
-			WorkID:    v.WorkID,
-			SubTotal:  subTotal,
+			ID:          v.ID,
+			Date:        v.Date,
+			StartTime:   v.StartTime,
+			EndTime:     v.EndTime,
+			WorkID:      v.WorkID,
+			Description: work.Description,
+			SubTotal:    subTotal,
 		})
 	}
 
@@ -207,7 +224,8 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 	timeSheetDetailsResponse := make([]response.TimeSheetDetailResponse, 0)
 	var total int
 	for _, v := range res.TimeSheetDetails {
-		work, err := workRepository.GetById(v.WorkID)
+		var fee int
+		work, err := workService.GetById(v.WorkID)
 		if err != nil {
 			return nil, err
 		}
@@ -215,15 +233,21 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 		if duration < 1 {
 			return nil, errors.New("invalid work duration")
 		}
-		subTotal := work.Fee * duration
+		if strings.Contains(strings.ToLower(work.Description), "interview") && duration >= 2 {
+			fee = 50000
+		} else {
+			fee = work.Fee
+		}
+		subTotal := fee * duration
 		total += subTotal
 		timeSheetDetailsResponse = append(timeSheetDetailsResponse, response.TimeSheetDetailResponse{
-			ID:        v.ID,
-			Date:      v.Date,
-			StartTime: v.StartTime,
-			EndTime:   v.EndTime,
-			WorkID:    v.WorkID,
-			SubTotal:  subTotal,
+			ID:          v.ID,
+			Date:        v.Date,
+			StartTime:   v.StartTime,
+			EndTime:     v.EndTime,
+			WorkID:      v.WorkID,
+			Description: work.Description,
+			SubTotal:    subTotal,
 		})
 	}
 
@@ -256,6 +280,8 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, period, userId, co
 	var err error
 	var pagingInt int
 	var rowsPerPageInt int
+	var totalRows string
+	var results *[]entity.TimeSheet
 
 	pagingInt, err = strconv.Atoi(paging)
 	if err != nil {
@@ -266,13 +292,88 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, period, userId, co
 		return nil, "0", "0", errors.New("invalid query for rows per page")
 	}
 
-	_, err = timeSheetRepository.GetAllTimeSheets(pagingInt, rowsPerPageInt)
+	results, totalRows, err = timeSheetRepository.GetAllTimeSheets(pagingInt, rowsPerPageInt)
 	if err != nil {
 		return nil, "0", "0", err
 	}
 	timeSheetsResponse := make([]response.TimeSheetResponse, 0)
 
-	return &timeSheetsResponse, "0", "0", nil
+	for _, v := range *results {
+		var statusByManager string
+		var statusByBenefit string
+
+		status, err := timeSheetRepository.GetStatusTimeSheetByID(v.StatusTimeSheetID)
+		if err != nil {
+			return nil, "0", "0", err
+		} else if (status.StatusName == "approved" || status.StatusName == "rejected") && v.ConfirmedManagerBy != "" {
+			statusByManager = v.ConfirmedManagerBy
+			statusByBenefit = "pending"
+		}
+
+		if v.ConfirmedManagerBy != "" && v.ConfirmedBenefitBy == "" {
+			statusByManager = status.StatusName
+			statusByBenefit = "pending"
+			if v.ConfirmedBenefitBy != "" {
+				statusByBenefit = status.StatusName
+			}
+		}
+
+		user, err := accountService.GetAccountByID(v.UserID)
+		if err != nil {
+			return nil, "0", "0", err
+		}
+
+		timeSheetDetailsResponse := make([]response.TimeSheetDetailResponse, 0)
+		var total int
+		for _, v := range v.TimeSheetDetails {
+			var fee int
+			work, err := workService.GetById(v.WorkID)
+			if err != nil {
+				return nil, "0", "0", err
+			}
+			duration := int(v.EndTime.Sub(v.StartTime).Hours())
+			if duration < 1 {
+				return nil, "0", "0", errors.New("invalid work duration")
+			}
+			if strings.Contains(strings.ToLower(work.Description), "interview") && duration >= 2 {
+				fee = 50000
+			} else {
+				fee = work.Fee
+			}
+			subTotal := fee * duration
+			total += subTotal
+			timeSheetDetailsResponse = append(timeSheetDetailsResponse, response.TimeSheetDetailResponse{
+				ID:          v.ID,
+				Date:        v.Date,
+				StartTime:   v.StartTime,
+				EndTime:     v.EndTime,
+				WorkID:      v.WorkID,
+				Description: work.Description,
+				SubTotal:    subTotal,
+			})
+		}
+
+		timeSheetsResponse = append(timeSheetsResponse, response.TimeSheetResponse{
+			ID:                 v.ID,
+			CreatedAt:          v.CreatedAt,
+			UpdatedAt:          v.UpdatedAt,
+			StatusByManager:    statusByManager,
+			StatusByBenefit:    statusByBenefit,
+			ConfirmedManagerBy: response.ConfirmedByResponse{},
+			ConfirmedBenefitBy: response.ConfirmedByResponse{},
+			UserTimeSheetResponse: response.UserTimeSheetResponse{
+				ID:           user.UserID,
+				Name:         user.Name,
+				Email:        user.Email,
+				SignatureUrl: user.SignatureURL,
+			},
+			TimeSheetDetails: timeSheetDetailsResponse,
+			Total:            total,
+		})
+	}
+
+	totalPage := helper.GetTotalPage(totalRows, rowsPerPageInt)
+	return &timeSheetsResponse, totalRows, strconv.Itoa(totalPage), nil
 }
 
 func (TimeSheetService) ApproveManagerTimeSheet(id string, userID string) error {
