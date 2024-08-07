@@ -1,7 +1,8 @@
 package repository
 
 import (
-	"final-project-enigma/entity"
+	"timesheet-app/entity"
+
 	"gorm.io/gorm"
 )
 

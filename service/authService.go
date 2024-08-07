@@ -1,8 +1,8 @@
 package service
 
 import (
-	"final-project-enigma/dto/request"
-	"final-project-enigma/dto/response"
+	"timesheet-app/dto/request"
+	"timesheet-app/dto/response"
 )
 
 type AuthService interface {

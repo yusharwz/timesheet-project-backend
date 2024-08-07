@@ -1,8 +1,8 @@
 package helper
 
 import (
-	"final-project-enigma/middleware"
 	"fmt"
+	"timesheet-app/middleware"
 )
 
 func GetTokenJwt(userId, name, email, roles string) (string, error) {

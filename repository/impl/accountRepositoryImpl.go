@@ -3,12 +3,12 @@ package impl
 import (
 	"context"
 	"errors"
-	"final-project-enigma/config"
-	"final-project-enigma/dto/request"
-	"final-project-enigma/dto/response"
-	"final-project-enigma/entity"
-	"final-project-enigma/helper"
 	"os"
+	"timesheet-app/config"
+	"timesheet-app/dto/request"
+	"timesheet-app/dto/response"
+	"timesheet-app/entity"
+	"timesheet-app/helper"
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"

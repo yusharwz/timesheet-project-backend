@@ -1,6 +1,6 @@
 package service
 
-import "final-project-enigma/dto/response"
+import "timesheet-app/dto/response"
 
 type AdminService interface {
 	RetrieveAccountList(paging, rowsPerPage, name string) ([]response.ListAccountResponse, string, string, error)

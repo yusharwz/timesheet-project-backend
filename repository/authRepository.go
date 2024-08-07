@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"final-project-enigma/dto/request"
-	"final-project-enigma/dto/response"
-	"final-project-enigma/entity"
+	"timesheet-app/dto/request"
+	"timesheet-app/dto/response"
+	"timesheet-app/entity"
 )
 
 type AuthRepository interface {
