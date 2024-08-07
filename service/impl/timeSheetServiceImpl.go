@@ -9,11 +9,12 @@ import (
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"final-project-enigma/service"
-	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type TimeSheetService struct{}
@@ -126,9 +127,7 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 
 	timeSheetDetails := make([]entity.TimeSheetDetail, 0)
 	for _, value := range req.TimeSheetDetails {
-		if err != nil {
-			return nil, err
-		}
+
 		timeSheetDetails = append(timeSheetDetails, entity.TimeSheetDetail{
 			Base:      entity.Base{ID: value.ID},
 			Date:      value.Date,

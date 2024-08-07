@@ -27,6 +27,5 @@ type UpdateTimeSheetDetailRequest struct {
 }
 
 type UpdateTimeSheetStatusRequest struct {
-	TimeSheetID         string
-	TimeSheetStatusName string `json:"status" binding:"required"`
+	TimeSheetID string
 }
