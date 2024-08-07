@@ -23,8 +23,4 @@ type (
 	UploadImageResponse struct {
 		ImageURL string `json:"imageUrl"`
 	}
-
-	UploadImageResponse struct {
-		ImageURL string `json:"image_url"`
-	}
 )

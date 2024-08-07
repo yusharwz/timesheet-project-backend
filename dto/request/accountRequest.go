@@ -28,9 +28,4 @@ type (
 	ChangePasswordRequest struct {
 		NewPassword string `json:"newPassword" binding:"password"`
 	}
-
-	UploadImagesRequest struct {
-		UserID         string         `json:"user_id"`
-		SignatureImage multipart.File `json:"signature"`
-	}
 )

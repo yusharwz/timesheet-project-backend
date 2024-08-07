@@ -4,6 +4,7 @@ import (
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
 	"final-project-enigma/middleware"
+	"final-project-enigma/service"
 	"final-project-enigma/service/impl"
 	"final-project-enigma/utils"
 
