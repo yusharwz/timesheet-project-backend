@@ -5,32 +5,15 @@ import (
 	"final-project-enigma/dto"
 	"final-project-enigma/dto/response"
 	"fmt"
-	"github.com/joho/godotenv"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/joho/godotenv"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
-
-func BasicAuth(c *gin.Context) {
-	userAuth := os.Getenv("BASIC_AUTH_USERNAME")
-	passAuth := os.Getenv("BASIC_AUTH_PASSWORD")
-
-	user, password, ok := c.Request.BasicAuth()
-	if !ok {
-		response.NewResponseUnauthorized(c, "Invalid token")
-		c.Abort()
-		return
-	}
-	if user != userAuth || password != passAuth {
-		response.NewResponseUnauthorized(c, "Invalid token")
-		c.Abort()
-		return
-	}
-	c.Next()
-}
 
 var (
 	applicationName  = "timesheet-app"
@@ -69,34 +52,6 @@ func GenerateTokenJwt(Id, name, email, roles string, expiredAt int64) (string, e
 		return "", err
 	}
 	return signedToken, nil
-}
-
-func JWTAuth() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if !strings.Contains(authHeader, "Bearer") {
-			response.NewResponseUnauthorized(c, "Invalid token")
-			c.Abort()
-			return
-		}
-
-		tokenString := strings.Replace(authHeader, "Bearer ", "", -1)
-		claims := &dto.JwtClaim{}
-		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return jwtSignatureKey, nil
-		})
-		if err != nil {
-			response.NewResponseUnauthorized(c, "Invalid token")
-			c.Abort()
-			return
-		}
-		if !token.Valid {
-			response.NewResponseForbidden(c, "Invalid token")
-			c.Abort()
-			return
-		}
-		c.Next()
-	}
 }
 
 func JwtAuthWithRoles(userId ...string) gin.HandlerFunc {
@@ -153,17 +108,13 @@ func GetIdFromToken(authHeader string) (string, error) {
 	}
 	tokenString := splitToken[1]
 
-	// Mendekode token JWT
 	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Validasi algoritma yang digunakan
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		// Mengembalikan kunci rahasia yang sama yang digunakan untuk menandatangani token
 		return []byte("your_secret_key"), nil
 	})
 
-	// Mendapatkan ID dari klaim token JWT
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return "", errors.New("failed to get claims")

@@ -7,13 +7,13 @@ import (
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
 	"fmt"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/lib/pq"
-	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"time"
 )
 
 func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
@@ -85,7 +85,7 @@ func autoCreateDb(config dto.ConfigData, logger zerolog.Logger) error {
 	_, err = db.Exec(fmt.Sprintf("CREATE DATABASE %s", config.DbConfig.Database))
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
-			if pqErr.Code == "42P04" { // 42P04 is the error code for "database already exists"
+			if pqErr.Code == "42P04" {
 				logger.Info().Msg("Database already exists, proceeding without creating it")
 				return nil
 			}
