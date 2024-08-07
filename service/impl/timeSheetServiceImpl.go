@@ -313,7 +313,7 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 	return &timeSheetResponse, nil
 }
 
-func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, status string, period []string) (*[]response.TimeSheetResponse, string, string, error) {
+func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, status, name string, period []string) (*[]response.TimeSheetResponse, string, string, error) {
 	var err error
 	var pagingInt int
 	var rowsPerPageInt int
@@ -345,6 +345,10 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 			return nil, "0", "0", err
 		}
 		spec = append(spec, helper.SelectByStatus(result.ID))
+	}
+
+	if name != "" {
+		spec = append(spec, helper.SelectUserInTimSheet(name))
 	}
 
 	results, totalRows, err = timeSheetRepository.GetAllTimeSheets(spec)

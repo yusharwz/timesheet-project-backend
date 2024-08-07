@@ -4,6 +4,7 @@ import (
 	"final-project-enigma/config"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -13,10 +14,10 @@ func NewAdminRepository() *AdminRepository {
 	return &AdminRepository{}
 }
 
-func (AdminRepository) RetrieveAccountList(paging, rowsPerPage int) ([]entity.User, string, error) {
+func (AdminRepository) RetrieveAccountList(spec []func(db *gorm.DB) *gorm.DB) ([]entity.User, string, error) {
 	var users []entity.User
 
-	if err := config.DB.Scopes(helper.Paginate(paging, rowsPerPage)).Joins("Account").Find(&users).Error; err != nil {
+	if err := config.DB.Scopes(spec...).Joins("Account").Find(&users).Error; err != nil {
 		return nil, "0", err
 	}
 	totalRows := helper.GetTotalRows(config.DB.Model(&entity.User{}))

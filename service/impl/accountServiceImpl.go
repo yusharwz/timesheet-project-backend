@@ -26,22 +26,6 @@ func (AccountService) AccountActivationUrl(account request.ActivateAccountReques
 	return nil
 }
 
-func (AccountService) UploadSignature(req request.UploadImagesRequest, authHeader string) (resp response.UploadImageResponse, err error) {
-
-	userID, err := middleware.GetIdFromToken(authHeader)
-	if err != nil {
-		return resp, err
-	}
-	req.UserID = userID
-
-	resp, err = accountRepository.UserUploadSignatureIMG(req)
-	if err != nil {
-		return resp, err
-	}
-
-	return resp, nil
-}
-
 func (AccountService) EditAccount(req request.EditAccountRequest, authHeader string) (response.AccountDetailResponse, error) {
 
 	userId, err := middleware.GetIdFromToken(authHeader)
@@ -66,6 +50,22 @@ func (AccountService) EditAccount(req request.EditAccountRequest, authHeader str
 		Phone:    user.PhoneNumber,
 		Role:     role.RoleName,
 		IsActive: account.IsActive,
+	}
+
+	return resp, nil
+}
+
+func (AccountService) UploadSignature(req request.UploadImagesRequest, authHeader string) (resp response.UploadImageResponse, err error) {
+
+	userID, err := middleware.GetIdFromToken(authHeader)
+	if err != nil {
+		return resp, err
+	}
+	req.UserID = userID
+
+	resp, err = accountRepository.UserUploadSignatureIMG(req)
+	if err != nil {
+		return resp, err
 	}
 
 	return resp, nil

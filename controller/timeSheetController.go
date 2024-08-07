@@ -114,6 +114,7 @@ func (TimeSheetController) GetAllTimeSheets(c *gin.Context) {
 	period := c.Query("period")
 	userId := c.Query("userId")
 	status := c.Query("status")
+	name := c.Query("name")
 
 	var err error
 	var totalRows string
@@ -139,7 +140,7 @@ func (TimeSheetController) GetAllTimeSheets(c *gin.Context) {
 		}
 	}
 
-	results, totalRows, totalPage, err = timeSheetService.GetAllTimeSheets(paging, rowsPerPage, year, userId, status, parsedPeriod)
+	results, totalRows, totalPage, err = timeSheetService.GetAllTimeSheets(paging, rowsPerPage, year, userId, status, name, parsedPeriod)
 	if err != nil {
 		response.NewResponseError(c, err.Error())
 		return

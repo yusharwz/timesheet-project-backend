@@ -7,6 +7,7 @@ import (
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"final-project-enigma/service"
+	"gorm.io/gorm"
 	"strconv"
 )
 
@@ -19,7 +20,7 @@ func NewAdminService() *AdminService {
 	return &AdminService{}
 }
 
-func (AdminService) RetrieveAccountList(paging, rowsPerPage string) ([]response.ListAccountResponse, string, string, error) {
+func (AdminService) RetrieveAccountList(paging, rowsPerPage, name string) ([]response.ListAccountResponse, string, string, error) {
 	pagingInt, err := strconv.Atoi(paging)
 	if err != nil {
 		return nil, "0", "0", errors.New("invalid query for paging")
@@ -28,7 +29,14 @@ func (AdminService) RetrieveAccountList(paging, rowsPerPage string) ([]response.
 	if err != nil {
 		return nil, "0", "0", errors.New("invalid query for rows per page")
 	}
-	users, totalRows, err := adminRepository.RetrieveAccountList(pagingInt, rowsPerPageInt)
+
+	var spec []func(db *gorm.DB) *gorm.DB
+	spec = append(spec, helper.Paginate(pagingInt, rowsPerPageInt))
+	if name != "" {
+		spec = append(spec, helper.SelectAccountByName(name))
+	}
+
+	users, totalRows, err := adminRepository.RetrieveAccountList(spec)
 	if err != nil {
 		return nil, "0", "0", err
 	}

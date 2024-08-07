@@ -5,6 +5,7 @@ import (
 	"final-project-enigma/config"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
+	"gorm.io/gorm"
 )
 
 type WorkRepository struct{}
@@ -43,9 +44,9 @@ func (WorkRepository) GetById(id string) (entity.Work, error) {
 	return work, nil
 }
 
-func (WorkRepository) GetAllWork(paging, rowsPerPage int) ([]entity.Work, string, error) {
+func (WorkRepository) GetAllWork(spec []func(db *gorm.DB) *gorm.DB) ([]entity.Work, string, error) {
 	var works []entity.Work
-	config.DB.Scopes(helper.Paginate(paging, rowsPerPage)).Find(&works)
+	config.DB.Scopes(spec...).Find(&works)
 	totalRows := helper.GetTotalRows(config.DB.Model(&entity.Work{}))
 	return works, totalRows, nil
 }
