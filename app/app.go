@@ -171,16 +171,6 @@ func RunService() {
 			log.Info().Msg(err.Error())
 			return
 		}
-		err = v.RegisterValidation("username", utils.ValidateUsername)
-		if err != nil {
-			log.Info().Msg(err.Error())
-			return
-		}
-		err = v.RegisterValidation("pin", utils.ValidatePIN)
-		if err != nil {
-			log.Info().Msg(err.Error())
-			return
-		}
 	}
 
 	r.Use(logger.SetLogger(

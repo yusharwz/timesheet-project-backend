@@ -4,6 +4,7 @@ import (
 	"final-project-enigma/config"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
+
 	"gorm.io/gorm"
 )
 
@@ -133,6 +134,9 @@ func (TimeSheetRepository) RejectBenefitTimeSheet(id string, userID string) erro
 func (t TimeSheetRepository) UpdateTimeSheetStatus(id string) error {
 	var ts entity.TimeSheet
 	err := config.DB.Preload("TimeSheetDetails").First(&ts, "id = ?", id).Error
+	if err != nil {
+		return err
+	}
 
 	status, err := t.GetStatusTimeSheetByName("pending")
 	if err != nil {

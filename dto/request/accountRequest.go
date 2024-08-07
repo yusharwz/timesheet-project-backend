@@ -9,7 +9,7 @@ type (
 	}
 
 	UploadImagesRequest struct {
-		UserID         string         `json:"userId"`
+		UserID         string
 		SignatureImage multipart.File `json:"signature"`
 	}
 
