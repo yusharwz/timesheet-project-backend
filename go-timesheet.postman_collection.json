@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "7f5ccb7e-3ecd-4695-9c9e-9e33895cf71b",
+		"_postman_id": "e3bce88f-d1a1-4ce0-8dff-76ae678261aa",
 		"name": "go-timesheet",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30958942"
+		"_exporter_id": "32191756"
 	},
 	"item": [
 		{
@@ -363,6 +363,34 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "delete timesheet",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjU2MDQzNzYsImlhdCI6MTcyMzAxMjM3NiwiaXNzIjoidGltZXNoZWV0LWFwcCIsImlkIjoiYjZhZmY4ODUtZWM0My00YmU5LWJiZDItOTI5OWUxMDE4ZTNiIiwidXNlcm5hbWUiOiJBa3UgVXNlciIsImVtYWlsIjoiZXBjNDE4MDVAemNjY2suY29tIiwicm9sZSI6InVzZXIifQ.iTMsfNDxINhHee6BMlXpCHlseuvaGKdOx2GfCPxixC8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/timesheets/cd769764-df49-4bed-9e4b-66e3ffcabea4",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"timesheets",
+								"cd769764-df49-4bed-9e4b-66e3ffcabea4"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -657,7 +685,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjU2MDg1MDAsImlhdCI6MTcyMzAxNjUwMCwiaXNzIjoidGltZXNoZWV0LWFwcCIsImlkIjoiYjZhZmY4ODUtZWM0My00YmU5LWJiZDItOTI5OWUxMDE4ZTNiIiwidXNlcm5hbWUiOiJ1c2VyIHVwZGF0ZWQiLCJlbWFpbCI6ImVwYzQxODA1QHpjY2NrLmNvbSIsInJvbGUiOiJ1c2VyIn0.Q3E-XWakF0vXnnKDUwkmuxp0IOaBX8S71BD_1iEb-2w",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjU2MDgyMTcsImlhdCI6MTcyMzAxNjIxNywiaXNzIjoidGltZXNoZWV0LWFwcCIsImlkIjoiNzU1ZjVhZDItYmI2ZC00OWVjLTgyOWMtMjA0MWMwOGFiZGIxIiwidXNlcm5hbWUiOiJBa3UgQmVuZWZpdCIsImVtYWlsIjoiZ29qODU5MTBAdGNjaG8uY29tIiwicm9sZSI6ImJlbmVmaXQifQ.YCnsOq0duyDMDjP3FWr5jSdN77qPwb4IAbyclLKW3yw",
 				"type": "string"
 			}
 		]
