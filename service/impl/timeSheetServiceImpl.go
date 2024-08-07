@@ -9,7 +9,6 @@ import (
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"final-project-enigma/service"
-	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"strconv"
@@ -137,7 +136,6 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 			EndTime:   value.EndTime,
 			WorkID:    value.WorkID,
 		})
-		fmt.Println(timeSheetDetails[0].Date)
 	}
 
 	user, err := accountService.GetAccountDetail(authHeader)
@@ -286,7 +284,6 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 		managerResponse.SignatureUrl = manager.SignatureURL
 	}
 
-	fmt.Println("benefit not found", res.ConfirmedBenefitBy)
 	if res.ConfirmedBenefitBy != "" {
 		benefit, err := accountService.GetAccountByID(res.ConfirmedBenefitBy)
 		if err != nil {

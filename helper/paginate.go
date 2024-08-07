@@ -12,7 +12,7 @@ func Paginate(paging, rowsPerPage int) func(db *gorm.DB) *gorm.DB {
 		}
 
 		offset := (paging - 1) * rowsPerPage
-		return db.Offset(offset).Limit(rowsPerPage)
+		return db.Order("updated_at desc").Offset(offset).Limit(rowsPerPage)
 	}
 }
 

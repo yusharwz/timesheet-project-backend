@@ -1,7 +1,6 @@
 package impl
 
 import (
-	"errors"
 	"final-project-enigma/config"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
@@ -71,9 +70,6 @@ func (TimeSheetRepository) GetTimeSheetByID(id string) (*entity.TimeSheet, error
 func (TimeSheetRepository) GetAllTimeSheets(spec []func(db *gorm.DB) *gorm.DB) (*[]entity.TimeSheet, string, error) {
 	var timeSheets []entity.TimeSheet
 	err := config.DB.Scopes(spec...).Preload("TimeSheetDetails").Find(&timeSheets).Error
-	if len(timeSheets) == 0 {
-		return nil, "0", errors.New("data not found")
-	}
 	totalRows := helper.GetTotalRows(config.DB.Model(&entity.TimeSheet{}))
 	return &timeSheets, totalRows, err
 }

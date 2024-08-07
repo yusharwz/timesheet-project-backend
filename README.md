@@ -31,7 +31,13 @@ go run .
 
 ## For documentation
 
+#### using postman
 [go-timesheet.postman_collection.json](go-timesheet.postman_collection.json)
+- download file above
+- import in postman
+
+#### look this file to documentation without postman
+[collection.md](collection.md)
 
 ## How to use import documentation
 

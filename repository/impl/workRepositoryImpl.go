@@ -46,9 +46,6 @@ func (WorkRepository) GetById(id string) (entity.Work, error) {
 func (WorkRepository) GetAllWork(paging, rowsPerPage int) ([]entity.Work, string, error) {
 	var works []entity.Work
 	config.DB.Scopes(helper.Paginate(paging, rowsPerPage)).Find(&works)
-	if len(works) == 0 {
-		return nil, "0", errors.New("data not found")
-	}
 	totalRows := helper.GetTotalRows(config.DB.Model(&entity.Work{}))
 	return works, totalRows, nil
 }
