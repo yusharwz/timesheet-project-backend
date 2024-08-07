@@ -46,7 +46,7 @@ func (WorkRepository) GetById(id string) (entity.Work, error) {
 
 func (WorkRepository) GetAllWork(spec []func(db *gorm.DB) *gorm.DB) ([]entity.Work, string, error) {
 	var works []entity.Work
-	config.DB.Scopes(spec...).Find(&works)
-	totalRows := helper.GetTotalRows(config.DB.Model(&entity.Work{}))
-	return works, totalRows, nil
+	db := config.DB.Scopes(spec...).Find(&works)
+	totalRows := helper.GetTotalRows(db)
+	return works, totalRows, db.Error
 }

@@ -37,7 +37,7 @@ func SelectWorkByDescription(description string) func(db *gorm.DB) *gorm.DB {
 	}
 }
 
-func SelectUserInTimSheet(name string) func(db *gorm.DB) *gorm.DB {
+func SelectUserInTimeSheet(name string) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Joins("JOIN users ON users.id = time_sheets.user_id").Where("LOWER(users.name) LIKE ?", "%"+strings.ToLower(name)+"%")
 	}

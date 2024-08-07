@@ -349,7 +349,7 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 	}
 
 	if name != "" {
-		spec = append(spec, helper.SelectUserInTimSheet(name))
+		spec = append(spec, helper.SelectUserInTimeSheet(name))
 	}
 
 	results, totalRows, err = timeSheetRepository.GetAllTimeSheets(spec)
