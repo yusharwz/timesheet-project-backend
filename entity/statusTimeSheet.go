@@ -1,7 +1,7 @@
 package entity
 
 type StatusTimeSheet struct {
-	ID         string `gorm:"primaryKey" json:"id"`
-	StatusName string `gorm:"not null" json:"status_name"`
+	ID         string `gorm:"primaryKey"`
+	StatusName string `gorm:"not null"`
 	TimeSheets []TimeSheet
 }

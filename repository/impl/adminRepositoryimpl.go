@@ -3,31 +3,27 @@ package impl
 import (
 	"final-project-enigma/config"
 	"final-project-enigma/entity"
+	"final-project-enigma/helper"
 	"time"
 )
 
 type AdminRepository struct{}
 
-func NewAdminRepository() *AccountRepository {
-	return &AccountRepository{}
+func NewAdminRepository() *AdminRepository {
+	return &AdminRepository{}
 }
 
-func (AccountRepository) RetrieveAccountList() ([]entity.Account, []entity.User, error) {
-	var accounts []entity.Account
+func (AdminRepository) RetrieveAccountList(paging, rowsPerPage int) ([]entity.User, string, error) {
 	var users []entity.User
 
-	if err := config.DB.Find(&accounts).Error; err != nil {
-		return nil, nil, err
+	if err := config.DB.Scopes(helper.Paginate(paging, rowsPerPage)).Joins("Account").Find(&users).Error; err != nil {
+		return nil, "0", err
 	}
-
-	if err := config.DB.Find(&users).Error; err != nil {
-		return nil, nil, err
-	}
-
-	return accounts, users, nil
+	totalRows := helper.GetTotalRows(config.DB.Model(&entity.User{}))
+	return users, totalRows, nil
 }
 
-func (AccountRepository) DetailAccount(userID string) (entity.Account, entity.User, entity.Role, error) {
+func (AdminRepository) DetailAccount(userID string) (entity.Account, entity.User, entity.Role, error) {
 	var account entity.Account
 	var user entity.User
 	var role entity.Role
@@ -47,7 +43,7 @@ func (AccountRepository) DetailAccount(userID string) (entity.Account, entity.Us
 	return account, user, role, nil
 }
 
-func (AccountRepository) SoftDeleteAccount(userID string) error {
+func (AdminRepository) SoftDeleteAccount(userID string) error {
 	var account entity.Account
 	var user entity.User
 
@@ -68,4 +64,12 @@ func (AccountRepository) SoftDeleteAccount(userID string) error {
 	}
 
 	return nil
+}
+
+func (AdminRepository) GetAllRole() (*[]entity.Role, error) {
+	var roles []entity.Role
+	if err := config.DB.Find(&roles).Error; err != nil {
+		return nil, err
+	}
+	return &roles, nil
 }

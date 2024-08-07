@@ -12,19 +12,19 @@ import (
 
 type AccountController struct{}
 
-var accountService = impl.NewAccountService()
+var accountService service.AccountService = impl.NewAccountService()
 
 func NewAccountController(g *gin.RouterGroup) {
 	controller := new(AccountController)
 
-	accountGroup := g.Group("/accounts")
+	accountGroup := g.Group("/accounts", middleware.JwtAuthWithRoles("admin", "user", "manager", "benefit"))
 	{
-		accountGroup.GET("/activate", controller.AccountActivation)
-		accountGroup.GET("/profile", middleware.JwtAuthWithRoles("user"), controller.GetAccountDetailByUserID)
-		accountGroup.POST("/profile/upload-signature", middleware.JwtAuthWithRoles("admin"), controller.UploadSignature)
-		accountGroup.PUT("/", middleware.JwtAuthWithRoles("user"), controller.EditAccount)
-		accountGroup.PUT("/change-password", middleware.JwtAuthWithRoles("user"), controller.ChangePassword)
+		accountGroup.GET("/profile", controller.GetAccountDetailByUserID)
+		accountGroup.POST("/profile/upload-signature", controller.UploadSignature)
+		accountGroup.PUT("/", controller.EditAccount)
+		accountGroup.PUT("/change-password", controller.ChangePassword)
 	}
+	g.GET("accounts/activate", controller.AccountActivation)
 }
 func (AccountController) AccountActivation(ctx *gin.Context) {
 
@@ -39,7 +39,7 @@ func (AccountController) AccountActivation(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "account has been activated")
+	response.NewResponseSuccess(ctx, nil)
 }
 
 func (AccountController) EditAccount(ctx *gin.Context) {
@@ -51,7 +51,7 @@ func (AccountController) EditAccount(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponseBadRequest(ctx, validationError, "bad request")
+			response.NewResponseBadRequest(ctx, validationError)
 			return
 		}
 		response.NewResponseError(ctx, "json request body required")
@@ -63,7 +63,7 @@ func (AccountController) EditAccount(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "update account success")
+	response.NewResponseSuccess(ctx, resp)
 }
 
 func (AccountController) UploadSignature(ctx *gin.Context) {
@@ -85,7 +85,7 @@ func (AccountController) UploadSignature(ctx *gin.Context) {
 		response.NewResponseError(ctx, err.Error())
 		return
 	}
-	response.NewResponseSuccess(ctx, resp, "Success upload image")
+	response.NewResponseSuccess(ctx, resp)
 
 }
 
@@ -98,7 +98,7 @@ func (AccountController) ChangePassword(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponseBadRequest(ctx, validationError, "bad request")
+			response.NewResponseBadRequest(ctx, validationError)
 			return
 		}
 		response.NewResponseError(ctx, "json request body required")
@@ -110,7 +110,7 @@ func (AccountController) ChangePassword(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "update password success")
+	response.NewResponseSuccess(ctx, nil)
 }
 
 func (AccountController) GetAccountDetailByUserID(ctx *gin.Context) {
@@ -123,5 +123,5 @@ func (AccountController) GetAccountDetailByUserID(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "get data detail success")
+	response.NewResponseSuccess(ctx, resp)
 }

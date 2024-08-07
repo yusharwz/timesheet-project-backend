@@ -4,6 +4,7 @@ import (
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
 	"final-project-enigma/middleware"
+	"final-project-enigma/service"
 	"final-project-enigma/service/impl"
 	"final-project-enigma/utils"
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 
 type AuthController struct{}
 
-var authService = impl.NewAuthService()
+var authService service.AuthService = impl.NewAuthService()
 
 func NewAuthController(g *gin.RouterGroup) {
 	controller := new(AuthController)
@@ -33,7 +34,7 @@ func (AuthController) RegisterAccountRequest(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponseBadRequest(ctx, validationError, "bad request")
+			response.NewResponseBadRequest(ctx, validationError)
 			return
 		}
 		response.NewResponseError(ctx, "json request body required")
@@ -46,7 +47,7 @@ func (AuthController) RegisterAccountRequest(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "create account success, please check your email for activated your account")
+	response.NewResponseSuccess(ctx, resp)
 }
 
 func (AuthController) AccountLogin(ctx *gin.Context) {
@@ -56,7 +57,7 @@ func (AuthController) AccountLogin(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponseBadRequest(ctx, validationError, "bad request")
+			response.NewResponseBadRequest(ctx, validationError)
 			return
 		}
 		response.NewResponseError(ctx, "json request body required")
@@ -68,5 +69,5 @@ func (AuthController) AccountLogin(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "logged in")
+	response.NewResponseSuccess(ctx, resp)
 }

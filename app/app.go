@@ -134,12 +134,10 @@ func RunService() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowAllOrigins: false,
-		AllowOrigins:    []string{"*"},
-		AllowMethods:    []string{"GET", "POST", "PUT", "OPTIONS", "DELETE"},
-		AllowHeaders: []string{
-			"Origin", "Content-Type",
-			"Authorization"},
+		AllowAllOrigins:  false,
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "OPTIONS", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "ngrok-skip-browser-warning"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           120 * time.Second,
@@ -163,10 +161,26 @@ func RunService() {
 	log.Logger = log.Output(logFile)
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("password", utils.ValidatePassword)
-		v.RegisterValidation("nomorHp", utils.ValidateNoHp)
-		v.RegisterValidation("username", utils.ValidateUsername)
-		v.RegisterValidation("pin", utils.ValidatePIN)
+		err := v.RegisterValidation("password", utils.ValidatePassword)
+		if err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
+		err = v.RegisterValidation("nomorHp", utils.ValidateNoHp)
+		if err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
+		err = v.RegisterValidation("username", utils.ValidateUsername)
+		if err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
+		err = v.RegisterValidation("pin", utils.ValidatePIN)
+		if err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
 	}
 
 	r.Use(logger.SetLogger(

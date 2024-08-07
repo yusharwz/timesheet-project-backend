@@ -13,6 +13,7 @@ import (
 	"github.com/rs/zerolog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"time"
 )
 
 func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
@@ -26,7 +27,11 @@ func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
 
 	var dsn = fmt.Sprintf("host=%s user= %s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta", in.DbConfig.Host, in.DbConfig.User, in.DbConfig.Pass, in.DbConfig.Database, in.DbConfig.DbPort)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		NowFunc: func() time.Time {
+			return time.Now().Local()
+		},
+	})
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Failed to open database")
 		return nil, err
@@ -51,6 +56,9 @@ func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
 
 	logger.Info().Msg("Initializing table role")
 	initRoles(logger)
+
+	logger.Info().Msg("Initializing table status timesheet")
+	initStatusTimeSheet(logger)
 
 	logger.Info().Msg("Initializing admin account")
 	err = initAdmin(in.AdminConfig.Email, in.AdminConfig.Password)
@@ -174,4 +182,48 @@ func createAdminIfNotFound(email, password string) error {
 		return errors.New("admin account failed to create")
 	}
 	return nil
+}
+
+// init timesheet status
+func initStatusTimeSheet(logger zerolog.Logger) {
+	statuses := []entity.StatusTimeSheet{
+		{
+			ID:         uuid.NewString(),
+			StatusName: "created",
+		},
+		{
+			ID:         uuid.NewString(),
+			StatusName: "pending",
+		},
+		{
+			ID:         uuid.NewString(),
+			StatusName: "accepted",
+		},
+		{
+			ID:         uuid.NewString(),
+			StatusName: "denied",
+		},
+		{
+			ID:         uuid.NewString(),
+			StatusName: "approved",
+		},
+		{
+			ID:         uuid.NewString(),
+			StatusName: "rejected",
+		},
+	}
+	for _, status := range statuses {
+		var existsStatus entity.StatusTimeSheet
+		result := DB.Where("status_name = ?", status.StatusName).First(&existsStatus)
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				DB.Create(&status)
+				logger.Info().Msg(fmt.Sprintf("Role %s created", status.StatusName))
+			} else {
+				logger.Info().Msg(fmt.Sprintf("failed to execute query %s", result.Error))
+			}
+		} else {
+			logger.Info().Msg(fmt.Sprintf("Role %s already exists, proceeding without creating it", status.StatusName))
+		}
+	}
 }

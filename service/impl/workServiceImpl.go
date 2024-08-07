@@ -1,18 +1,22 @@
 package impl
 
 import (
+	"errors"
 	"final-project-enigma/config"
 	"final-project-enigma/dto/request"
 	"final-project-enigma/dto/response"
 	"final-project-enigma/entity"
+	"final-project-enigma/helper"
+	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
+	"strconv"
 
 	"github.com/google/uuid"
 )
 
 type WorkService struct{}
 
-var workRepository = impl.NewWorkRepository()
+var workRepository repository.WorkRepository = impl.NewWorkRepository()
 
 func NewWorkService() *WorkService {
 	return &WorkService{}
@@ -76,10 +80,18 @@ func (WorkService) GetById(id string) (response.WorkResponse, error) {
 	}, nil
 }
 
-func (WorkService) GetAllWork(page, size string) ([]response.WorkResponse, string, error) {
-	results, total, err := workRepository.GetAllWork(page, size)
+func (WorkService) GetAllWork(paging, rowsPerPage string) ([]response.WorkResponse, string, string, error) {
+	pagingInt, err := strconv.Atoi(paging)
 	if err != nil {
-		return []response.WorkResponse{}, "0", err
+		return nil, "0", "0", errors.New("invalid query for paging")
+	}
+	rowsPerPageInt, err := strconv.Atoi(rowsPerPage)
+	if err != nil {
+		return nil, "0", "0", errors.New("invalid query for rows per page")
+	}
+	results, totalRows, err := workRepository.GetAllWork(pagingInt, rowsPerPageInt)
+	if err != nil {
+		return nil, "0", "0", err
 	}
 	responses := make([]response.WorkResponse, 0)
 	for _, v := range results {
@@ -89,5 +101,6 @@ func (WorkService) GetAllWork(page, size string) ([]response.WorkResponse, strin
 			Fee:         v.Fee,
 		})
 	}
-	return responses, total, nil
+	totalPage := helper.GetTotalPage(totalRows, rowsPerPageInt)
+	return responses, totalRows, strconv.Itoa(totalPage), nil
 }

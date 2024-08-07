@@ -1,46 +1,61 @@
 package impl
 
 import (
+	"errors"
 	"final-project-enigma/dto/response"
+	"final-project-enigma/helper"
+	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
+	"final-project-enigma/service"
+	"strconv"
 )
 
 type AdminService struct{}
 
-var adminRepository = impl.NewAdminRepository()
+var adminRepository repository.AdminRepository = impl.NewAdminRepository()
+var authService service.AuthService = NewAuthService()
 
 func NewAdminService() *AdminService {
 	return &AdminService{}
 }
 
-func (AdminService) RetrieveAccountList() ([]response.ListAccountResponse, error) {
-
-	accounts, users, err := adminRepository.RetrieveAccountList()
+func (AdminService) RetrieveAccountList(paging, rowsPerPage string) ([]response.ListAccountResponse, string, string, error) {
+	pagingInt, err := strconv.Atoi(paging)
 	if err != nil {
-		return nil, err
+		return nil, "0", "0", errors.New("invalid query for paging")
 	}
-
-	userMap := make(map[string]string)
-	for _, user := range users {
-		userMap[user.ID] = user.Name
+	rowsPerPageInt, err := strconv.Atoi(rowsPerPage)
+	if err != nil {
+		return nil, "0", "0", errors.New("invalid query for rows per page")
+	}
+	users, totalRows, err := adminRepository.RetrieveAccountList(pagingInt, rowsPerPageInt)
+	if err != nil {
+		return nil, "0", "0", err
 	}
 
 	var resp []response.ListAccountResponse
-	for _, account := range accounts {
+	for _, user := range users {
 		var status string
-		if account.IsActive {
-			status = "Active"
+		if user.Account.IsActive {
+			status = "active"
 		} else {
-			status = "Inactive"
+			status = "inactive"
 		}
-
+		result, err := authService.GetRoleById(user.Account.RoleID)
+		if err != nil {
+			return nil, "0", "0", err
+		}
 		resp = append(resp, response.ListAccountResponse{
-			Email:  account.Email,
+			ID:     user.ID,
+			Email:  user.Account.Email,
+			Name:   user.Name,
+			Role:   result.RoleName,
 			Status: status,
 		})
 	}
 
-	return resp, nil
+	totalPage := helper.GetTotalPage(totalRows, rowsPerPageInt)
+	return resp, totalRows, strconv.Itoa(totalPage), nil
 }
 
 func (AdminService) DetailAccount(userID string) (response.AccountDetailResponse, error) {
@@ -65,4 +80,19 @@ func (AdminService) DetailAccount(userID string) (response.AccountDetailResponse
 
 func (AdminService) SoftDeleteAccount(userID string) error {
 	return adminRepository.SoftDeleteAccount(userID)
+}
+
+func (AdminService) GetAllRole() (*[]response.RoleResponse, error) {
+	roles, err := adminRepository.GetAllRole()
+	if err != nil {
+		return nil, err
+	}
+	var responseList = make([]response.RoleResponse, 0)
+	for _, role := range *roles {
+		responseList = append(responseList, response.RoleResponse{
+			ID:       role.ID,
+			RoleName: role.RoleName,
+		})
+	}
+	return &responseList, nil
 }

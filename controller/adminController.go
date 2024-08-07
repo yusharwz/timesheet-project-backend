@@ -3,6 +3,7 @@ package controller
 import (
 	"final-project-enigma/dto/response"
 	"final-project-enigma/middleware"
+	"final-project-enigma/service"
 	"final-project-enigma/service/impl"
 
 	"github.com/gin-gonic/gin"
@@ -10,29 +11,30 @@ import (
 
 type AdminController struct{}
 
-var adminService = impl.NewAdminService()
+var adminService service.AdminService = impl.NewAdminService()
 
 func NewAdminController(g *gin.RouterGroup) {
 	controller := new(AdminController)
 
-	adminGroup := g.Group("/admin")
+	adminGroup := g.Group("/admin", middleware.JwtAuthWithRoles("admin"))
 	{
-		adminGroup.GET("/accounts", middleware.JwtAuthWithRoles("admin"), controller.AccountList)
-		adminGroup.GET("/accounts/detail/:id", middleware.JwtAuthWithRoles("admin"), controller.AccountDetail)
-		adminGroup.DELETE("/accounts/delete/:id", middleware.JwtAuthWithRoles("admin"), controller.AccountSoftDelete)
-
+		adminGroup.GET("/accounts", controller.AccountList)
+		adminGroup.GET("/accounts/detail/:id", controller.AccountDetail)
+		adminGroup.DELETE("/accounts/delete/:id", controller.AccountSoftDelete)
+		adminGroup.GET("/roles", controller.GetAllRole)
 	}
 }
 
 func (AdminController) AccountList(ctx *gin.Context) {
-
-	resp, err := adminService.RetrieveAccountList()
+	paging := ctx.DefaultQuery("paging", "1")
+	rowsPerPage := ctx.DefaultQuery("rowsPerPage", "10")
+	resp, totalRows, totalPage, err := adminService.RetrieveAccountList(paging, rowsPerPage)
 	if err != nil {
 		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "success get account list")
+	response.NewResponseSuccessPaging(ctx, resp, paging, rowsPerPage, totalRows, totalPage)
 }
 
 func (AdminController) AccountDetail(ctx *gin.Context) {
@@ -44,7 +46,7 @@ func (AdminController) AccountDetail(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "success get detail account")
+	response.NewResponseSuccess(ctx, resp)
 }
 
 func (AdminController) AccountSoftDelete(ctx *gin.Context) {
@@ -56,5 +58,14 @@ func (AdminController) AccountSoftDelete(ctx *gin.Context) {
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "delete account success")
+	response.NewResponseSuccess(ctx, nil)
+}
+
+func (AdminController) GetAllRole(c *gin.Context) {
+	results, err := adminService.GetAllRole()
+	if err != nil {
+		response.NewResponseError(c, err.Error())
+		return
+	}
+	response.NewResponseSuccess(c, results)
 }

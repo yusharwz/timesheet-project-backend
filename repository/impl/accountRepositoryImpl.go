@@ -8,10 +8,9 @@ import (
 	"final-project-enigma/dto/response"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
-	"os"
-
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
+	"os"
 )
 
 type AccountRepository struct{}
@@ -89,10 +88,10 @@ func (AccountRepository) UserUploadSignatureIMG(req request.UploadImagesRequest)
 	return resp, nil
 }
 
-func (repo AccountRepository) ChangePassword(req request.ChangePasswordRequest) error {
+func (repo AccountRepository) ChangePassword(id string, req request.ChangePasswordRequest) error {
 
 	var account entity.Account
-	if err := config.DB.Where("user_id = ?", req.UserID).First(&account).Error; err != nil {
+	if err := config.DB.Where("user_id = ? AND is_active = ?", id, true).First(&account).Error; err != nil {
 		return errors.New("failed to change password")
 	}
 

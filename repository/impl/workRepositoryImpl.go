@@ -5,7 +5,6 @@ import (
 	"final-project-enigma/config"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
-	"strconv"
 )
 
 type WorkRepository struct{}
@@ -44,13 +43,9 @@ func (WorkRepository) GetById(id string) (entity.Work, error) {
 	return work, nil
 }
 
-func (WorkRepository) GetAllWork(page, size string) ([]entity.Work, string, error) {
+func (WorkRepository) GetAllWork(paging, rowsPerPage int) ([]entity.Work, string, error) {
 	var works []entity.Work
-	config.DB.Scopes(helper.Paginate(page, size)).Find(&works)
-	if len(works) == 0 {
-		return nil, "0", errors.New("data not found")
-	}
-	var total int64
-	config.DB.Model(&entity.Work{}).Count(&total)
-	return works, strconv.FormatInt(total, 10), nil
+	config.DB.Scopes(helper.Paginate(paging, rowsPerPage)).Find(&works)
+	totalRows := helper.GetTotalRows(config.DB.Model(&entity.Work{}))
+	return works, totalRows, nil
 }
