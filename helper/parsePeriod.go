@@ -25,5 +25,8 @@ func ParsePeriod(period string) ([]string, error) {
 	} else if endPeriod > 12 || endPeriod < 1 {
 		return nil, errors.New("endPeriod must be greater than 0 and less than 12")
 	}
-	return make([]string, startPeriod, endPeriod), nil
+	parsed := make([]string, 0)
+	parsed = append(parsed, strconv.Itoa(startPeriod))
+	parsed = append(parsed, strconv.Itoa(endPeriod))
+	return parsed, nil
 }

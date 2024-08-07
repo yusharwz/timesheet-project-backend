@@ -9,12 +9,11 @@ import (
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"final-project-enigma/service"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type TimeSheetService struct{}
@@ -117,7 +116,7 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 		return nil, err
 	}
 
-	status, err := timeSheetRepository.GetStatusTimeSheetByName("approve")
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("created")
 	if err != nil {
 		return nil, err
 	}
@@ -127,6 +126,9 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 
 	timeSheetDetails := make([]entity.TimeSheetDetail, 0)
 	for _, value := range req.TimeSheetDetails {
+		if err != nil {
+			return nil, err
+		}
 		timeSheetDetails = append(timeSheetDetails, entity.TimeSheetDetail{
 			Base:      entity.Base{ID: value.ID},
 			Date:      value.Date,
@@ -154,7 +156,7 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 	}
 	timeSheetDetailsResponse := make([]response.TimeSheetDetailResponse, 0)
 	var total int
-	for _, v := range timeSheetDetails {
+	for _, v := range res.TimeSheetDetails {
 		var fee int
 		work, err := workService.GetById(v.WorkID)
 		if err != nil {
@@ -186,6 +188,7 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 	if err != nil {
 		return nil, err
 	}
+
 	timeSheetResponse := response.TimeSheetResponse{
 		ID:                 res.ID,
 		CreatedAt:          res.CreatedAt,
@@ -211,7 +214,12 @@ func (TimeSheetService) DeleteTimeSheet(id string) error {
 		return err
 	}
 
-	if existingTs.ConfirmedManagerBy != "" || existingTs.ConfirmedBenefitBy != "" {
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("created")
+	if err != nil {
+		return err
+	}
+
+	if existingTs.StatusTimeSheetID != status.ID {
 		return errors.New("timesheet cannot be deleted as it has been approved or rejected")
 	}
 
@@ -262,13 +270,38 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 	if err != nil {
 		return nil, err
 	}
+
+	var managerResponse response.ConfirmedByResponse
+	var benefitResponse response.ConfirmedByResponse
+	if res.ConfirmedManagerBy != "" {
+		manager, err := accountService.GetAccountByID(res.ConfirmedManagerBy)
+		if err != nil {
+			return nil, err
+		}
+		managerResponse.ID = manager.UserID
+		managerResponse.Name = manager.Name
+		managerResponse.Email = manager.Email
+		managerResponse.SignatureUrl = manager.SignatureURL
+	}
+
+	if res.ConfirmedBenefitBy != "" {
+		benefit, err := accountService.GetAccountByID(res.ConfirmedBenefitBy)
+		if err != nil {
+			return nil, err
+		}
+		benefitResponse.ID = benefit.UserID
+		benefitResponse.Name = benefit.Name
+		benefitResponse.Email = benefit.Email
+		benefitResponse.SignatureUrl = benefit.SignatureURL
+	}
+
 	timeSheetResponse := response.TimeSheetResponse{
 		ID:                 res.ID,
 		CreatedAt:          res.CreatedAt,
 		UpdatedAt:          res.UpdatedAt,
 		Status:             status.StatusName,
-		ConfirmedManagerBy: response.ConfirmedByResponse{},
-		ConfirmedBenefitBy: response.ConfirmedByResponse{},
+		ConfirmedManagerBy: managerResponse,
+		ConfirmedBenefitBy: benefitResponse,
 		UserTimeSheetResponse: response.UserTimeSheetResponse{
 			ID:           user.UserID,
 			Name:         user.Name,
@@ -361,13 +394,37 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 			})
 		}
 
+		var managerResponse response.ConfirmedByResponse
+		var benefitResponse response.ConfirmedByResponse
+		if v.ConfirmedManagerBy != "" {
+			manager, err := accountService.GetAccountByID(v.ConfirmedManagerBy)
+			if err != nil {
+				return nil, "0", "0", err
+			}
+			managerResponse.ID = manager.UserID
+			managerResponse.Name = manager.Name
+			managerResponse.Email = manager.Email
+			managerResponse.SignatureUrl = manager.SignatureURL
+		}
+
+		if v.ConfirmedBenefitBy != "" {
+			benefit, err := accountService.GetAccountByID(v.ConfirmedBenefitBy)
+			if err != nil {
+				return nil, "0", "0", err
+			}
+			benefitResponse.ID = benefit.UserID
+			benefitResponse.Name = benefit.Name
+			benefitResponse.Email = benefit.Email
+			benefitResponse.SignatureUrl = benefit.SignatureURL
+		}
+
 		timeSheetsResponse = append(timeSheetsResponse, response.TimeSheetResponse{
 			ID:                 v.ID,
 			CreatedAt:          v.CreatedAt,
 			UpdatedAt:          v.UpdatedAt,
 			Status:             status.StatusName,
-			ConfirmedManagerBy: response.ConfirmedByResponse{},
-			ConfirmedBenefitBy: response.ConfirmedByResponse{},
+			ConfirmedManagerBy: managerResponse,
+			ConfirmedBenefitBy: benefitResponse,
 			UserTimeSheetResponse: response.UserTimeSheetResponse{
 				ID:           user.UserID,
 				Name:         user.Name,
@@ -384,22 +441,70 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 }
 
 func (TimeSheetService) ApproveManagerTimeSheet(id string, userID string) error {
-	return timeSheetRepository.ApproveManagerTimeSheet(id, userID)
+	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
+	if err != nil {
+		return err
+	}
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("pending")
+	if err != nil {
+		return err
+	}
+	if timeSheet.StatusTimeSheetID == status.ID {
+		return timeSheetRepository.ApproveManagerTimeSheet(id, userID)
+	} else if timeSheet.ConfirmedManagerBy != "" {
+		return errors.New("timesheet has been submitted")
+	}
+	return errors.New("timesheet not submitted")
 }
 
 func (TimeSheetService) RejectManagerTimeSheet(id string, userID string) error {
-	return timeSheetRepository.RejectManagerTimeSheet(id, userID)
+	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
+	if err != nil {
+		return err
+	}
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("pending")
+	if err != nil {
+		return err
+	} else if timeSheet.ConfirmedManagerBy != "" {
+		return errors.New("timesheet has been submitted")
+	}
+	if timeSheet.StatusTimeSheetID == status.ID {
+		return timeSheetRepository.RejectManagerTimeSheet(id, userID)
+	}
+	return errors.New("timesheet not submitted")
 }
 
 func (TimeSheetService) ApproveBenefitTimeSheet(id string, userID string) error {
-	return timeSheetRepository.ApproveBenefitTimeSheet(id, userID)
+	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
+	if err != nil {
+		return err
+	}
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("accepted")
+	if err != nil {
+		return err
+	}
+	if timeSheet.StatusTimeSheetID == status.ID {
+		return timeSheetRepository.ApproveBenefitTimeSheet(id, userID)
+	}
+	return errors.New("timesheet not approved by manager")
 }
 
 func (TimeSheetService) RejectBenefitTimeSheet(id string, userID string) error {
-	return timeSheetRepository.RejectBenefitTimeSheet(id, userID)
+	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
+	if err != nil {
+		return err
+	}
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("accepted")
+	if err != nil {
+		return err
+	}
+	if timeSheet.StatusTimeSheetID == status.ID {
+		return timeSheetRepository.RejectBenefitTimeSheet(id, userID)
+	}
+	return errors.New("timesheet not approved by manager")
 }
 
-func (TimeSheetService) UpdateTimeSheetStatus(req request.UpdateTimeSheetStatusRequest) error {
+func (TimeSheetService) UpdateTimeSheetStatus(id string) error {
 	timeNow := time.Now()
 	day := timeNow.Day()
 
@@ -407,7 +512,7 @@ func (TimeSheetService) UpdateTimeSheetStatus(req request.UpdateTimeSheetStatusR
 		return errors.New("failed to update time sheet status, please only submit on 19 or 20")
 	}
 
-	err := timeSheetRepository.UpdateTimeSheetStatus(req)
+	err := timeSheetRepository.UpdateTimeSheetStatus(id)
 	if err != nil {
 		return err
 	}

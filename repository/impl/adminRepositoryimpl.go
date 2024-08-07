@@ -4,7 +4,6 @@ import (
 	"final-project-enigma/config"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
-	"strconv"
 	"time"
 )
 
@@ -20,10 +19,8 @@ func (AdminRepository) RetrieveAccountList(paging, rowsPerPage int) ([]entity.Us
 	if err := config.DB.Scopes(helper.Paginate(paging, rowsPerPage)).Joins("Account").Find(&users).Error; err != nil {
 		return nil, "0", err
 	}
-
-	var totalRows int64
-	config.DB.Model(&entity.User{}).Count(&totalRows)
-	return users, strconv.FormatInt(totalRows, 10), nil
+	totalRows := helper.GetTotalRows(config.DB.Model(&entity.User{}))
+	return users, totalRows, nil
 }
 
 func (AdminRepository) DetailAccount(userID string) (entity.Account, entity.User, entity.Role, error) {

@@ -12,7 +12,7 @@ func Paginate(paging, rowsPerPage int) func(db *gorm.DB) *gorm.DB {
 		}
 
 		offset := (paging - 1) * rowsPerPage
-		return db.Offset(offset).Limit(rowsPerPage)
+		return db.Order("updated_at desc").Offset(offset).Limit(rowsPerPage)
 	}
 }
 
@@ -25,4 +25,10 @@ func GetTotalPage(totalRows string, rowsPerPage int) int {
 		totalPage = totalPage + 1
 	}
 	return totalPage
+}
+
+func GetTotalRows(db *gorm.DB) string {
+	var totalRows int64
+	db.Where("deleted_at IS NULL").Count(&totalRows)
+	return strconv.FormatInt(totalRows, 10)
 }
