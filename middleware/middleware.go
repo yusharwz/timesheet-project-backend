@@ -149,7 +149,6 @@ func JwtAuthWithRoles(userId ...string) gin.HandlerFunc {
 func GetIdFromToken(authHeader string) (string, error) {
 	splitToken := strings.Split(authHeader, " ")
 	if len(splitToken) != 2 || splitToken[0] != "Bearer" {
-		fmt.Println(authHeader)
 		return "", errors.New("invalid authorization format")
 	}
 	tokenString := splitToken[1]

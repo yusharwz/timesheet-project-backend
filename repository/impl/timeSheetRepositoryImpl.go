@@ -4,8 +4,8 @@ import (
 	"errors"
 	"final-project-enigma/config"
 	"final-project-enigma/entity"
+	"final-project-enigma/helper"
 	"gorm.io/gorm"
-	"strconv"
 )
 
 type TimeSheetRepository struct{}
@@ -74,7 +74,8 @@ func (TimeSheetRepository) GetAllTimeSheets(spec []func(db *gorm.DB) *gorm.DB) (
 	if len(timeSheets) == 0 {
 		return nil, "0", errors.New("data not found")
 	}
-	return &timeSheets, strconv.Itoa(len(timeSheets)), err
+	totalRows := helper.GetTotalRows(config.DB.Model(&entity.TimeSheet{}))
+	return &timeSheets, totalRows, err
 }
 
 func (TimeSheetRepository) ApproveManagerTimeSheet(id string, userID string) error {

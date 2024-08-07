@@ -127,6 +127,9 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 
 	timeSheetDetails := make([]entity.TimeSheetDetail, 0)
 	for _, value := range req.TimeSheetDetails {
+		if err != nil {
+			return nil, err
+		}
 		timeSheetDetails = append(timeSheetDetails, entity.TimeSheetDetail{
 			Base:      entity.Base{ID: value.ID},
 			Date:      value.Date,
@@ -134,6 +137,7 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 			EndTime:   value.EndTime,
 			WorkID:    value.WorkID,
 		})
+		fmt.Println(timeSheetDetails[0].Date)
 	}
 
 	user, err := accountService.GetAccountDetail(authHeader)
@@ -154,7 +158,7 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 	}
 	timeSheetDetailsResponse := make([]response.TimeSheetDetailResponse, 0)
 	var total int
-	for _, v := range timeSheetDetails {
+	for _, v := range res.TimeSheetDetails {
 		var fee int
 		work, err := workService.GetById(v.WorkID)
 		if err != nil {
@@ -268,13 +272,39 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 	if err != nil {
 		return nil, err
 	}
+
+	var managerResponse response.ConfirmedByResponse
+	var benefitResponse response.ConfirmedByResponse
+	if res.ConfirmedManagerBy != "" {
+		manager, err := accountService.GetAccountByID(res.ConfirmedManagerBy)
+		if err != nil {
+			return nil, err
+		}
+		managerResponse.ID = manager.UserID
+		managerResponse.Name = manager.Name
+		managerResponse.Email = manager.Email
+		managerResponse.SignatureUrl = manager.SignatureURL
+	}
+
+	fmt.Println("benefit not found", res.ConfirmedBenefitBy)
+	if res.ConfirmedBenefitBy != "" {
+		benefit, err := accountService.GetAccountByID(res.ConfirmedBenefitBy)
+		if err != nil {
+			return nil, err
+		}
+		benefitResponse.ID = benefit.UserID
+		benefitResponse.Name = benefit.Name
+		benefitResponse.Email = benefit.Email
+		benefitResponse.SignatureUrl = benefit.SignatureURL
+	}
+
 	timeSheetResponse := response.TimeSheetResponse{
 		ID:                 res.ID,
 		CreatedAt:          res.CreatedAt,
 		UpdatedAt:          res.UpdatedAt,
 		Status:             status.StatusName,
-		ConfirmedManagerBy: response.ConfirmedByResponse{},
-		ConfirmedBenefitBy: response.ConfirmedByResponse{},
+		ConfirmedManagerBy: managerResponse,
+		ConfirmedBenefitBy: benefitResponse,
 		UserTimeSheetResponse: response.UserTimeSheetResponse{
 			ID:           user.UserID,
 			Name:         user.Name,
@@ -304,7 +334,6 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 		return nil, "0", "0", errors.New("invalid query for rows per page")
 	}
 
-	fmt.Println(period)
 	spec = append(spec, helper.Paginate(pagingInt, rowsPerPageInt))
 	if year != "" && period != nil {
 		spec = append(spec, helper.SelectByPeriod(year, period[0], period[1]))
@@ -368,13 +397,37 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 			})
 		}
 
+		var managerResponse response.ConfirmedByResponse
+		var benefitResponse response.ConfirmedByResponse
+		if v.ConfirmedManagerBy != "" {
+			manager, err := accountService.GetAccountByID(v.ConfirmedManagerBy)
+			if err != nil {
+				return nil, "0", "0", err
+			}
+			managerResponse.ID = manager.UserID
+			managerResponse.Name = manager.Name
+			managerResponse.Email = manager.Email
+			managerResponse.SignatureUrl = manager.SignatureURL
+		}
+
+		if v.ConfirmedBenefitBy != "" {
+			benefit, err := accountService.GetAccountByID(v.ConfirmedBenefitBy)
+			if err != nil {
+				return nil, "0", "0", err
+			}
+			benefitResponse.ID = benefit.UserID
+			benefitResponse.Name = benefit.Name
+			benefitResponse.Email = benefit.Email
+			benefitResponse.SignatureUrl = benefit.SignatureURL
+		}
+
 		timeSheetsResponse = append(timeSheetsResponse, response.TimeSheetResponse{
 			ID:                 v.ID,
 			CreatedAt:          v.CreatedAt,
 			UpdatedAt:          v.UpdatedAt,
 			Status:             status.StatusName,
-			ConfirmedManagerBy: response.ConfirmedByResponse{},
-			ConfirmedBenefitBy: response.ConfirmedByResponse{},
+			ConfirmedManagerBy: managerResponse,
+			ConfirmedBenefitBy: benefitResponse,
 			UserTimeSheetResponse: response.UserTimeSheetResponse{
 				ID:           user.UserID,
 				Name:         user.Name,

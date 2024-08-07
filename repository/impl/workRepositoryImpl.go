@@ -5,7 +5,6 @@ import (
 	"final-project-enigma/config"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
-	"strconv"
 )
 
 type WorkRepository struct{}
@@ -50,5 +49,6 @@ func (WorkRepository) GetAllWork(paging, rowsPerPage int) ([]entity.Work, string
 	if len(works) == 0 {
 		return nil, "0", errors.New("data not found")
 	}
-	return works, strconv.Itoa(len(works)), nil
+	totalRows := helper.GetTotalRows(config.DB.Model(&entity.Work{}))
+	return works, totalRows, nil
 }

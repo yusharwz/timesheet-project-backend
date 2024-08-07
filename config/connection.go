@@ -13,6 +13,7 @@ import (
 	"github.com/rs/zerolog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"time"
 )
 
 func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
@@ -26,7 +27,11 @@ func ConnectDb(in dto.ConfigData, logger zerolog.Logger) (*gorm.DB, error) {
 
 	var dsn = fmt.Sprintf("host=%s user= %s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta", in.DbConfig.Host, in.DbConfig.User, in.DbConfig.Pass, in.DbConfig.Database, in.DbConfig.DbPort)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		NowFunc: func() time.Time {
+			return time.Now().Local()
+		},
+	})
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Failed to open database")
 		return nil, err

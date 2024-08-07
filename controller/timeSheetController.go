@@ -204,15 +204,16 @@ func (TimeSheetController) ApproveBenefitTimeSheet(c *gin.Context) {
 
 func (TimeSheetController) RejectBenefitTimeSheet(c *gin.Context) {
 	id := c.Param("id")
-	userID := c.Query("user_id")
+	authHeader := c.GetHeader("Authorization")
+	userId, err := middleware.GetIdFromToken(authHeader)
 
-	err := timeSheetService.RejectBenefitTimeSheet(id, userID)
+	err = timeSheetService.RejectBenefitTimeSheet(id, userId)
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		response.NewResponseError(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "Benefit rejected"})
+	response.NewResponseSuccess(c, "Rejected by benefit")
 }
 
 func (TimeSheetController) SubmitTimeSheet(c *gin.Context) {
