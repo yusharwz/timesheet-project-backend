@@ -75,4 +75,5 @@ go run .
 - [x] **get all timesheet** [GET] `localhost:8080/api/v1/timesheets?period=&userId=&status=`
 - [x] **update timesheet** [PUT] `localhost:8080/api/v1/timesheets/:id`
 - [x] **get timesheet by id** [GET] `localhost:8080/api/v1/timesheets/:id`
-- [x] **approved by manager** [GET] `localhost:8080/api/v1/manager/approve/timesheets/bd34b5c5-f15d-4701-a9f8-1a122a45e7f1`
+- [x] **approved by manager** [POST] `localhost:8080/api/v1/manager/approve/timesheets/bd34b5c5-f15d-4701-a9f8-1a122a45e7f1`
+- [x] **rejected by manager** [POST] `localhost:8080/api/v1/manager/reject/timesheets/00b1cb80-e1a1-4bdb-a75e-14553b147da7`

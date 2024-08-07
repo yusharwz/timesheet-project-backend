@@ -6,7 +6,6 @@ import (
 	"final-project-enigma/entity"
 	"gorm.io/gorm"
 	"strconv"
-	"time"
 )
 
 type TimeSheetRepository struct{}
@@ -24,7 +23,17 @@ func (TimeSheetRepository) CreateTimeSheet(timesheet entity.TimeSheet) (*entity.
 }
 
 func (TimeSheetRepository) UpdateTimeSheet(ts entity.TimeSheet) (*entity.TimeSheet, error) {
-	err := config.DB.Save(&ts).Error
+	err := config.DB.Transaction(func(db *gorm.DB) error {
+		err := db.Save(&ts).Error
+		if err != nil {
+			return err
+		}
+		err = db.Save(&ts.TimeSheetDetails).Error
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -97,15 +106,30 @@ func (TimeSheetRepository) RejectManagerTimeSheet(id string, userID string) erro
 }
 
 func (TimeSheetRepository) ApproveBenefitTimeSheet(id string, userID string) error {
-	return config.DB.Model(&entity.TimeSheet{}).Where("id = ?", id).Update("confirmed_benefit_by", userID).Error
-}
-
-func (TimeSheetRepository) RejectBenefitTimeSheet(id string, userID string) error {
+	var status *entity.StatusTimeSheet
+	err := config.DB.Where("status_name = ?", "approved").First(&status).Error
+	if err != nil {
+		return err
+	}
 	return config.DB.Model(&entity.TimeSheet{}).
 		Where("id = ? AND deleted_at IS NULL", id).
 		Updates(map[string]interface{}{
-			"updated_at":           time.Now(),
-			"confirmed_benefit_by": "",
+			"confirmed_benefit_by": userID,
+			"status_time_sheet_id": status.ID,
+		}).Error
+}
+
+func (TimeSheetRepository) RejectBenefitTimeSheet(id string, userID string) error {
+	var status *entity.StatusTimeSheet
+	err := config.DB.Where("status_name = ?", "rejected").First(&status).Error
+	if err != nil {
+		return err
+	}
+	return config.DB.Model(&entity.TimeSheet{}).
+		Where("id = ? AND deleted_at IS NULL", id).
+		Updates(map[string]interface{}{
+			"confirmed_benefit_by": userID,
+			"status_time_sheet_id": status.ID,
 		}).Error
 }
 

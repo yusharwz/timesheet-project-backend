@@ -9,6 +9,7 @@ import (
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"final-project-enigma/service"
+	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"strconv"
@@ -116,7 +117,7 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 		return nil, err
 	}
 
-	status, err := timeSheetRepository.GetStatusTimeSheetByName("approve")
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("created")
 	if err != nil {
 		return nil, err
 	}
@@ -185,6 +186,7 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 	if err != nil {
 		return nil, err
 	}
+
 	timeSheetResponse := response.TimeSheetResponse{
 		ID:                 res.ID,
 		CreatedAt:          res.CreatedAt,
@@ -302,6 +304,7 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 		return nil, "0", "0", errors.New("invalid query for rows per page")
 	}
 
+	fmt.Println(period)
 	spec = append(spec, helper.Paginate(pagingInt, rowsPerPageInt))
 	if year != "" && period != nil {
 		spec = append(spec, helper.SelectByPeriod(year, period[0], period[1]))
@@ -398,6 +401,8 @@ func (TimeSheetService) ApproveManagerTimeSheet(id string, userID string) error 
 	}
 	if timeSheet.StatusTimeSheetID == status.ID {
 		return timeSheetRepository.ApproveManagerTimeSheet(id, userID)
+	} else if timeSheet.ConfirmedManagerBy != "" {
+		return errors.New("timesheet has been submitted")
 	}
 	return errors.New("timesheet not submitted")
 }
@@ -410,6 +415,8 @@ func (TimeSheetService) RejectManagerTimeSheet(id string, userID string) error {
 	status, err := timeSheetRepository.GetStatusTimeSheetByName("pending")
 	if err != nil {
 		return err
+	} else if timeSheet.ConfirmedManagerBy != "" {
+		return errors.New("timesheet has been submitted")
 	}
 	if timeSheet.StatusTimeSheetID == status.ID {
 		return timeSheetRepository.RejectManagerTimeSheet(id, userID)
@@ -418,11 +425,33 @@ func (TimeSheetService) RejectManagerTimeSheet(id string, userID string) error {
 }
 
 func (TimeSheetService) ApproveBenefitTimeSheet(id string, userID string) error {
-	return timeSheetRepository.ApproveBenefitTimeSheet(id, userID)
+	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
+	if err != nil {
+		return err
+	}
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("accepted")
+	if err != nil {
+		return err
+	}
+	if timeSheet.StatusTimeSheetID == status.ID {
+		return timeSheetRepository.ApproveBenefitTimeSheet(id, userID)
+	}
+	return errors.New("timesheet not approved by manager")
 }
 
 func (TimeSheetService) RejectBenefitTimeSheet(id string, userID string) error {
-	return timeSheetRepository.RejectBenefitTimeSheet(id, userID)
+	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
+	if err != nil {
+		return err
+	}
+	status, err := timeSheetRepository.GetStatusTimeSheetByName("accepted")
+	if err != nil {
+		return err
+	}
+	if timeSheet.StatusTimeSheetID == status.ID {
+		return timeSheetRepository.RejectBenefitTimeSheet(id, userID)
+	}
+	return errors.New("timesheet not approved by manager")
 }
 
 func (TimeSheetService) UpdateTimeSheetStatus(id string) error {
