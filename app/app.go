@@ -17,7 +17,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"github.com/go-resty/resty/v2"
 	"github.com/joho/godotenv"
 	"github.com/natefinch/lumberjack"
 	"github.com/rs/zerolog"
@@ -84,12 +83,12 @@ func InitEnv() (dto.ConfigData, error) {
 	return configData, nil
 }
 
-func initializeDomainModule(r *gin.Engine, client *resty.Client) {
+func initializeDomainModule(r *gin.Engine) {
 	apiGroup := r.Group("/api")
 	v1Group := apiGroup.Group("/v1")
 
 	// checkHealth
-	router.InitRoute(v1Group, client)
+	router.InitRoute(v1Group)
 }
 
 func RunService() {
@@ -181,9 +180,7 @@ func RunService() {
 
 	r.Use(gin.Recovery())
 
-	client := resty.New()
-
-	initializeDomainModule(r, client)
+	initializeDomainModule(r)
 
 	version := "0.0.1"
 	log.Info().Msg(fmt.Sprintf("Service Running version %s", version))

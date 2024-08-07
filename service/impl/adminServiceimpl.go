@@ -7,8 +7,10 @@ import (
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
 	"final-project-enigma/service"
-	"gorm.io/gorm"
 	"strconv"
+
+	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 )
 
 type AdminService struct{}
@@ -23,10 +25,12 @@ func NewAdminService() *AdminService {
 func (AdminService) RetrieveAccountList(paging, rowsPerPage, name string) ([]response.ListAccountResponse, string, string, error) {
 	pagingInt, err := strconv.Atoi(paging)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, "0", "0", errors.New("invalid query for paging")
 	}
 	rowsPerPageInt, err := strconv.Atoi(rowsPerPage)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, "0", "0", errors.New("invalid query for rows per page")
 	}
 
@@ -38,6 +42,7 @@ func (AdminService) RetrieveAccountList(paging, rowsPerPage, name string) ([]res
 
 	users, totalRows, err := adminRepository.RetrieveAccountList(spec)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, "0", "0", err
 	}
 
@@ -51,6 +56,7 @@ func (AdminService) RetrieveAccountList(paging, rowsPerPage, name string) ([]res
 		}
 		result, err := authService.GetRoleById(user.Account.RoleID)
 		if err != nil {
+			log.Error().Msg(err.Error())
 			return nil, "0", "0", err
 		}
 		resp = append(resp, response.ListAccountResponse{
@@ -71,6 +77,7 @@ func (AdminService) DetailAccount(userID string) (response.AccountDetailResponse
 
 	account, user, role, err := adminRepository.DetailAccount(userID)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 
@@ -93,6 +100,7 @@ func (AdminService) SoftDeleteAccount(userID string) error {
 func (AdminService) GetAllRole() (*[]response.RoleResponse, error) {
 	roles, err := adminRepository.GetAllRole()
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 	var responseList = make([]response.RoleResponse, 0)

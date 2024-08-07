@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
@@ -30,6 +31,7 @@ func NewTimeSheetService() *TimeSheetService {
 func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader string) (*response.TimeSheetResponse, error) {
 	status, err := timeSheetRepository.GetStatusTimeSheetByName("created")
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 
@@ -46,6 +48,7 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 
 	user, err := accountService.GetAccountDetail(authHeader)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 
@@ -58,6 +61,7 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 
 	res, err := timeSheetRepository.CreateTimeSheet(timeSheet)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 
@@ -67,6 +71,7 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 		var fee int
 		work, err := workService.GetById(v.WorkID)
 		if err != nil {
+			log.Error().Msg(err.Error())
 			return nil, err
 		}
 		duration := int(v.EndTime.Sub(v.StartTime).Hours())
@@ -114,11 +119,13 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, authHeader string) (*response.TimeSheetResponse, error) {
 	existingTs, err := timeSheetRepository.GetTimeSheetByID(req.ID)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 
 	status, err := timeSheetRepository.GetStatusTimeSheetByName("created")
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 	if existingTs.StatusTimeSheetID != status.ID {
@@ -139,6 +146,7 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 
 	user, err := accountService.GetAccountDetail(authHeader)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 
@@ -151,6 +159,7 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 
 	res, err := timeSheetRepository.UpdateTimeSheet(timeSheet)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 	timeSheetDetailsResponse := make([]response.TimeSheetDetailResponse, 0)
@@ -159,6 +168,7 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 		var fee int
 		work, err := workService.GetById(v.WorkID)
 		if err != nil {
+			log.Error().Msg(err.Error())
 			return nil, err
 		}
 		duration := int(v.EndTime.Sub(v.StartTime).Hours())
@@ -185,6 +195,7 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 
 	statusName, err := timeSheetRepository.GetStatusTimeSheetByID(existingTs.StatusTimeSheetID)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 
@@ -210,11 +221,13 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 func (TimeSheetService) DeleteTimeSheet(id string) error {
 	existingTs, err := timeSheetRepository.GetTimeSheetByID(id)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
 	status, err := timeSheetRepository.GetStatusTimeSheetByName("created")
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
@@ -228,6 +241,7 @@ func (TimeSheetService) DeleteTimeSheet(id string) error {
 func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse, error) {
 	res, err := timeSheetRepository.GetTimeSheetByID(id)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 	timeSheetDetailsResponse := make([]response.TimeSheetDetailResponse, 0)
@@ -236,6 +250,7 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 		var fee int
 		work, err := workService.GetById(v.WorkID)
 		if err != nil {
+			log.Error().Msg(err.Error())
 			return nil, err
 		}
 		duration := int(v.EndTime.Sub(v.StartTime).Hours())
@@ -262,11 +277,13 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 
 	user, err := accountService.GetAccountByID(res.UserID)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 
 	status, err := timeSheetRepository.GetStatusTimeSheetByID(res.StatusTimeSheetID)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 
@@ -275,6 +292,7 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 	if res.ConfirmedManagerBy != "" {
 		manager, err := accountService.GetAccountByID(res.ConfirmedManagerBy)
 		if err != nil {
+			log.Error().Msg(err.Error())
 			return nil, err
 		}
 		managerResponse.ID = manager.UserID
@@ -286,6 +304,7 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 	if res.ConfirmedBenefitBy != "" {
 		benefit, err := accountService.GetAccountByID(res.ConfirmedBenefitBy)
 		if err != nil {
+			log.Error().Msg(err.Error())
 			return nil, err
 		}
 		benefitResponse.ID = benefit.UserID
@@ -323,10 +342,12 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 
 	pagingInt, err = strconv.Atoi(paging)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, "0", "0", errors.New("invalid query for paging")
 	}
 	rowsPerPageInt, err = strconv.Atoi(rowsPerPage)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, "0", "0", errors.New("invalid query for rows per page")
 	}
 
@@ -353,6 +374,7 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 
 	results, totalRows, err = timeSheetRepository.GetAllTimeSheets(spec)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, "0", "0", err
 	}
 	timeSheetsResponse := make([]response.TimeSheetResponse, 0)
@@ -360,10 +382,12 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 	for _, v := range *results {
 		status, err := timeSheetRepository.GetStatusTimeSheetByID(v.StatusTimeSheetID)
 		if err != nil {
+			log.Error().Msg(err.Error())
 			return nil, "0", "0", err
 		}
 		user, err := accountService.GetAccountByID(v.UserID)
 		if err != nil {
+			log.Error().Msg(err.Error())
 			return nil, "0", "0", err
 		}
 
@@ -373,6 +397,7 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 			var fee int
 			work, err := workService.GetById(v.WorkID)
 			if err != nil {
+				log.Error().Msg(err.Error())
 				return nil, "0", "0", err
 			}
 			duration := int(v.EndTime.Sub(v.StartTime).Hours())
@@ -402,6 +427,7 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 		if v.ConfirmedManagerBy != "" {
 			manager, err := accountService.GetAccountByID(v.ConfirmedManagerBy)
 			if err != nil {
+				log.Error().Msg(err.Error())
 				return nil, "0", "0", err
 			}
 			managerResponse.ID = manager.UserID
@@ -413,6 +439,7 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 		if v.ConfirmedBenefitBy != "" {
 			benefit, err := accountService.GetAccountByID(v.ConfirmedBenefitBy)
 			if err != nil {
+				log.Error().Msg(err.Error())
 				return nil, "0", "0", err
 			}
 			benefitResponse.ID = benefit.UserID
@@ -446,10 +473,12 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 func (TimeSheetService) ApproveManagerTimeSheet(id string, userID string) error {
 	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 	status, err := timeSheetRepository.GetStatusTimeSheetByName("pending")
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 	if timeSheet.StatusTimeSheetID == status.ID {
@@ -463,10 +492,12 @@ func (TimeSheetService) ApproveManagerTimeSheet(id string, userID string) error 
 func (TimeSheetService) RejectManagerTimeSheet(id string, userID string) error {
 	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 	status, err := timeSheetRepository.GetStatusTimeSheetByName("pending")
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	} else if timeSheet.ConfirmedManagerBy != "" {
 		return errors.New("timesheet has been submitted")
@@ -480,10 +511,12 @@ func (TimeSheetService) RejectManagerTimeSheet(id string, userID string) error {
 func (TimeSheetService) ApproveBenefitTimeSheet(id string, userID string) error {
 	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 	status, err := timeSheetRepository.GetStatusTimeSheetByName("accepted")
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 	if timeSheet.StatusTimeSheetID == status.ID {
@@ -495,15 +528,18 @@ func (TimeSheetService) ApproveBenefitTimeSheet(id string, userID string) error 
 func (TimeSheetService) RejectBenefitTimeSheet(id string, userID string) error {
 	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 	status, err := timeSheetRepository.GetStatusTimeSheetByName("accepted")
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 	if timeSheet.StatusTimeSheetID == status.ID {
 		return timeSheetRepository.RejectBenefitTimeSheet(id, userID)
 	}
+	log.Error()
 	return errors.New("timesheet not approved by manager")
 }
 
@@ -512,11 +548,13 @@ func (TimeSheetService) UpdateTimeSheetStatus(id string) error {
 	day := timeNow.Day()
 
 	if day != 19 && day != 20 {
+		log.Error().Msg("failed to update time sheet status, please only submit on 19 or 20")
 		return errors.New("failed to update time sheet status, please only submit on 19 or 20")
 	}
 
 	err := timeSheetRepository.UpdateTimeSheetStatus(id)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 

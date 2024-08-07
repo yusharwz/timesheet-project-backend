@@ -8,11 +8,11 @@ import (
 	"final-project-enigma/service"
 	"final-project-enigma/service/impl"
 	"final-project-enigma/utils"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 type TimeSheetController struct{}
@@ -23,22 +23,22 @@ func NewTimesheetController(g *gin.RouterGroup) {
 	controller := &TimeSheetController{}
 	timesheetGroup := g.Group("/timesheets", middleware.JwtAuthWithRoles("user"))
 	{
+		timesheetGroup.GET("/:id", controller.GetTimeSheetByID)
+		timesheetGroup.GET("", controller.GetAllTimeSheets)
 		timesheetGroup.POST("/", controller.CreateTimeSheet)
 		timesheetGroup.PUT("/:id", controller.UpdateTimeSheet)
 		timesheetGroup.DELETE("/:id", controller.DeleteTimeSheet)
-		timesheetGroup.PUT(":id/submit", controller.SubmitTimeSheet)
+		timesheetGroup.PUT("/:id/submit", controller.SubmitTimeSheet)
 	}
-	g.GET("/timesheets/:id", controller.GetTimeSheetByID)
-	g.GET("/timesheets", controller.GetAllTimeSheets)
 	managerGroup := g.Group("/manager", middleware.JwtAuthWithRoles("manager"))
 	{
-		managerGroup.POST("approve/timesheets/:id", controller.ApproveManagerTimeSheet)
-		managerGroup.POST("reject/timesheets/:id", controller.RejectManagerTimeSheet)
+		managerGroup.POST("/approve/timesheets/:id", controller.ApproveManagerTimeSheet)
+		managerGroup.POST("/reject/timesheets/:id", controller.RejectManagerTimeSheet)
 	}
-	benefitGroup := g.Group("benefit", middleware.JwtAuthWithRoles("benefit"))
+	benefitGroup := g.Group("/benefit", middleware.JwtAuthWithRoles("benefit"))
 	{
-		benefitGroup.POST("approve/timesheets/:id", controller.ApproveBenefitTimeSheet)
-		benefitGroup.POST("reject/timesheets/:id", controller.RejectBenefitTimeSheet)
+		benefitGroup.POST("/approve/timesheets/:id", controller.ApproveBenefitTimeSheet)
+		benefitGroup.POST("/reject/timesheets/:id", controller.RejectBenefitTimeSheet)
 	}
 }
 
@@ -207,6 +207,10 @@ func (TimeSheetController) RejectBenefitTimeSheet(c *gin.Context) {
 	id := c.Param("id")
 	authHeader := c.GetHeader("Authorization")
 	userId, err := middleware.GetIdFromToken(authHeader)
+	if err != nil {
+		response.NewResponseError(c, err.Error())
+		return
+	}
 
 	err = timeSheetService.RejectBenefitTimeSheet(id, userId)
 	if err != nil {

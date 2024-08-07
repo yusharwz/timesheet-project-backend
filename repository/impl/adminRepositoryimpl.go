@@ -4,8 +4,10 @@ import (
 	"final-project-enigma/config"
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
-	"gorm.io/gorm"
 	"time"
+
+	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 )
 
 type AdminRepository struct{}
@@ -28,14 +30,17 @@ func (AdminRepository) DetailAccount(userID string) (entity.Account, entity.User
 	var role entity.Role
 
 	if err := config.DB.Where("id = ?", userID).First(&user).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return account, user, role, err
 	}
 
 	if err := config.DB.Where("user_id = ?", user.ID).First(&account).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return account, user, role, err
 	}
 
 	if err := config.DB.Where("id = ?", account.RoleID).First(&role).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return account, user, role, err
 	}
 
@@ -47,18 +52,22 @@ func (AdminRepository) SoftDeleteAccount(userID string) error {
 	var user entity.User
 
 	if err := config.DB.Where("user_id = ?", userID).First(&account).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
 	if err := config.DB.Where("id = ?", userID).First(&user).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
 	now := time.Now()
 	if err := config.DB.Model(&account).Update("deleted_at", &now).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 	if err := config.DB.Model(&user).Update("deleted_at", &now).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
@@ -68,6 +77,7 @@ func (AdminRepository) SoftDeleteAccount(userID string) error {
 func (AdminRepository) GetAllRole() (*[]entity.Role, error) {
 	var roles []entity.Role
 	if err := config.DB.Find(&roles).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 	return &roles, nil

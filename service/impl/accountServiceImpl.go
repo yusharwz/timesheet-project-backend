@@ -6,6 +6,8 @@ import (
 	"final-project-enigma/middleware"
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
+
+	"github.com/rs/zerolog/log"
 )
 
 type AccountService struct{}
@@ -30,17 +32,20 @@ func (AccountService) EditAccount(req request.EditAccountRequest, authHeader str
 
 	userId, err := middleware.GetIdFromToken(authHeader)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return response.AccountDetailResponse{}, err
 	}
 	req.UserID = userId
 
 	err = accountRepository.EditAccount(req)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return response.AccountDetailResponse{}, err
 	}
 
 	account, user, role, err := adminRepository.DetailAccount(req.UserID)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return response.AccountDetailResponse{}, err
 	}
 
@@ -59,12 +64,14 @@ func (AccountService) UploadSignature(req request.UploadImagesRequest, authHeade
 
 	userID, err := middleware.GetIdFromToken(authHeader)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 	req.UserID = userID
 
 	resp, err = accountRepository.UserUploadSignatureIMG(req)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 
@@ -75,11 +82,13 @@ func (AccountService) ChangePassword(req request.ChangePasswordRequest, authHead
 
 	userID, err := middleware.GetIdFromToken(authHeader)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
 	err = accountRepository.ChangePassword(userID, req)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
@@ -90,11 +99,13 @@ func (AccountService) GetAccountDetail(authHeader string) (*response.AccountUser
 
 	userID, err := middleware.GetIdFromToken(authHeader)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 
 	account, user, err := accountRepository.GetAccountDetailByUserID(userID)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 
@@ -114,6 +125,7 @@ func (AccountService) GetAccountDetail(authHeader string) (*response.AccountUser
 func (AccountService) GetAccountByID(id string) (*response.AccountUserResponse, error) {
 	account, user, err := accountRepository.GetAccountDetailByUserID(id)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 

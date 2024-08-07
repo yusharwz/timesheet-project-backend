@@ -8,7 +8,9 @@ import (
 	"final-project-enigma/helper"
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
+
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 type AuthService struct{}
@@ -23,16 +25,19 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 
 	code, err := helper.GenerateCode()
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 
 	hashedPassword, err := helper.HashPassword(code)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 
 	role, err := authRepository.GetRoleById(req.RoleId)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 
@@ -51,6 +56,7 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 
 	createdUser, createdAccount, err := authRepository.Register(user, newAccount)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 
@@ -62,6 +68,7 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 
 	err = helper.SendEmailActivatedAccount(resp.Email, code, hashedPassword)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 
@@ -71,16 +78,19 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 func (AuthService) Login(req request.LoginAccountRequest) (resp response.LoginResponse, err error) {
 	resp, err = authRepository.Login(req)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 
 	err = helper.ComparePassword(resp.HashPassword, req.Password)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, errors.New("invalid email or password")
 	}
 
 	resp.Token, err = helper.GetTokenJwt(resp.UserId, resp.Name, resp.Email, resp.Role)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 
@@ -90,6 +100,7 @@ func (AuthService) Login(req request.LoginAccountRequest) (resp response.LoginRe
 func (AuthService) GetRoleById(id string) (*response.GetRoleResponse, error) {
 	result, err := authRepository.GetRoleById(id)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 	roleResponse := response.GetRoleResponse{RoleName: result.RoleName}
