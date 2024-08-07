@@ -1,13 +1,13 @@
 {
 	"info": {
-		"_postman_id": "e3bce88f-d1a1-4ce0-8dff-76ae678261aa",
+		"_postman_id": "baf7519c-e0b3-401a-9123-00572c468de8",
 		"name": "go-timesheet",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "32191756"
+		"_exporter_id": "30958942"
 	},
 	"item": [
 		{
-			"name": "works",
+			"name": "work",
 			"item": [
 				{
 					"name": "get all work",
@@ -15,7 +15,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/admin/works",
+							"raw": "{{base}}/admin/works?description=react",
 							"host": [
 								"{{base}}"
 							],
@@ -33,6 +33,10 @@
 									"key": "rowsPerPage",
 									"value": "2",
 									"disabled": true
+								},
+								{
+									"key": "description",
+									"value": "react"
 								}
 							]
 						}
@@ -172,7 +176,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/timesheets?status=created",
+							"raw": "{{base}}/timesheets?name=user",
 							"host": [
 								"{{base}}"
 							],
@@ -207,7 +211,12 @@
 								},
 								{
 									"key": "status",
-									"value": "created"
+									"value": "created",
+									"disabled": true
+								},
+								{
+									"key": "name",
+									"value": "user"
 								}
 							]
 						}
@@ -461,7 +470,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/admin/accounts?rowsPerPage=2",
+							"raw": "{{base}}/admin/accounts?name=aku",
 							"host": [
 								"{{base}}"
 							],
@@ -472,12 +481,17 @@
 							"query": [
 								{
 									"key": "paging",
-									"value": null,
+									"value": "",
 									"disabled": true
 								},
 								{
 									"key": "rowsPerPage",
-									"value": "2"
+									"value": "2",
+									"disabled": true
+								},
+								{
+									"key": "name",
+									"value": "aku"
 								}
 							]
 						}
@@ -685,7 +699,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjU2MDgyMTcsImlhdCI6MTcyMzAxNjIxNywiaXNzIjoidGltZXNoZWV0LWFwcCIsImlkIjoiNzU1ZjVhZDItYmI2ZC00OWVjLTgyOWMtMjA0MWMwOGFiZGIxIiwidXNlcm5hbWUiOiJBa3UgQmVuZWZpdCIsImVtYWlsIjoiZ29qODU5MTBAdGNjaG8uY29tIiwicm9sZSI6ImJlbmVmaXQifQ.YCnsOq0duyDMDjP3FWr5jSdN77qPwb4IAbyclLKW3yw",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjU2MjAzOTYsImlhdCI6MTcyMzAyODM5NiwiaXNzIjoidGltZXNoZWV0LWFwcCIsImlkIjoiNmYxNTdkMTMtZTQxYi00NTdjLWExNDktMmQ4ZDM4MzkzMTY3IiwidXNlcm5hbWUiOiJBa3UgQWRtaW4gR2FudGVuZyIsImVtYWlsIjoiYWx2aW5kbzU2QGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiJ9.DPu-Gy9PoiECekJpIBTvGi6YfIuYynyGFtGQ3r7Jcn0",
 				"type": "string"
 			}
 		]

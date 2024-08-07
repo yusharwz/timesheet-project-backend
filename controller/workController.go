@@ -75,7 +75,8 @@ func (*WorkController) UpdateWork(c *gin.Context) {
 func (WorkController) GetAllWork(c *gin.Context) {
 	paging := c.DefaultQuery("paging", "1")
 	rowsPerPage := c.DefaultQuery("rowsPerPage", "10")
-	results, totalRows, totalPage, err := workService.GetAllWork(paging, rowsPerPage)
+	description := c.Query("description")
+	results, totalRows, totalPage, err := workService.GetAllWork(paging, rowsPerPage, description)
 	if err != nil {
 		response.NewResponseError(c, err.Error())
 		return

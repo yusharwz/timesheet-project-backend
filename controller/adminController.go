@@ -28,7 +28,8 @@ func NewAdminController(g *gin.RouterGroup) {
 func (AdminController) AccountList(ctx *gin.Context) {
 	paging := ctx.DefaultQuery("paging", "1")
 	rowsPerPage := ctx.DefaultQuery("rowsPerPage", "10")
-	resp, totalRows, totalPage, err := adminService.RetrieveAccountList(paging, rowsPerPage)
+	name := ctx.Query("name")
+	resp, totalRows, totalPage, err := adminService.RetrieveAccountList(paging, rowsPerPage, name)
 	if err != nil {
 		response.NewResponseForbidden(ctx, err.Error())
 		return

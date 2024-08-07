@@ -9,6 +9,7 @@ import (
 	"final-project-enigma/helper"
 	"final-project-enigma/repository"
 	"final-project-enigma/repository/impl"
+	"gorm.io/gorm"
 	"strconv"
 
 	"github.com/google/uuid"
@@ -80,7 +81,7 @@ func (WorkService) GetById(id string) (response.WorkResponse, error) {
 	}, nil
 }
 
-func (WorkService) GetAllWork(paging, rowsPerPage string) ([]response.WorkResponse, string, string, error) {
+func (WorkService) GetAllWork(paging, rowsPerPage, description string) ([]response.WorkResponse, string, string, error) {
 	pagingInt, err := strconv.Atoi(paging)
 	if err != nil {
 		return nil, "0", "0", errors.New("invalid query for paging")
@@ -89,7 +90,14 @@ func (WorkService) GetAllWork(paging, rowsPerPage string) ([]response.WorkRespon
 	if err != nil {
 		return nil, "0", "0", errors.New("invalid query for rows per page")
 	}
-	results, totalRows, err := workRepository.GetAllWork(pagingInt, rowsPerPageInt)
+
+	var spec []func(db *gorm.DB) *gorm.DB
+	spec = append(spec, helper.Paginate(pagingInt, rowsPerPageInt))
+	if description != "" {
+		spec = append(spec, helper.SelectWorkByDescription(description))
+	}
+
+	results, totalRows, err := workRepository.GetAllWork(spec)
 	if err != nil {
 		return nil, "0", "0", err
 	}
