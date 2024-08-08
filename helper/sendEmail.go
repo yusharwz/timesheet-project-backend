@@ -21,7 +21,7 @@ func SendEmailActivatedAccount(email, code, unique string) error {
 	m.SetHeader("From", os.Getenv("EMAIL_ADDRESS"))
 	m.SetHeader("To", email)
 	m.SetHeader("Subject", "Activation  Account")
-	m.SetBody("text/plain", "Click link to activated your account: \n"+url+"\n \nThis is information about your account for Login after activation: \nEmail: "+email+"\nPassword: "+code)
+	m.SetBody("text/plain", "Click link to activated your account: \n"+url+"\n \nThis is information about your account for Login after activation: \nEmail: "+email+"\nPassword: "+code+"\n\nnote: For the security of your account, we recommend that you change your password immediately after logging in")
 
 	d := gomail.NewDialer(os.Getenv("EMAIL_HOST"), emailPort, os.Getenv("EMAIL_ADDRESS"), os.Getenv("EMAIL_PASSWORD"))
 
@@ -38,7 +38,7 @@ func SendNewPassword(email, newPassword string) error {
 	m.SetHeader("From", os.Getenv("EMAIL_ADDRESS"))
 	m.SetHeader("To", email)
 	m.SetHeader("Subject", "New Password")
-	m.SetBody("text/plain", "Your new password: "+newPassword)
+	m.SetBody("text/plain", "Your new password: "+newPassword+"\n\nnote: For the security of your account, we recommend that you change your password immediately after logging in")
 
 	d := gomail.NewDialer(os.Getenv("EMAIL_HOST"), emailPort, os.Getenv("EMAIL_ADDRESS"), os.Getenv("EMAIL_PASSWORD"))
 
