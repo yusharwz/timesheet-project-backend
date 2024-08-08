@@ -21,9 +21,7 @@ func SelectByUserId(userId string) func(db *gorm.DB) *gorm.DB {
 
 func SelectByStatus(idStatus []string) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		return db.Where("status_time_sheet_id = ?", idStatus[0]).
-			Or("status_time_sheet_id = ?", idStatus[1]).
-			Or("status_time_sheet_id = ?", idStatus[2])
+		return db.Where("status_time_sheet_id IN (?)", idStatus)
 	}
 }
 
