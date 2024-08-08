@@ -130,6 +130,16 @@ func (AccountController) GetAccountDetailByUserID(ctx *gin.Context) {
 
 func (AccountController) ForgetPassword(ctx *gin.Context) {
 	var req request.ForgetPasswordRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		validationError := utils.GetValidationError(err)
+
+		if len(validationError) > 0 {
+			response.NewResponseBadRequest(ctx, validationError)
+			return
+		}
+		response.NewResponseError(ctx, "json request body required")
+		return
+	}
 
 	err := accountService.ForgetPassword(req)
 	if err != nil {
