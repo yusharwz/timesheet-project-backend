@@ -40,9 +40,9 @@ func (WorkRepository) DeleteWork(id string) error {
 	return nil
 }
 
-func (WorkRepository) GetById(id string) (entity.Work, error) {
+func (WorkRepository) GetById(id string, spec func(db *gorm.DB) *gorm.DB) (entity.Work, error) {
 	var work entity.Work
-	config.DB.Where("id = ?", id).First(&work)
+	config.DB.Scopes(spec).Where("id = ?", id).First(&work)
 	if work.ID == "" {
 		log.Error()
 		return entity.Work{}, errors.New("data not found")

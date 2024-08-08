@@ -69,7 +69,7 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 	var total int
 	for _, v := range timeSheetDetails {
 		var fee int
-		work, err := workService.GetById(v.WorkID)
+		work, err := workService.GetById(v.WorkID, false)
 		if err != nil {
 			log.Error().Msg(err.Error())
 			return nil, err
@@ -166,7 +166,7 @@ func (TimeSheetService) UpdateTimeSheet(req request.UpdateTimeSheetRequest, auth
 	var total int
 	for _, v := range res.TimeSheetDetails {
 		var fee int
-		work, err := workService.GetById(v.WorkID)
+		work, err := workService.GetById(v.WorkID, false)
 		if err != nil {
 			log.Error().Msg(err.Error())
 			return nil, err
@@ -248,7 +248,7 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 	var total int
 	for _, v := range res.TimeSheetDetails {
 		var fee int
-		work, err := workService.GetById(v.WorkID)
+		work, err := workService.GetById(v.WorkID, true)
 		if err != nil {
 			log.Error().Msg(err.Error())
 			return nil, err
@@ -401,7 +401,7 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, name
 		var total int
 		for _, v := range v.TimeSheetDetails {
 			var fee int
-			work, err := workService.GetById(v.WorkID)
+			work, err := workService.GetById(v.WorkID, true)
 			if err != nil {
 				log.Error().Msg(err.Error())
 				return nil, "0", "0", err
