@@ -7,6 +7,7 @@ import (
 	"final-project-enigma/dto/response"
 	"final-project-enigma/entity"
 
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
@@ -21,23 +22,27 @@ func (AuthRepository) Register(user entity.User, account entity.Account) (entity
 	tx := config.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
+			log.Error()
 			tx.Rollback()
 		}
 	}()
 
 	var existingAccount entity.Account
 	if err := tx.Where("email = ?", account.Email).First(&existingAccount).Error; err == nil {
+		log.Error()
 		tx.Rollback()
 		return user, account, errors.New("email already in use")
 	}
 
 	user.Account = account
 	if err := tx.Create(&user).Error; err != nil {
+		log.Error().Msg(err.Error())
 		tx.Rollback()
 		return user, account, errors.New("failed to create account")
 	}
 
 	if err := tx.Commit().Error; err != nil {
+		log.Error().Msg(err.Error())
 		tx.Rollback()
 		return user, account, errors.New("transaction commit failed")
 	}
@@ -52,6 +57,7 @@ func (AuthRepository) Login(req request.LoginAccountRequest) (resp response.Logi
 
 	resultAccount := config.DB.Where("email = ?", req.Email).First(&account)
 	if resultAccount.Error != nil {
+		log.Error()
 		if errors.Is(resultAccount.Error, gorm.ErrRecordNotFound) {
 			return resp, errors.New("invalid email or password")
 		}
@@ -61,20 +67,24 @@ func (AuthRepository) Login(req request.LoginAccountRequest) (resp response.Logi
 	resultUser := config.DB.Where("id = ?", account.UserID).First(&user)
 	if resultUser.Error != nil {
 		if errors.Is(resultUser.Error, gorm.ErrRecordNotFound) {
+			log.Error()
 			return resp, errors.New("invalid email or password")
 		}
 		return resp, resultUser.Error
 	}
 
 	if err := config.DB.Where("id = ?", account.RoleID).First(&role).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 
 	if !account.IsActive {
+		log.Error()
 		return resp, errors.New("account is not active")
 	}
 
 	if !account.DeletedAt.Time.IsZero() {
+		log.Error()
 		return resp, errors.New("account has been deleted")
 	}
 
@@ -92,6 +102,7 @@ func (AuthRepository) GetRoleByName(roleName string) (entity.Role, error) {
 	result := config.DB.Where("role_name = ?", roleName).First(&role)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			log.Error()
 			return entity.Role{}, errors.New("invalid role")
 		}
 		return entity.Role{}, result.Error
@@ -103,6 +114,7 @@ func (AuthRepository) GetRoleById(id string) (*entity.Role, error) {
 	var role entity.Role
 	err := config.DB.Where("id = ?", id).First(&role).Error
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 	return &role, nil

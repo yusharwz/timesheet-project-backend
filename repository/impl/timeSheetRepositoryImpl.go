@@ -5,6 +5,7 @@ import (
 	"final-project-enigma/entity"
 	"final-project-enigma/helper"
 
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
@@ -17,6 +18,7 @@ func NewTimeSheetRepository() *TimeSheetRepository {
 func (TimeSheetRepository) CreateTimeSheet(timesheet entity.TimeSheet) (*entity.TimeSheet, error) {
 	err := config.DB.Create(&timesheet).Error
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 	return &timesheet, nil
@@ -26,15 +28,18 @@ func (TimeSheetRepository) UpdateTimeSheet(ts entity.TimeSheet) (*entity.TimeShe
 	err := config.DB.Transaction(func(db *gorm.DB) error {
 		err := db.Save(&ts).Error
 		if err != nil {
+			log.Error().Msg(err.Error())
 			return err
 		}
 		err = db.Save(&ts.TimeSheetDetails).Error
 		if err != nil {
+			log.Error().Msg(err.Error())
 			return err
 		}
 		return nil
 	})
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 	return &ts, nil
@@ -48,6 +53,7 @@ func (TimeSheetRepository) GetStatusTimeSheetByID(id string) (*entity.StatusTime
 	var status *entity.StatusTimeSheet
 	err := config.DB.Where("id = ?", id).First(&status).Error
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 	return status, nil
@@ -57,6 +63,7 @@ func (TimeSheetRepository) GetStatusTimeSheetByName(name string) (*entity.Status
 	var status *entity.StatusTimeSheet
 	err := config.DB.Where("status_name = ?", name).First(&status).Error
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, err
 	}
 	return status, nil
@@ -80,6 +87,7 @@ func (TimeSheetRepository) ApproveManagerTimeSheet(id string, userID string) err
 	var status *entity.StatusTimeSheet
 	err := config.DB.Where("status_name = ?", "accepted").First(&status).Error
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 	return config.DB.Model(&entity.TimeSheet{}).
@@ -94,6 +102,7 @@ func (TimeSheetRepository) RejectManagerTimeSheet(id string, userID string) erro
 	var status *entity.StatusTimeSheet
 	err := config.DB.Where("status_name = ?", "denied").First(&status).Error
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 	return config.DB.Model(&entity.TimeSheet{}).
@@ -108,6 +117,7 @@ func (TimeSheetRepository) ApproveBenefitTimeSheet(id string, userID string) err
 	var status *entity.StatusTimeSheet
 	err := config.DB.Where("status_name = ?", "approved").First(&status).Error
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 	return config.DB.Model(&entity.TimeSheet{}).
@@ -122,6 +132,7 @@ func (TimeSheetRepository) RejectBenefitTimeSheet(id string, userID string) erro
 	var status *entity.StatusTimeSheet
 	err := config.DB.Where("status_name = ?", "rejected").First(&status).Error
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 	return config.DB.Model(&entity.TimeSheet{}).
@@ -136,11 +147,13 @@ func (t TimeSheetRepository) UpdateTimeSheetStatus(id string) error {
 	var ts entity.TimeSheet
 	err := config.DB.Preload("TimeSheetDetails").First(&ts, "id = ?", id).Error
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
 	status, err := t.GetStatusTimeSheetByName("pending")
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
@@ -148,6 +161,7 @@ func (t TimeSheetRepository) UpdateTimeSheetStatus(id string) error {
 
 	_, err = t.UpdateTimeSheet(ts)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 

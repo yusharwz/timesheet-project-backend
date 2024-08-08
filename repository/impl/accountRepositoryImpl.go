@@ -12,6 +12,7 @@ import (
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
+	"github.com/rs/zerolog/log"
 )
 
 type AccountRepository struct{}
@@ -36,16 +37,19 @@ func (AccountRepository) EditAccount(req request.EditAccountRequest) error {
 	var user entity.User
 
 	if err := config.DB.Where("user_id = ?", req.UserID).First(&account).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
 	if err := config.DB.Where("id = ?", req.UserID).First(&user).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
 	if req.Email != "" && req.Email != account.Email {
 		var existingAccount entity.Account
 		if err := config.DB.Where("email = ?", req.Email).First(&existingAccount).Error; err == nil {
+			log.Error()
 			return errors.New("email already in use")
 		}
 		account.Email = req.Email
@@ -59,9 +63,11 @@ func (AccountRepository) EditAccount(req request.EditAccountRequest) error {
 	}
 
 	if err := config.DB.Save(&account).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 	if err := config.DB.Save(&user).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
@@ -76,6 +82,7 @@ func (AccountRepository) UserUploadSignatureIMG(req request.UploadImagesRequest)
 
 	uploadResponse, err := cldService.Upload.Upload(ctx, req.SignatureImage, uploader.UploadParams{})
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 
@@ -83,6 +90,7 @@ func (AccountRepository) UserUploadSignatureIMG(req request.UploadImagesRequest)
 
 	err = config.DB.Model(&entity.User{}).Where("id = ?", req.UserID).Update("signature", resp.ImageURL).Error
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 
@@ -93,17 +101,20 @@ func (repo AccountRepository) ChangePassword(id string, req request.ChangePasswo
 
 	var account entity.Account
 	if err := config.DB.Where("user_id = ? AND is_active = ?", id, true).First(&account).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return errors.New("failed to change password")
 	}
 
 	hashedPassword, err := helper.HashPassword(req.NewPassword)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
 	account.Password = hashedPassword
 
 	if err := config.DB.Save(&account).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return err
 	}
 
@@ -115,10 +126,12 @@ func (AccountRepository) GetAccountDetailByUserID(userID string) (entity.Account
 	var user entity.User
 
 	if err := config.DB.Where("user_id = ?", userID).First(&account).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return account, user, err
 	}
 
 	if err := config.DB.Where("id = ?", userID).First(&user).Error; err != nil {
+		log.Error().Msg(err.Error())
 		return account, user, err
 	}
 
