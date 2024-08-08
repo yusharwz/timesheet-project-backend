@@ -1,16 +1,16 @@
 package controller
 
 import (
-	"final-project-enigma/dto/request"
-	"final-project-enigma/dto/response"
-	"final-project-enigma/helper"
-	"final-project-enigma/middleware"
-	"final-project-enigma/service"
-	"final-project-enigma/service/impl"
-	"final-project-enigma/utils"
 	"net/http"
 	"strconv"
 	"strings"
+	"timesheet-app/dto/request"
+	"timesheet-app/dto/response"
+	"timesheet-app/helper"
+	"timesheet-app/middleware"
+	"timesheet-app/service"
+	"timesheet-app/service/impl"
+	"timesheet-app/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"

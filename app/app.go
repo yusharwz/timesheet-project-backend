@@ -2,15 +2,15 @@ package app
 
 import (
 	"errors"
-	"final-project-enigma/config"
-	"final-project-enigma/dto"
-	"final-project-enigma/router"
-	"final-project-enigma/utils"
 	"flag"
 	"fmt"
 	"os"
 	"strconv"
 	"time"
+	"timesheet-app/config"
+	"timesheet-app/dto"
+	"timesheet-app/router"
+	"timesheet-app/utils"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/logger"

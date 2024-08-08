@@ -1,8 +1,8 @@
 package main
 
 import (
-	"final-project-enigma/app"
 	"time"
+	"timesheet-app/app"
 )
 
 func main() {

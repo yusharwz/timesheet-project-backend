@@ -2,12 +2,12 @@ package impl
 
 import (
 	"errors"
-	"final-project-enigma/dto/response"
-	"final-project-enigma/helper"
-	"final-project-enigma/repository"
-	"final-project-enigma/repository/impl"
-	"final-project-enigma/service"
 	"strconv"
+	"timesheet-app/dto/response"
+	"timesheet-app/helper"
+	"timesheet-app/repository"
+	"timesheet-app/repository/impl"
+	"timesheet-app/service"
 
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"

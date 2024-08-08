@@ -2,14 +2,14 @@ package impl
 
 import (
 	"errors"
-	"final-project-enigma/config"
-	"final-project-enigma/dto/request"
-	"final-project-enigma/dto/response"
-	"final-project-enigma/entity"
-	"final-project-enigma/helper"
-	"final-project-enigma/repository"
-	"final-project-enigma/repository/impl"
 	"strconv"
+	"timesheet-app/config"
+	"timesheet-app/dto/request"
+	"timesheet-app/dto/response"
+	"timesheet-app/entity"
+	"timesheet-app/helper"
+	"timesheet-app/repository"
+	"timesheet-app/repository/impl"
 
 	"gorm.io/gorm"
 

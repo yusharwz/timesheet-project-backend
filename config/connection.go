@@ -3,11 +3,11 @@ package config
 import (
 	"database/sql"
 	"errors"
-	"final-project-enigma/dto"
-	"final-project-enigma/entity"
-	"final-project-enigma/helper"
 	"fmt"
 	"time"
+	"timesheet-app/dto"
+	"timesheet-app/entity"
+	"timesheet-app/helper"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"

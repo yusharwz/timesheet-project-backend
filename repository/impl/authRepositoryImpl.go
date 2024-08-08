@@ -2,10 +2,10 @@ package impl
 
 import (
 	"errors"
-	"final-project-enigma/config"
-	"final-project-enigma/dto/request"
-	"final-project-enigma/dto/response"
-	"final-project-enigma/entity"
+	"timesheet-app/config"
+	"timesheet-app/dto/request"
+	"timesheet-app/dto/response"
+	"timesheet-app/entity"
 
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"

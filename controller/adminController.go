@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"final-project-enigma/dto/response"
-	"final-project-enigma/middleware"
-	"final-project-enigma/service"
-	"final-project-enigma/service/impl"
+	"timesheet-app/dto/response"
+	"timesheet-app/middleware"
+	"timesheet-app/service"
+	"timesheet-app/service/impl"
 
 	"github.com/gin-gonic/gin"
 )

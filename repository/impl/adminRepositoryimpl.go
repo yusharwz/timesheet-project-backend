@@ -1,10 +1,10 @@
 package impl
 
 import (
-	"final-project-enigma/config"
-	"final-project-enigma/entity"
-	"final-project-enigma/helper"
 	"time"
+	"timesheet-app/config"
+	"timesheet-app/entity"
+	"timesheet-app/helper"
 
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"

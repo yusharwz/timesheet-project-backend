@@ -1,4 +1,4 @@
-module final-project-enigma
+module timesheet-app
 
 go 1.22.1
 

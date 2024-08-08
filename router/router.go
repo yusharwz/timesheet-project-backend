@@ -1,7 +1,7 @@
 package router
 
 import (
-	"final-project-enigma/controller"
+	"timesheet-app/controller"
 
 	"github.com/gin-gonic/gin"
 )

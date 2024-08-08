@@ -2,12 +2,12 @@ package middleware
 
 import (
 	"errors"
-	"final-project-enigma/dto"
-	"final-project-enigma/dto/response"
 	"fmt"
 	"os"
 	"strings"
 	"time"
+	"timesheet-app/dto"
+	"timesheet-app/dto/response"
 
 	"github.com/joho/godotenv"
 
