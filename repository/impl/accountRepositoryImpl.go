@@ -137,3 +137,21 @@ func (AccountRepository) GetAccountDetailByUserID(userID string) (entity.Account
 
 	return account, user, nil
 }
+
+func (AccountRepository) ForgetPassword(req request.ForgetPasswordRequest) error {
+	var account entity.Account
+
+	if err := config.DB.Where("email = ?", req.Email).First(&account).Error; err != nil {
+		log.Error().Msg(err.Error())
+		return errors.New("email not found")
+	}
+
+	account.Password = req.NewPassword
+
+	if err := config.DB.Save(&account).Error; err != nil {
+		log.Error().Msg(err.Error())
+		return err
+	}
+
+	return nil
+}

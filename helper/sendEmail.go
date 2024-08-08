@@ -30,3 +30,20 @@ func SendEmailActivatedAccount(email, code, unique string) error {
 	}
 	return nil
 }
+
+func SendNewPassword(email, newPassword string) error {
+	emailPort, _ := strconv.Atoi(os.Getenv("EMAIL_PORT"))
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", os.Getenv("EMAIL_ADDRESS"))
+	m.SetHeader("To", email)
+	m.SetHeader("Subject", "New Password")
+	m.SetBody("text/plain", "Your new password: "+newPassword)
+
+	d := gomail.NewDialer(os.Getenv("EMAIL_HOST"), emailPort, os.Getenv("EMAIL_ADDRESS"), os.Getenv("EMAIL_PASSWORD"))
+
+	if err := d.DialAndSend(m); err != nil {
+		return err
+	}
+	return nil
+}

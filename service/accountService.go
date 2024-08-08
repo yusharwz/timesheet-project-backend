@@ -12,4 +12,5 @@ type AccountService interface {
 	ChangePassword(req request.ChangePasswordRequest, authHeader string) error
 	GetAccountDetail(authHeader string) (*response.AccountUserResponse, error)
 	GetAccountByID(id string) (*response.AccountUserResponse, error)
+	ForgetPassword(req request.ForgetPasswordRequest) error
 }

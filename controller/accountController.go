@@ -26,6 +26,7 @@ func NewAccountController(g *gin.RouterGroup) {
 		accountGroup.PUT("/change-password", controller.ChangePassword)
 	}
 	g.GET("accounts/activate", controller.AccountActivation)
+	g.POST("accounts/forget-password", controller.ForgetPassword)
 }
 func (AccountController) AccountActivation(ctx *gin.Context) {
 
@@ -125,4 +126,16 @@ func (AccountController) GetAccountDetailByUserID(ctx *gin.Context) {
 	}
 
 	response.NewResponseSuccess(ctx, resp)
+}
+
+func (AccountController) ForgetPassword(ctx *gin.Context) {
+	var req request.ForgetPasswordRequest
+
+	err := accountService.ForgetPassword(req)
+	if err != nil {
+		response.NewResponseForbidden(ctx, err.Error())
+		return
+	}
+
+	response.NewResponseSuccess(ctx, "Succes Send New Password to Your Email Address")
 }

@@ -28,4 +28,9 @@ type (
 	ChangePasswordRequest struct {
 		NewPassword string `json:"newPassword" binding:"password"`
 	}
+
+	ForgetPasswordRequest struct {
+		Email       string `json:"email" binding:"required,email"`
+		NewPassword string
+	}
 )

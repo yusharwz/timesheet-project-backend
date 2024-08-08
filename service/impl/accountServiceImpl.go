@@ -3,6 +3,7 @@ package impl
 import (
 	"timesheet-app/dto/request"
 	"timesheet-app/dto/response"
+	"timesheet-app/helper"
 	"timesheet-app/middleware"
 	"timesheet-app/repository"
 	"timesheet-app/repository/impl"
@@ -140,4 +141,31 @@ func (AccountService) GetAccountByID(id string) (*response.AccountUserResponse, 
 	}
 
 	return &accountUserResp, nil
+}
+
+func (AccountService) ForgetPassword(req request.ForgetPasswordRequest) error {
+
+	newPassword, err := helper.GenerateCode()
+	if err != nil {
+		log.Error().Msg(err.Error())
+		return err
+	}
+
+	hashedPassword, err := helper.HashPassword(newPassword)
+	if err != nil {
+		log.Error().Msg(err.Error())
+		return err
+	}
+
+	req.NewPassword = hashedPassword
+
+	err = accountRepository.ForgetPassword(req)
+	if err != nil {
+		log.Error().Msg(err.Error())
+		return err
+	}
+
+	helper.SendNewPassword(req.Email, newPassword)
+
+	return nil
 }
