@@ -24,13 +24,13 @@ func NewTimesheetController(g *gin.RouterGroup) {
 	controller := &TimeSheetController{}
 	timesheetGroup := g.Group("/timesheets", middleware.JwtAuthWithRoles("user"))
 	{
-		timesheetGroup.GET("/:id", controller.GetTimeSheetByID)
-		timesheetGroup.GET("", controller.GetAllTimeSheets)
 		timesheetGroup.POST("/", controller.CreateTimeSheet)
 		timesheetGroup.PUT("/:id", controller.UpdateTimeSheet)
 		timesheetGroup.DELETE("/:id", controller.DeleteTimeSheet)
 		timesheetGroup.PUT("/:id/submit", controller.SubmitTimeSheet)
 	}
+	g.GET("/timesheets", controller.GetAllTimeSheets)
+	g.GET("/timesheets/:id", controller.GetTimeSheetByID)
 	managerGroup := g.Group("/manager", middleware.JwtAuthWithRoles("manager"))
 	{
 		managerGroup.POST("/approve/timesheets/:id", controller.ApproveManagerTimeSheet)
