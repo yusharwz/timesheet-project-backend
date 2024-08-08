@@ -159,13 +159,15 @@ func (AccountService) ForgetPassword(req request.ForgetPasswordRequest) error {
 
 	req.NewPassword = hashedPassword
 
-	err = accountRepository.ForgetPassword(req)
-	if err != nil {
+	if err = accountRepository.ForgetPassword(req); err != nil {
 		log.Error().Msg(err.Error())
 		return err
 	}
 
-	helper.SendNewPassword(req.Email, newPassword)
+	if err = helper.SendNewPassword(req.Email, newPassword); err != nil {
+		log.Error().Msg(err.Error())
+		return err
+	}
 
 	return nil
 }
