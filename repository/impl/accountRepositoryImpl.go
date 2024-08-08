@@ -23,7 +23,7 @@ func NewAccountRepository() *AccountRepository {
 
 func (AccountRepository) AccountActivation(email, password string) error {
 
-	result := config.DB.Model(&entity.Account{}).Where("email, password = ?, ?", email, password).Update("is_active", true)
+	result := config.DB.Model(&entity.Account{}).Where("email = ? AND password = ?", email, password).Update("is_active", true)
 	if result.Error != nil {
 		return errors.New("failed to activate account")
 	}
