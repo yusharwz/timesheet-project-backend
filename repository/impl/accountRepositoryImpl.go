@@ -24,7 +24,7 @@ func NewAccountRepository() *AccountRepository {
 func (AccountRepository) AccountActivation(email, password string) error {
 
 	result := config.DB.Model(&entity.Account{}).Where("email = ? AND password = ?", email, password).Update("is_active", true)
-	if result.Error != nil {
+	if result.RowsAffected < 1 && result.Error == nil {
 		return errors.New("failed to activate account")
 	}
 
