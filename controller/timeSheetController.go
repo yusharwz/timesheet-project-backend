@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -119,7 +120,7 @@ func (TimeSheetController) GetAllTimeSheets(c *gin.Context) {
 	var err error
 	var totalRows string
 	var totalPage string
-	var parsedPeriod []string
+	var parsedPeriod, parsedStatus []string
 	var results *[]response.TimeSheetResponse
 
 	if period != "" {
@@ -140,7 +141,11 @@ func (TimeSheetController) GetAllTimeSheets(c *gin.Context) {
 		}
 	}
 
-	results, totalRows, totalPage, err = timeSheetService.GetAllTimeSheets(paging, rowsPerPage, year, userId, status, name, parsedPeriod)
+	if status != "" {
+		parsedStatus = strings.Split(status, ":")
+	}
+
+	results, totalRows, totalPage, err = timeSheetService.GetAllTimeSheets(paging, rowsPerPage, year, userId, name, parsedPeriod, parsedStatus)
 	if err != nil {
 		response.NewResponseError(c, err.Error())
 		return

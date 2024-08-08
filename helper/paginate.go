@@ -29,6 +29,6 @@ func GetTotalPage(totalRows string, rowsPerPage int) int {
 
 func GetTotalRows(db *gorm.DB) string {
 	var totalRows int64
-	db.Where("deleted_at IS NULL").Count(&totalRows)
+	db.Count(&totalRows)
 	return strconv.FormatInt(totalRows, 10)
 }

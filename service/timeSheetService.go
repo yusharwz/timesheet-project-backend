@@ -10,7 +10,7 @@ type TimeSheetService interface {
 	UpdateTimeSheet(ts request.UpdateTimeSheetRequest, authHeader string) (*response.TimeSheetResponse, error)
 	DeleteTimeSheet(id string) error
 	GetTimeSheetByID(id string) (*response.TimeSheetResponse, error)
-	GetAllTimeSheets(paging, rowsPerPage, year, userId, status, name string, period []string) (*[]response.TimeSheetResponse, string, string, error)
+	GetAllTimeSheets(paging, rowsPerPage, year, userId, name string, period, status []string) (*[]response.TimeSheetResponse, string, string, error)
 	ApproveManagerTimeSheet(id string, userID string) error
 	RejectManagerTimeSheet(id string, userID string) error
 	ApproveBenefitTimeSheet(id string, userID string) error

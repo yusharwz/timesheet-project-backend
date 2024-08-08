@@ -17,9 +17,10 @@ func NewAdminRepository() *AdminRepository {
 func (AdminRepository) RetrieveAccountList(spec []func(db *gorm.DB) *gorm.DB) ([]entity.User, string, error) {
 	var users []entity.User
 
-	db := config.DB.Scopes(spec...).Joins("Account").Find(&users)
+	db := config.DB.Model(entity.User{}).Scopes(spec[1:]...).Preload("Account")
 	totalRows := helper.GetTotalRows(db)
-	return users, totalRows, db.Error
+	err := db.Scopes(spec[0]).Find(&users).Error
+	return users, totalRows, err
 }
 
 func (AdminRepository) DetailAccount(userID string) (entity.Account, entity.User, entity.Role, error) {

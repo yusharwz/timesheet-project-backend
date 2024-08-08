@@ -313,13 +313,14 @@ func (TimeSheetService) GetTimeSheetByID(id string) (*response.TimeSheetResponse
 	return &timeSheetResponse, nil
 }
 
-func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, status, name string, period []string) (*[]response.TimeSheetResponse, string, string, error) {
+func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, name string, period, status []string) (*[]response.TimeSheetResponse, string, string, error) {
 	var err error
 	var pagingInt int
 	var rowsPerPageInt int
 	var totalRows string
 	var spec []func(db *gorm.DB) *gorm.DB
 	var results *[]entity.TimeSheet
+	listStatusId := []string{"", "", ""}
 
 	pagingInt, err = strconv.Atoi(paging)
 	if err != nil {
@@ -339,12 +340,17 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, stat
 		spec = append(spec, helper.SelectByUserId(userId))
 	}
 
-	if status != "" {
-		result, err := timeSheetRepository.GetStatusTimeSheetByName(status)
-		if err != nil {
-			return nil, "0", "0", err
+	if status != nil {
+		var res *entity.StatusTimeSheet
+		var err error
+		for i := 0; i < len(status); i++ {
+			res, err = timeSheetRepository.GetStatusTimeSheetByName(status[i])
+			if err != nil {
+				return nil, "0", "0", err
+			}
+			listStatusId[i] = res.ID
 		}
-		spec = append(spec, helper.SelectByStatus(result.ID))
+		spec = append(spec, helper.SelectByStatus(listStatusId))
 	}
 
 	if name != "" {

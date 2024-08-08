@@ -70,9 +70,10 @@ func (TimeSheetRepository) GetTimeSheetByID(id string) (*entity.TimeSheet, error
 
 func (TimeSheetRepository) GetAllTimeSheets(spec []func(db *gorm.DB) *gorm.DB) (*[]entity.TimeSheet, string, error) {
 	var timeSheets []entity.TimeSheet
-	db := config.DB.Scopes(spec...).Preload("TimeSheetDetails").Find(&timeSheets)
+	db := config.DB.Model(&entity.TimeSheet{}).Scopes(spec[1:]...).Preload("TimeSheetDetails")
 	totalRows := helper.GetTotalRows(db)
-	return &timeSheets, totalRows, db.Error
+	err := db.Scopes(spec[0]).Find(&timeSheets).Error
+	return &timeSheets, totalRows, err
 }
 
 func (TimeSheetRepository) ApproveManagerTimeSheet(id string, userID string) error {
