@@ -94,6 +94,7 @@ INSERT INTO public.status_time_sheets (id, status_name) VALUES ('0bfc9fbe-ccec-4
 INSERT INTO public.status_time_sheets (id, status_name) VALUES ('8d31eac1-3d39-4fc0-8a42-e8683e05251a', 'denied');
 
 
+
 --
 -- Data for Name: time_sheets; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -141,8 +142,6 @@ INSERT INTO public.time_sheets (id, created_at, updated_at, deleted_at, confirme
 INSERT INTO public.works (id, created_at, updated_at, deleted_at, description, fee) VALUES ('ab88eadb-3f49-47cb-9dbe-6a0bc92784ba', '2024-08-03 10:28:33.703792+07', '2024-08-06 18:38:03.554683+07', NULL, 'Mengajar Angular', 50000);
 INSERT INTO public.works (id, created_at, updated_at, deleted_at, description, fee) VALUES ('2abc03cc-5ef1-4722-a433-a0e656199670', '2024-08-06 18:40:18.840535+07', '2024-08-06 18:40:18.840535+07', NULL, 'Mengajar React Native', 50000);
 INSERT INTO public.works (id, created_at, updated_at, deleted_at, description, fee) VALUES ('edd90b16-dada-46cd-92ef-f41c8db81326', '2024-08-07 21:36:05.402916+07', '2024-08-07 21:36:05.402916+07', NULL, 'Mengajar Vue JS', 50000);
-INSERT INTO public.works (id, created_at, updated_at, deleted_at, description, fee) VALUES ('56820395-b42f-414c-98e7-c3ea142e367f', '2024-08-06 18:40:26.374859+07', '2024-08-06 18:40:26.374859+07', '2024-08-06 18:41:13.129086+07', 'Mengajar React Native', 50000);
-INSERT INTO public.works (id, created_at, updated_at, deleted_at, description, fee) VALUES ('cc2f2d99-9a81-4b17-8c3a-42c28dc5d6cb', '2024-08-06 18:41:31.284323+07', '2024-08-06 18:41:31.284323+07', '2024-08-06 18:41:44.113995+07', 'Mengajar React Native', 50000);
 INSERT INTO public.works (id, created_at, updated_at, deleted_at, description, fee) VALUES ('08dc25e0-6d3a-439b-80d3-01fe83998f58', '2024-08-08 21:37:30.632084+07', '2024-08-08 21:37:30.632084+07', NULL, 'Mengajar Laravel', 50000);
 
 
