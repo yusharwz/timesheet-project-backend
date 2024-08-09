@@ -75,7 +75,7 @@ func (WorkService) DeleteWork(id string) error {
 	return nil
 }
 
-func (WorkService) GetById(id string, useSpec, getDeleted bool) (response.WorkResponse, error) {
+func (WorkService) GetById(id string, getDeleted bool) (response.WorkResponse, error) {
 	var spec func(db *gorm.DB) *gorm.DB
 	if getDeleted {
 		spec = func(db *gorm.DB) *gorm.DB {
@@ -86,7 +86,7 @@ func (WorkService) GetById(id string, useSpec, getDeleted bool) (response.WorkRe
 			return db
 		}
 	}
-	result, err := workRepository.GetById(id, useSpec, spec)
+	result, err := workRepository.GetById(id, spec)
 	if err != nil {
 		log.Error().Msg(err.Error())
 		return response.WorkResponse{}, err
