@@ -84,3 +84,4 @@
 {"level":"error","time":"09-08-2024 12:10:20","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/timesheet-app/service/impl/timeSheetServiceImpl.go:406","message":"data not found"}
 {"level":"error","time":"09-08-2024 12:10:32","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/timesheet-app/service/impl/workServiceImpl.go:87","message":"data not found"}
 {"level":"error","time":"09-08-2024 12:10:40","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/timesheet-app/service/impl/workServiceImpl.go:117","message":"record not found"}
+{"level":"error","time":"09-08-2024 13:54:42","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/timesheet-app/service/impl/authServiceImpl.go:87","message":"crypto/bcrypt: hashedPassword is not the hash of the given password"}

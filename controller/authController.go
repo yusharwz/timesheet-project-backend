@@ -20,7 +20,7 @@ func NewAuthController(g *gin.RouterGroup) {
 
 	usersGroup := g.Group("/")
 	{
-		usersGroup.POST("/login", controller.AccountLogin)
+		usersGroup.POST("/login", middleware.BasicAuth, controller.AccountLogin)
 	}
 
 	adminGroup := g.Group("/admin", middleware.JwtAuthWithRoles("admin"))

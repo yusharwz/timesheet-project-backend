@@ -25,8 +25,8 @@ func NewAccountController(g *gin.RouterGroup) {
 		accountGroup.PUT("/", controller.EditAccount)
 		accountGroup.PUT("/change-password", controller.ChangePassword)
 	}
-	g.GET("accounts/activate", controller.AccountActivation)
-	g.POST("accounts/forget-password", controller.ForgetPassword)
+	g.GET("accounts/activate", middleware.BasicAuth, controller.AccountActivation)
+	g.POST("accounts/forget-password", middleware.BasicAuth, controller.ForgetPassword)
 }
 func (AccountController) AccountActivation(ctx *gin.Context) {
 

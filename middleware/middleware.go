@@ -29,6 +29,24 @@ func init() {
 	jwtSignatureKey = []byte(os.Getenv("JWT_SECRET"))
 }
 
+func BasicAuth(c *gin.Context) {
+	userAuth := os.Getenv("BASIC_AUTH_USERNAME")
+	passAuth := os.Getenv("BASIC_AUTH_PASSWORD")
+
+	user, password, ok := c.Request.BasicAuth()
+	if !ok {
+		response.NewResponseUnauthorized(c, "Invalid header authorization")
+		c.Abort()
+		return
+	}
+	if user != userAuth || password != passAuth {
+		response.NewResponseUnauthorized(c, "Invalid token")
+		c.Abort()
+		return
+	}
+	c.Next()
+}
+
 func GenerateTokenJwt(Id, name, email, roles string, expiredAt int64) (string, error) {
 	loginExpDuration := time.Duration(expiredAt) * time.Hour
 	issuedAt := time.Now()
