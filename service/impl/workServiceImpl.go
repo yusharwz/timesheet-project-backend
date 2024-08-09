@@ -81,6 +81,10 @@ func (WorkService) GetById(id string, getDeleted bool) (response.WorkResponse, e
 		spec = func(db *gorm.DB) *gorm.DB {
 			return db.Unscoped()
 		}
+	} else {
+		spec = func(db *gorm.DB) *gorm.DB {
+			return db
+		}
 	}
 	result, err := workRepository.GetById(id, spec)
 	if err != nil {
