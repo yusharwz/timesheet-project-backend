@@ -47,7 +47,7 @@ func (WorkController) CreateWork(c *gin.Context) {
 
 func (WorkController) GetById(c *gin.Context) {
 	id := c.Param("id")
-	result, err := workService.GetById(id, false)
+	result, err := workService.GetById(id, false, false)
 	if err != nil {
 		response.NewResponseError(c, err.Error())
 		return

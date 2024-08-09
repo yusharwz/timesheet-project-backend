@@ -40,12 +40,20 @@ func (WorkRepository) DeleteWork(id string) error {
 	return nil
 }
 
-func (WorkRepository) GetById(id string, spec func(db *gorm.DB) *gorm.DB) (entity.Work, error) {
+func (WorkRepository) GetById(id string, useSpec bool, spec func(db *gorm.DB) *gorm.DB) (entity.Work, error) {
 	var work entity.Work
-	config.DB.Scopes(spec).Where("id = ?", id).First(&work)
-	if work.ID == "" {
-		log.Error()
-		return entity.Work{}, errors.New("data not found")
+
+	db := config.DB
+
+	if useSpec && spec != nil {
+		db = db.Scopes(spec)
+	}
+
+	if err := db.Where("id = ?", id).First(&work).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return entity.Work{}, errors.New("data not found")
+		}
+		return entity.Work{}, err
 	}
 	return work, nil
 }
