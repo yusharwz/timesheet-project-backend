@@ -477,76 +477,179 @@ func (TimeSheetService) GetAllTimeSheets(paging, rowsPerPage, year, userId, name
 }
 
 func (TimeSheetService) ApproveManagerTimeSheet(id string, userID string) error {
+
 	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
 	if err != nil {
-		log.Error().Msg(err.Error())
+		log.Error().Msgf("Failed to get timesheet by ID: %v", err)
 		return err
 	}
+
 	status, err := timeSheetRepository.GetStatusTimeSheetByName("pending")
+	if err != nil {
+		log.Error().Msgf("Failed to get status 'pending': %v", err)
+		return err
+	}
+
+	if timeSheet.StatusTimeSheetID == status.ID {
+		err = timeSheetRepository.ApproveManagerTimeSheet(id, userID)
+		if err != nil {
+			log.Error().Msgf("Failed to approve timesheet: %v", err)
+			return err
+		}
+	} else if timeSheet.ConfirmedManagerBy != "" {
+		return errors.New("timesheet has already been submitted")
+	} else {
+		return errors.New("timesheet not submitted")
+	}
+
+	detailAccount, detailUser, err := accountRepository.GetAccountDetailByUserID(timeSheet.UserID)
+	if err != nil {
+		log.Error().Msgf("Failed to get account details by userID: %v", err)
+		return err
+	}
+
+	err = helper.SendNotificationToTrainer(detailAccount.Email, detailUser.Name, "Accepted", "Manager")
+	if err != nil {
+		log.Error().Msgf("Failed to send approval email: %v", err)
+		return err
+	}
+
+	emails, err := timeSheetRepository.GetBenefitEmails()
 	if err != nil {
 		log.Error().Msg(err.Error())
 		return err
 	}
-	if timeSheet.StatusTimeSheetID == status.ID {
-		return timeSheetRepository.ApproveManagerTimeSheet(id, userID)
-	} else if timeSheet.ConfirmedManagerBy != "" {
-		return errors.New("timesheet has been submitted")
+
+	for _, email := range emails {
+		err := helper.SendNotificationToBenefit(email, detailUser.Name)
+		if err != nil {
+			log.Error().Msg(err.Error())
+			continue
+		}
 	}
-	return errors.New("timesheet not submitted")
+
+	return nil
 }
 
 func (TimeSheetService) RejectManagerTimeSheet(id string, userID string) error {
+
 	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
 	if err != nil {
-		log.Error().Msg(err.Error())
+		log.Error().Msgf("Failed to get timesheet by ID: %v", err)
 		return err
 	}
+
 	status, err := timeSheetRepository.GetStatusTimeSheetByName("pending")
 	if err != nil {
-		log.Error().Msg(err.Error())
+		log.Error().Msgf("Failed to get status 'pending': %v", err)
 		return err
-	} else if timeSheet.ConfirmedManagerBy != "" {
-		return errors.New("timesheet has been submitted")
 	}
+
+	if timeSheet.ConfirmedManagerBy != "" {
+		return errors.New("timesheet has already been submitted")
+	}
+
 	if timeSheet.StatusTimeSheetID == status.ID {
-		return timeSheetRepository.RejectManagerTimeSheet(id, userID)
+		err = timeSheetRepository.RejectManagerTimeSheet(id, userID)
+		if err != nil {
+			log.Error().Msgf("Failed to reject timesheet: %v", err)
+			return err
+		}
 	}
-	return errors.New("timesheet not submitted")
+
+	detailAccount, detailUser, err := accountRepository.GetAccountDetailByUserID(timeSheet.UserID)
+	if err != nil {
+		log.Error().Msgf("Failed to get account details by userID: %v", err)
+		return err
+	}
+
+	err = helper.SendNotificationToTrainer(detailAccount.Email, detailUser.Name, "Denied", "Manager")
+	if err != nil {
+		log.Error().Msgf("Failed to send rejection email: %v", err)
+		return err
+	}
+
+	return nil
 }
 
 func (TimeSheetService) ApproveBenefitTimeSheet(id string, userID string) error {
 	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
 	if err != nil {
-		log.Error().Msg(err.Error())
+		log.Error().Msgf("Failed to get timesheet by ID: %v", err)
 		return err
 	}
+
 	status, err := timeSheetRepository.GetStatusTimeSheetByName("accepted")
 	if err != nil {
-		log.Error().Msg(err.Error())
+		log.Error().Msgf("Failed to get status 'pending': %v", err)
 		return err
 	}
+
 	if timeSheet.StatusTimeSheetID == status.ID {
-		return timeSheetRepository.ApproveBenefitTimeSheet(id, userID)
+		err = timeSheetRepository.ApproveBenefitTimeSheet(id, userID)
+		if err != nil {
+			log.Error().Msgf("Failed to approve timesheet: %v", err)
+			return err
+		}
+	} else if timeSheet.ConfirmedBenefitBy != "" {
+		return errors.New("timesheet has already been submitted")
+	} else {
+		return errors.New("timesheet not submitted")
 	}
-	return errors.New("timesheet not approved by manager")
+
+	detailAccount, detailUser, err := accountRepository.GetAccountDetailByUserID(timeSheet.UserID)
+	if err != nil {
+		log.Error().Msgf("Failed to get account details by userID: %v", err)
+		return err
+	}
+
+	err = helper.SendNotificationToTrainer(detailAccount.Email, detailUser.Name, "Approved", "Manager")
+	if err != nil {
+		log.Error().Msgf("Failed to send approval email: %v", err)
+		return err
+	}
+
+	return nil
 }
 
 func (TimeSheetService) RejectBenefitTimeSheet(id string, userID string) error {
 	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
 	if err != nil {
-		log.Error().Msg(err.Error())
+		log.Error().Msgf("Failed to get timesheet by ID: %v", err)
 		return err
 	}
+
 	status, err := timeSheetRepository.GetStatusTimeSheetByName("accepted")
 	if err != nil {
-		log.Error().Msg(err.Error())
+		log.Error().Msgf("Failed to get status 'pending': %v", err)
 		return err
 	}
+
 	if timeSheet.StatusTimeSheetID == status.ID {
-		return timeSheetRepository.RejectBenefitTimeSheet(id, userID)
+		err = timeSheetRepository.RejectBenefitTimeSheet(id, userID)
+		if err != nil {
+			log.Error().Msgf("Failed to approve timesheet: %v", err)
+			return err
+		}
+	} else if timeSheet.ConfirmedBenefitBy != "" {
+		return errors.New("timesheet has already been submitted")
+	} else {
+		return errors.New("timesheet not submitted")
 	}
-	log.Error()
-	return errors.New("timesheet not approved by manager")
+
+	detailAccount, detailUser, err := accountRepository.GetAccountDetailByUserID(timeSheet.UserID)
+	if err != nil {
+		log.Error().Msgf("Failed to get account details by userID: %v", err)
+		return err
+	}
+
+	err = helper.SendNotificationToTrainer(detailAccount.Email, detailUser.Name, "Rejected", "Manager")
+	if err != nil {
+		log.Error().Msgf("Failed to send approval email: %v", err)
+		return err
+	}
+
+	return nil
 }
 
 func (TimeSheetService) UpdateTimeSheetStatus(id string) error {
@@ -562,6 +665,32 @@ func (TimeSheetService) UpdateTimeSheetStatus(id string) error {
 	if err != nil {
 		log.Error().Msg(err.Error())
 		return err
+	}
+
+	timeSheet, err := timeSheetRepository.GetTimeSheetByID(id)
+	if err != nil {
+		log.Error().Msgf("Failed to get timesheet by ID: %v", err)
+		return err
+	}
+
+	_, detailUser, err := accountRepository.GetAccountDetailByUserID(timeSheet.UserID)
+	if err != nil {
+		log.Error().Msgf("Failed to get account details by userID: %v", err)
+		return err
+	}
+
+	emails, err := timeSheetRepository.GetManagerEmails()
+	if err != nil {
+		log.Error().Msg(err.Error())
+		return err
+	}
+
+	for _, email := range emails {
+		err := helper.SendNotificationToManager(email, detailUser.Name)
+		if err != nil {
+			log.Error().Msg(err.Error())
+			continue
+		}
 	}
 
 	return nil

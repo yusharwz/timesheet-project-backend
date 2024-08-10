@@ -22,23 +22,23 @@ var timeSheetService service.TimeSheetService = impl.NewTimeSheetService()
 
 func NewTimesheetController(g *gin.RouterGroup) {
 	controller := &TimeSheetController{}
-	timesheetGroup := g.Group("/timesheets", middleware.JwtAuthWithRoles("user"))
+
+	timesheetGroup := g.Group("/timesheets", middleware.JwtAuthWithRoles("admin", "user", "manager", "benefit"))
 	{
-		timesheetGroup.POST("/", controller.CreateTimeSheet)
-		timesheetGroup.PUT("/:id", controller.UpdateTimeSheet)
-		timesheetGroup.DELETE("/:id", controller.DeleteTimeSheet)
-		timesheetGroup.PUT("/:id/submit", controller.SubmitTimeSheet)
+		timesheetGroup.GET("", controller.GetAllTimeSheets)
+		timesheetGroup.GET("/:id", controller.GetTimeSheetByID)
+		timesheetGroup.POST("/", middleware.JwtAuthWithRoles("user"), controller.CreateTimeSheet)
+		timesheetGroup.PUT("/:id", middleware.JwtAuthWithRoles("user"), controller.UpdateTimeSheet)
+		timesheetGroup.DELETE("/:id", middleware.JwtAuthWithRoles("user"), controller.DeleteTimeSheet)
+		timesheetGroup.PUT("/:id/submit", middleware.JwtAuthWithRoles("user"), controller.SubmitTimeSheet)
 	}
-	all := g.Group("/timeSheets", middleware.JwtAuthWithRoles("admin", "user", "manager", "benefit"))
-	{
-		all.GET("/timesheets", controller.GetAllTimeSheets)
-		all.GET("/timesheets/:id", controller.GetTimeSheetByID)
-	}
+
 	managerGroup := g.Group("/manager", middleware.JwtAuthWithRoles("manager"))
 	{
 		managerGroup.POST("/approve/timesheets/:id", controller.ApproveManagerTimeSheet)
 		managerGroup.POST("/reject/timesheets/:id", controller.RejectManagerTimeSheet)
 	}
+
 	benefitGroup := g.Group("/benefit", middleware.JwtAuthWithRoles("benefit"))
 	{
 		benefitGroup.POST("/approve/timesheets/:id", controller.ApproveBenefitTimeSheet)

@@ -98,6 +98,24 @@ func (TimeSheetRepository) ApproveManagerTimeSheet(id string, userID string) err
 		}).Error
 }
 
+func (TimeSheetRepository) GetDetailTimesheetByID(id string) (entity.Work, error) {
+	var ts entity.TimeSheetDetail
+	var work entity.Work
+
+	err := config.DB.Where("time_sheet_id =?", id).First(&ts).Error
+	if err != nil {
+		log.Error().Msg(err.Error())
+		return entity.Work{}, err
+	}
+
+	err = config.DB.Where("id = ?", ts.WorkID).First(&work).Error
+	if err != nil {
+		log.Error().Msg(err.Error())
+		return entity.Work{}, err
+	}
+	return work, nil
+}
+
 func (TimeSheetRepository) RejectManagerTimeSheet(id string, userID string) error {
 	var status *entity.StatusTimeSheet
 	err := config.DB.Where("status_name = ?", "denied").First(&status).Error
@@ -166,4 +184,36 @@ func (t TimeSheetRepository) UpdateTimeSheetStatus(id string) error {
 	}
 
 	return nil
+}
+
+func (TimeSheetRepository) GetManagerEmails() ([]string, error) {
+	var emails []string
+
+	err := config.DB.Model(&entity.Account{}).
+		Select("email").
+		Joins("JOIN roles ON accounts.role_id = roles.id").
+		Where("roles.role_name = ?", "manager").
+		Pluck("email", &emails).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return emails, nil
+}
+
+func (TimeSheetRepository) GetBenefitEmails() ([]string, error) {
+	var emails []string
+
+	err := config.DB.Model(&entity.Account{}).
+		Select("email").
+		Joins("JOIN roles ON accounts.role_id = roles.id").
+		Where("roles.role_name = ?", "benefit").
+		Pluck("email", &emails).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return emails, nil
 }

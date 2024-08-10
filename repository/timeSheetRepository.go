@@ -19,4 +19,7 @@ type TimeSheetRepository interface {
 	ApproveBenefitTimeSheet(id string, userID string) error
 	RejectBenefitTimeSheet(id string, userID string) error
 	UpdateTimeSheetStatus(id string) error
+	GetDetailTimesheetByID(id string) (entity.Work, error)
+	GetManagerEmails() ([]string, error)
+	GetBenefitEmails() ([]string, error)
 }
