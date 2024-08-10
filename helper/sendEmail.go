@@ -47,3 +47,57 @@ func SendNewPassword(email, newPassword string) error {
 	}
 	return nil
 }
+
+func SendNotificationToTrainer(email, name, status, statusBy string) error {
+	emailPort, _ := strconv.Atoi(os.Getenv("EMAIL_PORT"))
+	link := fmt.Sprintf("%s/approvals/on-progress", os.Getenv("HOST_FRONTEND"))
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", os.Getenv("EMAIL_ADDRESS"))
+	m.SetHeader("To", email)
+	m.SetHeader("Subject", "Approval Notification")
+	m.SetBody("text/plain", "Hai, "+name+"\nPengajuan timesheet anda sudah di "+status+" oleh "+statusBy+". Silahkan buka aplikasi untuk melihat update dengan klik link berikut "+link)
+
+	d := gomail.NewDialer(os.Getenv("EMAIL_HOST"), emailPort, os.Getenv("EMAIL_ADDRESS"), os.Getenv("EMAIL_PASSWORD"))
+
+	if err := d.DialAndSend(m); err != nil {
+		return err
+	}
+	return nil
+}
+
+func SendNotificationToManager(email, name string) error {
+	emailPort, _ := strconv.Atoi(os.Getenv("EMAIL_PORT"))
+	link := fmt.Sprintf("%s/approvals/on-progress", os.Getenv("HOST_FRONTEND"))
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", os.Getenv("EMAIL_ADDRESS"))
+	m.SetHeader("To", email)
+	m.SetHeader("Subject", "Approval Notification")
+	m.SetBody("text/plain", "Ada pengajuan timesheet baru oleh trainer "+name+". Silahkan buka aplikasi untuk melihat update dengan klik link berikut "+link)
+
+	d := gomail.NewDialer(os.Getenv("EMAIL_HOST"), emailPort, os.Getenv("EMAIL_ADDRESS"), os.Getenv("EMAIL_PASSWORD"))
+
+	if err := d.DialAndSend(m); err != nil {
+		return err
+	}
+	return nil
+}
+
+func SendNotificationToBenefit(email, name string) error {
+	emailPort, _ := strconv.Atoi(os.Getenv("EMAIL_PORT"))
+	link := fmt.Sprintf("%s/approvals/on-progress", os.Getenv("HOST_FRONTEND"))
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", os.Getenv("EMAIL_ADDRESS"))
+	m.SetHeader("To", email)
+	m.SetHeader("Subject", "Approval Notification")
+	m.SetBody("text/plain", "Ada pengajuan timesheet oleh trainer "+name+" yang sudah disetujui oleh Manager IT. Silahkan buka aplikasi untuk melihat update dengan klik link berikut "+link)
+
+	d := gomail.NewDialer(os.Getenv("EMAIL_HOST"), emailPort, os.Getenv("EMAIL_ADDRESS"), os.Getenv("EMAIL_PASSWORD"))
+
+	if err := d.DialAndSend(m); err != nil {
+		return err
+	}
+	return nil
+}

@@ -17,14 +17,14 @@ var workService service.WorkService = impl.NewWorkService()
 
 func NewWorkController(g *gin.RouterGroup) {
 	controller := new(WorkController)
-	workGroup := g.Group("/admin/works", middleware.JwtAuthWithRoles("admin"))
+	workGroup := g.Group("/admin/works", middleware.JwtAuthWithRoles("user", "admin"))
 	{
-		workGroup.POST("/", controller.CreateWork)
-		workGroup.PUT("/:id", controller.UpdateWork)
-		workGroup.DELETE("/:id", controller.DeleteWork)
-		workGroup.GET("/:id", controller.GetById)
+		workGroup.GET("", controller.GetAllWork)
+		workGroup.POST("/", middleware.JwtAuthWithRoles("admin"), controller.CreateWork)
+		workGroup.PUT("/:id", middleware.JwtAuthWithRoles("admin"), controller.UpdateWork)
+		workGroup.DELETE("/:id", middleware.JwtAuthWithRoles("admin"), controller.DeleteWork)
+		workGroup.GET("/:id", middleware.JwtAuthWithRoles("admin"), controller.GetById)
 	}
-	g.GET("/admin/works", middleware.JwtAuthWithRoles("user", "admin"), controller.GetAllWork)
 }
 
 func (WorkController) CreateWork(c *gin.Context) {
