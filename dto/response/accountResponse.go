@@ -1,13 +1,17 @@
 package response
 
+import "time"
+
 type (
 	LoginResponse struct {
-		Token        string `json:"token"`
-		HashPassword string `json:"-"`
-		Name         string `json:"-"`
-		UserId       string `json:"-"`
-		Email        string `json:"-"`
-		Role         string `json:"-"`
+		Token        string    `json:"token"`
+		HashPassword string    `json:"-"`
+		Name         string    `json:"-"`
+		UserId       string    `json:"-"`
+		Email        string    `json:"-"`
+		Role         string    `json:"-"`
+		LoginChance  int       `json:"-"`
+		LoginTime    time.Time `json:"-"`
 	}
 
 	AccountUserResponse struct {

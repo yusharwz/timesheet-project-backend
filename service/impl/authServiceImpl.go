@@ -2,6 +2,8 @@ package impl
 
 import (
 	"errors"
+	"fmt"
+	"time"
 	"timesheet-app/dto/request"
 	"timesheet-app/dto/response"
 	"timesheet-app/entity"
@@ -84,8 +86,22 @@ func (AuthService) Login(req request.LoginAccountRequest) (resp response.LoginRe
 
 	err = helper.ComparePassword(resp.HashPassword, req.Password)
 	if err != nil {
+		err := authRepository.DecrementLoginChance(req.Email)
+		if err != nil {
+			log.Error().Msg(err.Error())
+			return resp, err
+		}
+		resp.LoginChance--
+		if resp.LoginChance == 0 {
+			return resp, errors.New("account has been locked due to too many login attempts, please try again after 15 minutes on " + resp.LoginTime.Format(time.RFC1123))
+		}
+		log.Error().Msg("Invalid email or password")
+		return resp, errors.New("invalid email or password, your login chance is " + fmt.Sprintf("%d", resp.LoginChance) + " times before your account is blocked for 15 minutes")
+	}
+
+	if err := authRepository.IncrementLoginChance(req.Email); err != nil {
 		log.Error().Msg(err.Error())
-		return resp, errors.New("invalid email or password")
+		return resp, err
 	}
 
 	resp.Token, err = helper.GetTokenJwt(resp.UserId, resp.Name, resp.Email, resp.Role)

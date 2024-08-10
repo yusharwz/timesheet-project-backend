@@ -2,6 +2,7 @@ package impl
 
 import (
 	"errors"
+	"time"
 	"timesheet-app/config"
 	"timesheet-app/dto/request"
 	"timesheet-app/dto/response"
@@ -54,20 +55,34 @@ func (AuthRepository) Login(req request.LoginAccountRequest) (resp response.Logi
 	var account entity.Account
 	var user entity.User
 	var role entity.Role
+	timeNow := time.Now()
 
 	resultAccount := config.DB.Where("email = ?", req.Email).First(&account)
 	if resultAccount.Error != nil {
-		log.Error()
+		log.Error().Msg(resultAccount.Error.Error())
 		if errors.Is(resultAccount.Error, gorm.ErrRecordNotFound) {
 			return resp, errors.New("invalid email or password")
 		}
 		return resp, resultAccount.Error
 	}
 
+	if account.LoginChances == 0 {
+		if account.LoginTime.After(timeNow) {
+			log.Error().Msg("Account is locked. Please try again after 15 minutes")
+			return resp, errors.New("account has been locked due to too many login attempts, please try again after 15 minutes on " + account.LoginTime.Format(time.RFC1123))
+		} else {
+			account.LoginChances = 3
+			if err := config.DB.Save(&account).Error; err != nil {
+				log.Error().Msg(err.Error())
+				return resp, err
+			}
+		}
+	}
+
 	resultUser := config.DB.Where("id = ?", account.UserID).First(&user)
 	if resultUser.Error != nil {
+		log.Error().Msg(resultUser.Error.Error())
 		if errors.Is(resultUser.Error, gorm.ErrRecordNotFound) {
-			log.Error()
 			return resp, errors.New("invalid email or password")
 		}
 		return resp, resultUser.Error
@@ -79,12 +94,12 @@ func (AuthRepository) Login(req request.LoginAccountRequest) (resp response.Logi
 	}
 
 	if !account.IsActive {
-		log.Error()
+		log.Error().Msg("Account is not active")
 		return resp, errors.New("account is not active")
 	}
 
 	if !account.DeletedAt.Time.IsZero() {
-		log.Error()
+		log.Error().Msg("Account has been deleted")
 		return resp, errors.New("account has been deleted")
 	}
 
@@ -93,8 +108,49 @@ func (AuthRepository) Login(req request.LoginAccountRequest) (resp response.Logi
 	resp.Name = user.Name
 	resp.UserId = account.UserID
 	resp.Role = role.RoleName
+	resp.LoginChance = account.LoginChances
+	resp.LoginTime = account.LoginTime
 
 	return resp, nil
+}
+
+func (AuthRepository) DecrementLoginChance(email string) error {
+	var account entity.Account
+	timeNow := time.Now()
+
+	result := config.DB.Where("email = ?", email).First(&account)
+	if result.Error != nil {
+		log.Error().Msg(result.Error.Error())
+		return result.Error
+	}
+
+	if account.LoginChances == 1 {
+		account.LoginTime = timeNow.Add(15 * time.Minute)
+	}
+	account.LoginChances--
+
+	if err := config.DB.Save(&account).Error; err != nil {
+		log.Error().Msg(err.Error())
+		return err
+	}
+	return nil
+}
+
+func (AuthRepository) IncrementLoginChance(email string) error {
+	var account entity.Account
+
+	result := config.DB.Where("email = ?", email).First(&account)
+	if result.Error != nil {
+		log.Error().Msg(result.Error.Error())
+		return result.Error
+	}
+	account.LoginChances = 3
+
+	if err := config.DB.Save(&account).Error; err != nil {
+		log.Error().Msg(err.Error())
+		return err
+	}
+	return nil
 }
 
 func (AuthRepository) GetRoleByName(roleName string) (entity.Role, error) {

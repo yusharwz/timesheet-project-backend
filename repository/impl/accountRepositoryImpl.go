@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"time"
 	"timesheet-app/config"
 	"timesheet-app/dto/request"
 	"timesheet-app/dto/response"
@@ -147,6 +148,8 @@ func (AccountRepository) ForgetPassword(req request.ForgetPasswordRequest) error
 	}
 
 	account.Password = req.NewPassword
+	account.LoginChances = 3
+	account.LoginTime = time.Now()
 
 	if err := config.DB.Save(&account).Error; err != nil {
 		log.Error().Msg(err.Error())

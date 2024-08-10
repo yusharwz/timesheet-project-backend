@@ -31,8 +31,8 @@ func NewTimesheetController(g *gin.RouterGroup) {
 	}
 	all := g.Group("/timeSheets", middleware.JwtAuthWithRoles("admin", "user", "manager", "benefit"))
 	{
-		all.GET("/timesheets", middleware.BasicAuth, controller.GetAllTimeSheets)
-		all.GET("/timesheets/:id", middleware.BasicAuth, controller.GetTimeSheetByID)
+		all.GET("/timesheets", controller.GetAllTimeSheets)
+		all.GET("/timesheets/:id", controller.GetTimeSheetByID)
 	}
 	managerGroup := g.Group("/manager", middleware.JwtAuthWithRoles("manager"))
 	{

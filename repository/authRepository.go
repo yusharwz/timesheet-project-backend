@@ -11,4 +11,6 @@ type AuthRepository interface {
 	Login(req request.LoginAccountRequest) (resp response.LoginResponse, err error)
 	GetRoleByName(roleName string) (entity.Role, error)
 	GetRoleById(id string) (*entity.Role, error)
+	DecrementLoginChance(email string) error
+	IncrementLoginChance(email string) error
 }
