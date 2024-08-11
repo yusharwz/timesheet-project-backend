@@ -1,0 +1,3 @@
+{"level":"error","time":"11-08-2024 07:55:20","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/timesheet-app/repository/impl/authRepositoryImpl.go:62","message":"record not found"}
+{"level":"error","time":"11-08-2024 07:55:20","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/timesheet-app/service/impl/authServiceImpl.go:83","message":"invalid email or password"}
+{"level":"error","time":"11-08-2024 08:04:44","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/timesheet-app/service/impl/authServiceImpl.go:98","message":"Invalid email or password"}
