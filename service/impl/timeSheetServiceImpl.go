@@ -603,7 +603,7 @@ func (TimeSheetService) ApproveBenefitTimeSheet(id string, userID string) error 
 		return err
 	}
 
-	err = helper.SendNotificationToTrainer(detailAccount.Email, detailUser.Name, "Approved", "Manager")
+	err = helper.SendNotificationToTrainer(detailAccount.Email, detailUser.Name, "Approved", "Benefit")
 	if err != nil {
 		log.Error().Msgf("Failed to send approval email: %v", err)
 		return err
@@ -643,7 +643,7 @@ func (TimeSheetService) RejectBenefitTimeSheet(id string, userID string) error {
 		return err
 	}
 
-	err = helper.SendNotificationToTrainer(detailAccount.Email, detailUser.Name, "Rejected", "Manager")
+	err = helper.SendNotificationToTrainer(detailAccount.Email, detailUser.Name, "Rejected", "Benefit")
 	if err != nil {
 		log.Error().Msgf("Failed to send approval email: %v", err)
 		return err
