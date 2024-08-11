@@ -13,30 +13,39 @@ git clone https://git.enigmacamp.com/enigma-camp/upskilling-class/01040726-upski
 - copy the .example.env and make new file .env
 
 ```bash
-cp .example.env .env 
+cp .example.env .env
+```
+
+- update library
+
+```bash
+go mod tidy
 ```
 
 - setting the env file
-- optional (for new update please checkout dev/alvindo)
+- optional (for new update please checkout development)
 
 ```bash
-git checkout dev/alvindo
+git checkout development
 ```
 
 - run with
 
 ```bash
-go run . 
+go run .
 ```
 
 ## For documentation
 
 #### using postman
+
 [go-timesheet.postman_collection.json](go-timesheet.postman_collection.json)
+
 - download file above
 - import in postman
 
 #### look this file to documentation without postman
+
 [collection.md](collection.md)
 
 ## How to use import documentation
