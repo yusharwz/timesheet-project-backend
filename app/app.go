@@ -2,22 +2,21 @@ package app
 
 import (
 	"errors"
-	"final-project-enigma/config"
-	"final-project-enigma/dto"
-	"final-project-enigma/router"
-	"final-project-enigma/utils"
 	"flag"
 	"fmt"
 	"os"
 	"strconv"
 	"time"
+	"timesheet-app/config"
+	"timesheet-app/dto"
+	"timesheet-app/router"
+	"timesheet-app/utils"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"github.com/go-resty/resty/v2"
 	"github.com/joho/godotenv"
 	"github.com/natefinch/lumberjack"
 	"github.com/rs/zerolog"
@@ -46,9 +45,15 @@ func InitEnv() (dto.ConfigData, error) {
 	dbMaxConn := os.Getenv("MAX_CONN")
 	dbMaxLifeTime := os.Getenv("MAX_LIFE_TIME")
 	logMode := os.Getenv("LOG_MODE")
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	adminEmail := os.Getenv("ADMIN_EMAIL")
 
 	if dbHost == "" || dbPort == "" || dbUser == "" || dbPass == "" || dbName == "" || dbMaxIdle == "" || dbMaxConn == "" || dbMaxLifeTime == "" || logMode == "" {
 		return configData, errors.New("DB config is not set")
+	}
+
+	if adminPassword == "" || adminEmail == "" {
+		return configData, errors.New("admin config is not set")
 	}
 
 	var err error
@@ -69,6 +74,8 @@ func InitEnv() (dto.ConfigData, error) {
 	configData.DbConfig.Database = dbName
 	configData.DbConfig.MaxLifeTime = dbMaxLifeTime
 	configData.DbConfig.LogMode, err = strconv.Atoi(logMode)
+	configData.AdminConfig.Email = adminEmail
+	configData.AdminConfig.Password = adminPassword
 	if err != nil {
 		return configData, err
 	}
@@ -76,12 +83,12 @@ func InitEnv() (dto.ConfigData, error) {
 	return configData, nil
 }
 
-func initializeDomainModule(r *gin.Engine, client *resty.Client) {
+func initializeDomainModule(r *gin.Engine) {
 	apiGroup := r.Group("/api")
 	v1Group := apiGroup.Group("/v1")
 
 	// checkHealth
-	router.InitRoute(v1Group, client)
+	router.InitRoute(v1Group)
 }
 
 func RunService() {
@@ -126,12 +133,10 @@ func RunService() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowAllOrigins: false,
-		AllowOrigins:    []string{"*"},
-		AllowMethods:    []string{"GET", "POST", "PUT", "OPTIONS", "DELETE"},
-		AllowHeaders: []string{
-			"Origin", "Content-Type",
-			"Authorization"},
+		AllowAllOrigins:  false,
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "OPTIONS", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "ngrok-skip-browser-warning"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           120 * time.Second,
@@ -155,10 +160,16 @@ func RunService() {
 	log.Logger = log.Output(logFile)
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("password", utils.ValidatePassword)
-		v.RegisterValidation("nomorHp", utils.ValidateNoHp)
-		v.RegisterValidation("username", utils.ValidateUsername)
-		v.RegisterValidation("pin", utils.ValidatePIN)
+		err := v.RegisterValidation("password", utils.ValidatePassword)
+		if err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
+		err = v.RegisterValidation("nomorHp", utils.ValidateNoHp)
+		if err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
 	}
 
 	r.Use(logger.SetLogger(
@@ -169,9 +180,7 @@ func RunService() {
 
 	r.Use(gin.Recovery())
 
-	client := resty.New()
-
-	initializeDomainModule(r, client)
+	initializeDomainModule(r)
 
 	version := "0.0.1"
 	log.Info().Msg(fmt.Sprintf("Service Running version %s", version))

@@ -1,13 +1,13 @@
 package helper
 
 import (
-	"final-project-enigma/middleware"
 	"fmt"
+	"timesheet-app/middleware"
 )
 
-func GetTokenJwt(userId, username, email, roles string) (string, error) {
+func GetTokenJwt(userId, name, email, roles string) (string, error) {
 
-	token, err := middleware.GenerateTokenJwt(userId, username, email, roles, 720)
+	token, err := middleware.GenerateTokenJwt(userId, name, email, roles, 720)
 	if err != nil {
 		fmt.Println(err)
 		return "", err

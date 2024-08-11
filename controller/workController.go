@@ -1,27 +1,29 @@
 package controller
 
 import (
-	"final-project-enigma/dto/request"
-	"final-project-enigma/dto/response"
-	"final-project-enigma/service/impl"
-	"final-project-enigma/utils"
+	"timesheet-app/dto/request"
+	"timesheet-app/dto/response"
+	"timesheet-app/middleware"
+	"timesheet-app/service"
+	"timesheet-app/service/impl"
+	"timesheet-app/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 type WorkController struct{}
 
-var workService = impl.NewWorkService()
+var workService service.WorkService = impl.NewWorkService()
 
 func NewWorkController(g *gin.RouterGroup) {
 	controller := new(WorkController)
-	workGroup := g.Group("/admin/works")
+	workGroup := g.Group("/admin/works", middleware.JwtAuthWithRoles("user", "admin"))
 	{
-		workGroup.POST("/", controller.CreateWork)
-		workGroup.PUT("/:id", controller.UpdateWork)
-		workGroup.DELETE("/:id", controller.DeleteWork)
-		workGroup.GET("/", controller.GetAllWork)
-		workGroup.GET("/:id", controller.GetById)
+		workGroup.GET("", controller.GetAllWork)
+		workGroup.POST("/", middleware.JwtAuthWithRoles("admin"), controller.CreateWork)
+		workGroup.PUT("/:id", middleware.JwtAuthWithRoles("admin"), controller.UpdateWork)
+		workGroup.DELETE("/:id", middleware.JwtAuthWithRoles("admin"), controller.DeleteWork)
+		workGroup.GET("/:id", middleware.JwtAuthWithRoles("admin"), controller.GetById)
 	}
 }
 
@@ -30,57 +32,58 @@ func (WorkController) CreateWork(c *gin.Context) {
 	err := c.ShouldBindJSON(&workRequest)
 	if err != nil {
 		validationError := utils.GetValidationError(err)
-		response.NewResponseBadRequest(c, validationError, "Could not parse request", "", "")
+		response.NewResponseBadRequest(c, validationError)
 		return
 	}
 
 	result, err := workService.CreateWork(workRequest)
 	if err != nil {
-		response.NewResponseError(c, err.Error(), "", "")
+		response.NewResponseError(c, err.Error())
 		return
 	}
 
-	response.NewResponseCreated(c, result, "Created new work successfully", "", "")
-
+	response.NewResponseCreated(c, result)
 }
 
 func (WorkController) GetById(c *gin.Context) {
 	id := c.Param("id")
-	result, err := workService.GetById(id)
+	result, err := workService.GetById(id, false)
 	if err != nil {
-		response.NewResponseError(c, err.Error(), "", "")
+		response.NewResponseError(c, err.Error())
 		return
 	}
-	response.NewResponseSuccess(c, result, "Success fetch work data", "", "")
+	response.NewResponseSuccess(c, result)
 }
 
 func (*WorkController) UpdateWork(c *gin.Context) {
 	id := c.Param("id")
 
-	var request request.WorkRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	var r request.WorkRequest
+	if err := c.ShouldBindJSON(&r); err != nil {
 		validationError := utils.GetValidationError(err)
-		response.NewResponseBadRequest(c, validationError, "Invalid request", "WORK", "400")
+		response.NewResponseBadRequest(c, validationError)
 		return
 	}
 
-	result, err := workService.UpdateWork(id, request)
+	result, err := workService.UpdateWork(id, r)
 	if err != nil {
-		response.NewResponseError(c, err.Error(), "", "")
+		response.NewResponseError(c, err.Error())
 	}
 
-	response.NewResponseSuccess(c, result, "Work updated successfully", "WORK", "200")
+	response.NewResponseSuccess(c, result)
 }
 
 func (WorkController) GetAllWork(c *gin.Context) {
-	page := c.DefaultQuery("page", "1")
-	size := c.DefaultQuery("size", "10")
-	results, total, err := workService.GetAllWork(page, size)
+	paging := c.DefaultQuery("paging", "1")
+	rowsPerPage := c.DefaultQuery("rowsPerPage", "10")
+	description := c.Query("description")
+	results, totalRows, totalPage, err := workService.GetAllWork(paging, rowsPerPage, description)
 	if err != nil {
-		response.NewResponseError(c, err.Error(), "", "")
+		response.NewResponseError(c, err.Error())
 		return
 	}
-	response.NewResponseSuccessPaging(c, results, "Success fetch all work data", "", "", page, size, total)
+
+	response.NewResponseSuccessPaging(c, results, paging, rowsPerPage, totalRows, totalPage)
 }
 
 func (WorkController) DeleteWork(c *gin.Context) {
@@ -88,8 +91,8 @@ func (WorkController) DeleteWork(c *gin.Context) {
 
 	err := workService.DeleteWork(id)
 	if err != nil {
-		response.NewResponseError(c, err.Error(), "WORK", "400")
+		response.NewResponseError(c, err.Error())
 	}
 
-	response.NewResponseSuccess(c, nil, "Work deleted successfully", "WORK", "200")
+	response.NewResponseSuccess(c, nil)
 }

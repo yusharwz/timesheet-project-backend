@@ -2,10 +2,12 @@ package impl
 
 import (
 	"errors"
-	"final-project-enigma/config"
-	"final-project-enigma/entity"
-	"final-project-enigma/helper"
-	"strconv"
+	"timesheet-app/config"
+	"timesheet-app/entity"
+	"timesheet-app/helper"
+
+	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 )
 
 type WorkRepository struct{}
@@ -16,6 +18,7 @@ func NewWorkRepository() *WorkRepository {
 
 func (WorkRepository) CreateWork(work entity.Work) (entity.Work, error) {
 	if result := config.DB.Create(&work); result.Error != nil {
+		log.Error()
 		return entity.Work{}, result.Error
 	}
 	return work, nil
@@ -23,6 +26,7 @@ func (WorkRepository) CreateWork(work entity.Work) (entity.Work, error) {
 
 func (WorkRepository) UpdateWork(work entity.Work) (entity.Work, error) {
 	if result := config.DB.Save(&work); result.Error != nil {
+		log.Error()
 		return entity.Work{}, result.Error
 	}
 	return work, nil
@@ -30,27 +34,26 @@ func (WorkRepository) UpdateWork(work entity.Work) (entity.Work, error) {
 
 func (WorkRepository) DeleteWork(id string) error {
 	if result := config.DB.Delete(&entity.Work{}, "id = ?", id); result.Error != nil {
+		log.Error()
 		return result.Error
 	}
 	return nil
 }
 
-func (WorkRepository) GetById(id string) (entity.Work, error) {
+func (WorkRepository) GetById(id string, spec func(db *gorm.DB) *gorm.DB) (entity.Work, error) {
 	var work entity.Work
-	config.DB.Where("id = ?", id).First(&work)
+	config.DB.Scopes(spec).Where("id = ?", id).First(&work)
 	if work.ID == "" {
+		log.Error()
 		return entity.Work{}, errors.New("data not found")
 	}
 	return work, nil
 }
 
-func (WorkRepository) GetAllWork(page, size string) ([]entity.Work, string, error) {
+func (WorkRepository) GetAllWork(spec []func(db *gorm.DB) *gorm.DB) ([]entity.Work, string, error) {
 	var works []entity.Work
-	config.DB.Scopes(helper.Paginate(page, size)).Find(&works)
-	if len(works) == 0 {
-		return nil, "0", errors.New("data not found")
-	}
-	var total int64
-	config.DB.Model(&entity.Work{}).Count(&total)
-	return works, strconv.FormatInt(total, 10), nil
+	db := config.DB.Model(&entity.Work{}).Scopes(spec[1:]...)
+	totalRows := helper.GetTotalRows(db)
+	err := db.Scopes(spec[0]).Find(&works).Error
+	return works, totalRows, err
 }

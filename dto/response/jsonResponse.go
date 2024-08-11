@@ -4,27 +4,23 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 )
 
 type (
 	jsonResponse struct {
-		Code    string      `json:"responseCode"`
-		Message string      `json:"responseMessage,omitempty"`
-		Data    interface{} `json:"data,omitempty"`
+		Status Status      `json:"status"`
+		Data   interface{} `json:"data,omitempty"`
 	}
 
 	jsonResponseWithPaging struct {
-		Code    string      `json:"responseCode"`
-		Message string      `json:"responseMessage"`
-		Data    interface{} `json:"data,omitempty"`
-		Paging  interface{} `json:"paging,omitempty"`
+		Status Status      `json:"status"`
+		Data   interface{} `json:"data,omitempty"`
+		Paging Paging      `json:"paging,omitempty"`
 	}
 
 	jsonErrorResponse struct {
-		Code    string `json:"responseCode"`
-		Message string `json:"responseMessage"`
-		Error   string `json:"error,omitempty"`
+		Status Status `json:"status"`
+		Data   string `json:"data,omitempty"`
 	}
 
 	ValidationField struct {
@@ -33,74 +29,95 @@ type (
 	}
 
 	jsonBadRequestResponse struct {
-		Code             string            `json:"responseCode"`
-		Message          string            `json:"responseMessage"`
-		ErrorDescription []ValidationField `json:"error_description,omitempty"`
+		Status Status            `json:"status"`
+		Data   []ValidationField `json:"data,omitempty"`
 	}
 
-	PagingInfo struct {
-		Page      string `json:"page,omitempty"`
-		Size      string `json:"size,omitempty"`
-		TotalData string `json:"totalData,omitempty"`
+	Paging struct {
+		Paging      string `json:"paging,omitempty"`
+		RowsPerPage string `json:"rowsPerPage,omitempty"`
+		TotalRows   string `json:"totalRows,omitempty"`
+		TotalPage   string `json:"totalPage,omitempty"`
+	}
+
+	Status struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
 	}
 )
 
-func NewResponseSuccessPaging(c *gin.Context, result interface{}, message, serviceCode, responseCode string, page, size, totalData string) {
+func NewResponseSuccessPaging(c *gin.Context, result interface{}, paging, rowsPerPage, totalRows, totalPage string) {
 	c.JSON(http.StatusOK, jsonResponseWithPaging{
-		Code:    "200" + serviceCode + responseCode,
-		Message: message,
-		Data:    result,
-		Paging: PagingInfo{
-			Page:      page,
-			Size:      size,
-			TotalData: totalData,
+		Status: Status{
+			Code:    http.StatusOK,
+			Message: "Success",
+		},
+		Data: result,
+		Paging: Paging{
+			Paging:      paging,
+			RowsPerPage: rowsPerPage,
+			TotalRows:   totalRows,
+			TotalPage:   totalPage,
 		},
 	})
 }
 
-func NewResponseSuccess(c *gin.Context, result interface{}, message, serviceCode, responseCode string) {
+func NewResponseSuccess(c *gin.Context, result interface{}) {
 	c.JSON(http.StatusOK, jsonResponse{
-		Code:    "200" + serviceCode + responseCode,
-		Message: message,
-		Data:    result,
+		Status: Status{
+			Code:    http.StatusOK,
+			Message: "Success",
+		},
+		Data: result,
 	})
 }
 
-func NewResponseCreated(c *gin.Context, result interface{}, message, serviceCode, responseCode string) {
-	c.JSON(http.StatusOK, jsonResponse{
-		Code:    "201" + serviceCode + responseCode,
-		Message: message,
-		Data:    result,
+func NewResponseCreated(c *gin.Context, result interface{}) {
+	c.JSON(http.StatusCreated, jsonResponse{
+		Status: Status{
+			Code:    http.StatusCreated,
+			Message: "Created",
+		},
+		Data: result,
 	})
 }
 
-func NewResponseBadRequest(c *gin.Context, validationField []ValidationField, message, serviceCode, errorCode string) {
+func NewResponseBadRequest(c *gin.Context, validationField []ValidationField) {
 	c.JSON(http.StatusBadRequest, jsonBadRequestResponse{
-		Code:             "400" + serviceCode + errorCode,
-		Message:          message,
-		ErrorDescription: validationField,
+		Status: Status{
+			Code:    http.StatusBadRequest,
+			Message: "Bad Request",
+		},
+		Data: validationField,
 	})
 }
 
-func NewResponseError(c *gin.Context, err, serviceCode, errorCode string) {
-	log.Error().Msg(err)
+func NewResponseError(c *gin.Context, err string) {
 	c.JSON(http.StatusInternalServerError, jsonErrorResponse{
-		Code:    "500" + serviceCode + errorCode,
-		Message: "Internal Server Error",
-		Error:   err,
+		Status: Status{
+			Code:    http.StatusInternalServerError,
+			Message: "Internal Server Error",
+		},
+		Data: err,
 	})
 }
 
-func NewResponseForbidden(c *gin.Context, message, serviceCode, errorCode string) {
+func NewResponseForbidden(c *gin.Context, err string) {
 	c.JSON(http.StatusForbidden, jsonErrorResponse{
-		Code:    "403" + serviceCode + errorCode,
-		Message: message,
+		Status: Status{
+			Code:    http.StatusForbidden,
+			Message: "Forbidden",
+		},
+		Data: err,
 	})
 }
 
-func NewResponseUnauthorized(c *gin.Context, message, serviceCode, errorCode string) {
+func NewResponseUnauthorized(c *gin.Context, err string) {
 	c.JSON(http.StatusUnauthorized, jsonErrorResponse{
-		Code:    "401" + serviceCode + errorCode,
-		Message: message,
+		Status: Status{
+			Code:    http.StatusOK,
+			Message: "Unauthorized",
+		},
+		Data: err,
 	})
 }

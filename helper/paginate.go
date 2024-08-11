@@ -5,16 +5,30 @@ import (
 	"strconv"
 )
 
-func Paginate(page, size string) func(db *gorm.DB) *gorm.DB {
+func Paginate(paging, rowsPerPage int) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		page, _ := strconv.Atoi(page)
-		if page <= 0 {
-			page = 1
+		if paging <= 0 {
+			paging = 1
 		}
 
-		pageSize, _ := strconv.Atoi(size)
-
-		offset := (page - 1) * pageSize
-		return db.Offset(offset).Limit(pageSize)
+		offset := (paging - 1) * rowsPerPage
+		return db.Order("updated_at desc").Offset(offset).Limit(rowsPerPage)
 	}
+}
+
+func GetTotalPage(totalRows string, rowsPerPage int) int {
+	var totalPage int
+	tr, _ := strconv.Atoi(totalRows)
+	rest := tr % rowsPerPage
+	totalPage = tr / rowsPerPage
+	if rest != 0 {
+		totalPage = totalPage + 1
+	}
+	return totalPage
+}
+
+func GetTotalRows(db *gorm.DB) string {
+	var totalRows int64
+	db.Count(&totalRows)
+	return strconv.FormatInt(totalRows, 10)
 }

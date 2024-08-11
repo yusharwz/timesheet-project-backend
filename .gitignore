@@ -2,3 +2,7 @@
 /tmp/
 /.idea/
 .vscode/.vscode/
+compose-dev.yaml
+docker-compose.yml
+dockerfile
+timesheet-app.exe

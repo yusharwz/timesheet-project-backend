@@ -1,46 +1,75 @@
 package impl
 
 import (
-	"final-project-enigma/dto/response"
-	"final-project-enigma/repository/impl"
+	"errors"
+	"strconv"
+	"timesheet-app/dto/response"
+	"timesheet-app/helper"
+	"timesheet-app/repository"
+	"timesheet-app/repository/impl"
+	"timesheet-app/service"
+
+	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 )
 
 type AdminService struct{}
 
-var adminRepository = impl.NewAdminRepository()
+var adminRepository repository.AdminRepository = impl.NewAdminRepository()
+var authService service.AuthService = NewAuthService()
 
 func NewAdminService() *AdminService {
 	return &AdminService{}
 }
 
-func (AdminService) RetrieveAccountList() ([]response.ListAccountResponse, error) {
-
-	accounts, users, err := adminRepository.RetrieveAccountList()
+func (AdminService) RetrieveAccountList(paging, rowsPerPage, name string) ([]response.ListAccountResponse, string, string, error) {
+	pagingInt, err := strconv.Atoi(paging)
 	if err != nil {
-		return nil, err
+		log.Error().Msg(err.Error())
+		return nil, "0", "0", errors.New("invalid query for paging")
+	}
+	rowsPerPageInt, err := strconv.Atoi(rowsPerPage)
+	if err != nil {
+		log.Error().Msg(err.Error())
+		return nil, "0", "0", errors.New("invalid query for rows per page")
 	}
 
-	userMap := make(map[string]string)
-	for _, user := range users {
-		userMap[user.ID] = user.Name
+	var spec []func(db *gorm.DB) *gorm.DB
+	spec = append(spec, helper.Paginate(pagingInt, rowsPerPageInt))
+	if name != "" {
+		spec = append(spec, helper.SelectAccountByName(name))
+	}
+
+	users, totalRows, err := adminRepository.RetrieveAccountList(spec)
+	if err != nil {
+		log.Error().Msg(err.Error())
+		return nil, "0", "0", err
 	}
 
 	var resp []response.ListAccountResponse
-	for _, account := range accounts {
+	for _, user := range users {
 		var status string
-		if account.IsActive {
-			status = "Active"
+		if user.Account.IsActive {
+			status = "active"
 		} else {
-			status = "Inactive"
+			status = "inactive"
 		}
-
+		result, err := authService.GetRoleById(user.Account.RoleID)
+		if err != nil {
+			log.Error().Msg(err.Error())
+			return nil, "0", "0", err
+		}
 		resp = append(resp, response.ListAccountResponse{
-			Email:  account.Email,
+			ID:     user.ID,
+			Email:  user.Account.Email,
+			Name:   user.Name,
+			Role:   result.RoleName,
 			Status: status,
 		})
 	}
 
-	return resp, nil
+	totalPage := helper.GetTotalPage(totalRows, rowsPerPageInt)
+	return resp, totalRows, strconv.Itoa(totalPage), nil
 }
 
 func (AdminService) DetailAccount(userID string) (response.AccountDetailResponse, error) {
@@ -48,6 +77,7 @@ func (AdminService) DetailAccount(userID string) (response.AccountDetailResponse
 
 	account, user, role, err := adminRepository.DetailAccount(userID)
 	if err != nil {
+		log.Error().Msg(err.Error())
 		return resp, err
 	}
 
@@ -65,4 +95,20 @@ func (AdminService) DetailAccount(userID string) (response.AccountDetailResponse
 
 func (AdminService) SoftDeleteAccount(userID string) error {
 	return adminRepository.SoftDeleteAccount(userID)
+}
+
+func (AdminService) GetAllRole() (*[]response.RoleResponse, error) {
+	roles, err := adminRepository.GetAllRole()
+	if err != nil {
+		log.Error().Msg(err.Error())
+		return nil, err
+	}
+	var responseList = make([]response.RoleResponse, 0)
+	for _, role := range *roles {
+		responseList = append(responseList, response.RoleResponse{
+			ID:       role.ID,
+			RoleName: role.RoleName,
+		})
+	}
+	return &responseList, nil
 }

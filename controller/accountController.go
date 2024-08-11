@@ -1,45 +1,47 @@
 package controller
 
 import (
-	"final-project-enigma/dto/request"
-	"final-project-enigma/dto/response"
-	"final-project-enigma/middleware"
-	"final-project-enigma/service/impl"
-	"final-project-enigma/utils"
+	"timesheet-app/dto/request"
+	"timesheet-app/dto/response"
+	"timesheet-app/middleware"
+	"timesheet-app/service"
+	"timesheet-app/service/impl"
+	"timesheet-app/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AccountController struct{}
 
-var accountService = impl.NewAccountService()
+var accountService service.AccountService = impl.NewAccountService()
 
 func NewAccountController(g *gin.RouterGroup) {
 	controller := new(AccountController)
 
-	accountGroup := g.Group("/accounts")
+	accountGroup := g.Group("/accounts", middleware.JwtAuthWithRoles("admin", "user", "manager", "benefit"))
 	{
-		accountGroup.GET("/activate", controller.AccountActivation)
-		accountGroup.GET("/profile", middleware.JwtAuthWithRoles("user"), controller.GetAccountDetailByUserID)
-		accountGroup.PUT("/", middleware.JwtAuthWithRoles("user"), controller.EditAccount)
-		accountGroup.PUT("/change-password", middleware.JwtAuthWithRoles("user"), controller.ChangePassword)
+		accountGroup.GET("/profile", controller.GetAccountDetailByUserID)
+		accountGroup.POST("/profile/upload-signature", controller.UploadSignature)
+		accountGroup.PUT("/", controller.EditAccount)
+		accountGroup.PUT("/change-password", controller.ChangePassword)
 	}
+	g.GET("accounts/activate", middleware.BasicAuth, controller.AccountActivation)
+	g.POST("accounts/forget-password", middleware.BasicAuth, controller.ForgetPassword)
 }
 func (AccountController) AccountActivation(ctx *gin.Context) {
 
 	var params request.ActivateAccountRequest
 
 	params.Email = ctx.Query("e")
-	params.Username = ctx.Query("un")
 	params.Password = ctx.Query("unique")
 
 	err := accountService.AccountActivationUrl(params)
 	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "account has been activated", "01", "01")
+	response.NewResponseSuccess(ctx, nil)
 }
 
 func (AccountController) EditAccount(ctx *gin.Context) {
@@ -51,19 +53,42 @@ func (AccountController) EditAccount(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponseBadRequest(ctx, validationError, "bad request", "01", "02")
+			response.NewResponseBadRequest(ctx, validationError)
 			return
 		}
-		response.NewResponseError(ctx, "json request body required", "01", "02")
+		response.NewResponseError(ctx, "json request body required")
 		return
 	}
 	resp, err := accountService.EditAccount(req, authHeader)
 	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "update account success", "01", "01")
+	response.NewResponseSuccess(ctx, resp)
+}
+
+func (AccountController) UploadSignature(ctx *gin.Context) {
+	var req request.UploadImagesRequest
+	authHeader := ctx.GetHeader("Authorization")
+	fileHeader, err := ctx.FormFile("image")
+	if err != nil {
+		response.NewResponseError(ctx, "failed to get file")
+		return
+	}
+	file, err := fileHeader.Open()
+	if err != nil {
+		response.NewResponseError(ctx, "failed to open file")
+		return
+	}
+	req.SignatureImage = file
+	resp, err := accountService.UploadSignature(req, authHeader)
+	if err != nil {
+		response.NewResponseError(ctx, err.Error())
+		return
+	}
+	response.NewResponseSuccess(ctx, resp)
+
 }
 
 func (AccountController) ChangePassword(ctx *gin.Context) {
@@ -75,19 +100,19 @@ func (AccountController) ChangePassword(ctx *gin.Context) {
 		validationError := utils.GetValidationError(err)
 
 		if len(validationError) > 0 {
-			response.NewResponseBadRequest(ctx, validationError, "bad request", "01", "02")
+			response.NewResponseBadRequest(ctx, validationError)
 			return
 		}
-		response.NewResponseError(ctx, "json request body required", "01", "02")
+		response.NewResponseError(ctx, "json request body required")
 		return
 	}
 	err := accountService.ChangePassword(req, authHeader)
 	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, nil, "update password success", "01", "01")
+	response.NewResponseSuccess(ctx, nil)
 }
 
 func (AccountController) GetAccountDetailByUserID(ctx *gin.Context) {
@@ -96,9 +121,31 @@ func (AccountController) GetAccountDetailByUserID(ctx *gin.Context) {
 
 	resp, err := accountService.GetAccountDetail(authHeader)
 	if err != nil {
-		response.NewResponseForbidden(ctx, err.Error(), "01", "01")
+		response.NewResponseForbidden(ctx, err.Error())
 		return
 	}
 
-	response.NewResponseSuccess(ctx, resp, "get data detail success", "01", "01")
+	response.NewResponseSuccess(ctx, resp)
+}
+
+func (AccountController) ForgetPassword(ctx *gin.Context) {
+	var req request.ForgetPasswordRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		validationError := utils.GetValidationError(err)
+
+		if len(validationError) > 0 {
+			response.NewResponseBadRequest(ctx, validationError)
+			return
+		}
+		response.NewResponseError(ctx, "json request body required")
+		return
+	}
+
+	err := accountService.ForgetPassword(req)
+	if err != nil {
+		response.NewResponseForbidden(ctx, err.Error())
+		return
+	}
+
+	response.NewResponseSuccess(ctx, "Succes Send New Password to Your Email Address")
 }

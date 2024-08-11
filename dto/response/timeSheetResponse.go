@@ -1,22 +1,41 @@
 package response
 
-import "time"
+import (
+	"time"
+)
 
 type TimeSheetResponse struct {
-	ID                 string                    `json:"id"`
-	UserID             string                    `json:"user_id"`
-	StatusTimeSheetID  string                    `json:"status_time_sheet_id"`
-	ConfirmedManagerBy string                    `json:"id_manager"`
-	ConfirmedBenefitBy string                    `json:"id_benefit"`
-	CreatedAt          time.Time                 `json:"created_at"`
-	UpdatedAt          time.Time                 `json:"updated_at"`
-	TimeSheetDetails   []TimeSheetDetailResponse `json:"time_sheet_details"`
+	ID                    string                    `json:"id"`
+	CreatedAt             time.Time                 `json:"createdAt"`
+	UpdatedAt             time.Time                 `json:"updatedAt"`
+	Status                string                    `json:"status"`
+	ConfirmedManagerBy    ConfirmedByResponse       `json:"confirmedManagerBy"`
+	ConfirmedBenefitBy    ConfirmedByResponse       `json:"confirmedBenefitBy"`
+	UserTimeSheetResponse UserTimeSheetResponse     `json:"user"`
+	TimeSheetDetails      []TimeSheetDetailResponse `json:"timeSheetDetails"`
+	Total                 int                       `json:"total"`
 }
 
 type TimeSheetDetailResponse struct {
-	ID        string    `json:"id"`
-	Date      time.Time `json:"date"`
-	StartTime time.Time `json:"start_time"`
-	EndTime   time.Time `json:"end_time"`
-	WorkID    string    `json:"work_id"`
+	ID          string    `json:"id"`
+	Date        time.Time `json:"date"`
+	StartTime   time.Time `json:"startTime"`
+	EndTime     time.Time `json:"endTime"`
+	WorkID      string    `json:"workId"`
+	Description string    `json:"description"`
+	SubTotal    int       `json:"subTotal"`
+}
+
+type ConfirmedByResponse struct {
+	ID           string `json:"userId"`
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+	SignatureUrl string `json:"signatureUrl"`
+}
+
+type UserTimeSheetResponse struct {
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+	SignatureUrl string `json:"signatureUrl"`
 }

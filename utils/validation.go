@@ -2,10 +2,10 @@ package utils
 
 import (
 	"errors"
-	"final-project-enigma/dto/response"
 	"fmt"
 	"regexp"
 	"strings"
+	"timesheet-app/dto/response"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
@@ -75,10 +75,6 @@ func formatMessage(err validator.FieldError) string {
 		message = "password must contain at least one uppercase letter, one lowercase letter, one number and one special character"
 	case "nomorHp":
 		message = "invalid number phone format"
-	case "username":
-		message = "invalid username format, don't use special characters and space"
-	case "pin":
-		message = "only 6 characters of number"
 	}
 	return message
 }
@@ -110,14 +106,4 @@ func ValidatePassword(fl validator.FieldLevel) bool {
 func ValidateNoHp(fl validator.FieldLevel) bool {
 	noHp := fl.Field().String()
 	return regexp.MustCompile(`^(08|\+62)\d{8,20}$`).MatchString(noHp)
-}
-
-func ValidateUsername(fl validator.FieldLevel) bool {
-	username := fl.Field().String()
-	return regexp.MustCompile(`^[a-zA-Z0-9]{5,20}$`).MatchString(username)
-}
-
-func ValidatePIN(fl validator.FieldLevel) bool {
-	pin := fl.Field().String()
-	return regexp.MustCompile(`^\d{6}$`).MatchString(pin)
 }

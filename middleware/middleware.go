@@ -2,16 +2,32 @@ package middleware
 
 import (
 	"errors"
-	"final-project-enigma/dto"
-	"final-project-enigma/dto/response"
 	"fmt"
 	"os"
 	"strings"
 	"time"
+	"timesheet-app/dto"
+	"timesheet-app/dto/response"
+
+	"github.com/joho/godotenv"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
+
+var (
+	applicationName  = "timesheet-app"
+	jwtSigningMethod = jwt.SigningMethodHS256
+	jwtSignatureKey  []byte
+)
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		return
+	}
+	jwtSignatureKey = []byte(os.Getenv("JWT_SECRET"))
+}
 
 func BasicAuth(c *gin.Context) {
 	userAuth := os.Getenv("BASIC_AUTH_USERNAME")
@@ -19,35 +35,31 @@ func BasicAuth(c *gin.Context) {
 
 	user, password, ok := c.Request.BasicAuth()
 	if !ok {
-		response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+		response.NewResponseUnauthorized(c, "Invalid header authorization")
 		c.Abort()
 		return
 	}
 	if user != userAuth || password != passAuth {
-		response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+		response.NewResponseUnauthorized(c, "Invalid token")
 		c.Abort()
 		return
 	}
 	c.Next()
 }
 
-var (
-	applicationName  = "timesheet-app"
-	jwtSigningMethod = jwt.SigningMethodHS256
-	jwtSignatureKey  = []byte("incubation-golang")
-)
-
-func GenerateTokenJwt(Id, username, email, roles string, expiredAt int64) (string, error) {
+func GenerateTokenJwt(Id, name, email, roles string, expiredAt int64) (string, error) {
 	loginExpDuration := time.Duration(expiredAt) * time.Hour
-	myExpiresAt := time.Now().Add(loginExpDuration).Unix()
+	issuedAt := time.Now()
+	myExpiresAt := issuedAt.Add(loginExpDuration).Unix()
 	claims := dto.JwtClaim{
 		Id:       Id,
-		Username: username,
+		Username: name,
 		Email:    email,
 		Roles:    roles,
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    applicationName,
 			ExpiresAt: myExpiresAt,
+			IssuedAt:  issuedAt.Unix(),
 		},
 	}
 
@@ -60,39 +72,11 @@ func GenerateTokenJwt(Id, username, email, roles string, expiredAt int64) (strin
 	return signedToken, nil
 }
 
-func JWTAuth() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if !strings.Contains(authHeader, "Bearer") {
-			response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
-			c.Abort()
-			return
-		}
-
-		tokenString := strings.Replace(authHeader, "Bearer ", "", -1)
-		claims := &dto.JwtClaim{}
-		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return jwtSignatureKey, nil
-		})
-		if err != nil {
-			response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
-			c.Abort()
-			return
-		}
-		if !token.Valid {
-			response.NewResponseForbidden(c, "Invalid token", "01", "03")
-			c.Abort()
-			return
-		}
-		c.Next()
-	}
-}
-
 func JwtAuthWithRoles(userId ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if !strings.Contains(authHeader, "Bearer") {
-			response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+			response.NewResponseUnauthorized(c, "Invalid authorization header")
 			c.Abort()
 			return
 		}
@@ -104,13 +88,13 @@ func JwtAuthWithRoles(userId ...string) gin.HandlerFunc {
 		})
 
 		if err != nil {
-			response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+			response.NewResponseUnauthorized(c, "Invalid token")
 			c.Abort()
 			return
 		}
 
 		if !token.Valid {
-			response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+			response.NewResponseUnauthorized(c, "Invalid token")
 			c.Abort()
 			return
 		}
@@ -127,7 +111,7 @@ func JwtAuthWithRoles(userId ...string) gin.HandlerFunc {
 		}
 
 		if !validRole {
-			response.NewResponseUnauthorized(c, "Invalid token", "01", "02")
+			response.NewResponseUnauthorized(c, "Invalid role")
 			c.Abort()
 			return
 		}
@@ -138,22 +122,17 @@ func JwtAuthWithRoles(userId ...string) gin.HandlerFunc {
 func GetIdFromToken(authHeader string) (string, error) {
 	splitToken := strings.Split(authHeader, " ")
 	if len(splitToken) != 2 || splitToken[0] != "Bearer" {
-		fmt.Println(authHeader)
 		return "", errors.New("invalid authorization format")
 	}
 	tokenString := splitToken[1]
 
-	// Mendekode token JWT
 	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Validasi algoritma yang digunakan
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		// Mengembalikan kunci rahasia yang sama yang digunakan untuk menandatangani token
 		return []byte("your_secret_key"), nil
 	})
 
-	// Mendapatkan ID dari klaim token JWT
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return "", errors.New("failed to get claims")
