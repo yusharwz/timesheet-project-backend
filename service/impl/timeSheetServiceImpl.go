@@ -4,7 +4,6 @@ import (
 	"errors"
 	"strconv"
 	"strings"
-	"time"
 	"timesheet-app/dto/request"
 	"timesheet-app/dto/response"
 	"timesheet-app/entity"
@@ -653,13 +652,13 @@ func (TimeSheetService) RejectBenefitTimeSheet(id string, userID string) error {
 }
 
 func (TimeSheetService) UpdateTimeSheetStatus(id string) error {
-	timeNow := time.Now()
-	day := timeNow.Day()
+	// timeNow := time.Now()
+	// day := timeNow.Day()
 
-	if day != 19 && day != 20 {
-		log.Error().Msg("failed to update time sheet status, please only submit on 19 or 20")
-		return errors.New("failed to update time sheet status, please only submit on 19 or 20")
-	}
+	// if day != 19 && day != 20 {
+	// 	log.Error().Msg("failed to update time sheet status, please only submit on 19 or 20")
+	// 	return errors.New("failed to update time sheet status, please only submit on 19 or 20")
+	// }
 
 	err := timeSheetRepository.UpdateTimeSheetStatus(id)
 	if err != nil {

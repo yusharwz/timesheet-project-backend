@@ -19,7 +19,7 @@ func NewWorkRepository() *WorkRepository {
 func (WorkRepository) CreateWork(work entity.Work) (entity.Work, error) {
 	if result := config.DB.Create(&work); result.Error != nil {
 		log.Error()
-		return entity.Work{}, result.Error
+		return entity.Work{}, errors.New("duplicate work description, try another description")
 	}
 	return work, nil
 }
@@ -27,7 +27,7 @@ func (WorkRepository) CreateWork(work entity.Work) (entity.Work, error) {
 func (WorkRepository) UpdateWork(work entity.Work) (entity.Work, error) {
 	if result := config.DB.Save(&work); result.Error != nil {
 		log.Error()
-		return entity.Work{}, result.Error
+		return entity.Work{}, errors.New("duplicate work description, try another description")
 	}
 	return work, nil
 }
