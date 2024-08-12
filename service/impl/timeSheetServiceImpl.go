@@ -74,8 +74,8 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 			log.Error().Msg(err.Error())
 			return nil, err
 		}
-		duration := int(v.EndTime.Sub(v.StartTime).Hours())
-		if duration < 1 {
+		duration := int(v.EndTime.Sub(v.StartTime).Minutes())
+		if duration < 60 {
 			return nil, errors.New("invalid work duration")
 		}
 		if strings.Contains(strings.ToLower(work.Description), "interview") && duration >= 2 {
