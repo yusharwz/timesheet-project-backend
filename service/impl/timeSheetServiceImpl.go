@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 	"timesheet-app/dto/request"
 	"timesheet-app/dto/response"
 	"timesheet-app/entity"
@@ -73,8 +74,8 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 			log.Error().Msg(err.Error())
 			return nil, err
 		}
-		duration := int(v.EndTime.Sub(v.StartTime).Hours())
-		if duration < 1 {
+		duration := int(v.EndTime.Sub(v.StartTime).Minutes())
+		if duration < 60 {
 			return nil, errors.New("invalid work duration")
 		}
 		if strings.Contains(strings.ToLower(work.Description), "interview") && duration >= 2 {
@@ -652,13 +653,13 @@ func (TimeSheetService) RejectBenefitTimeSheet(id string, userID string) error {
 }
 
 func (TimeSheetService) UpdateTimeSheetStatus(id string) error {
-	// timeNow := time.Now()
-	// day := timeNow.Day()
+	timeNow := time.Now()
+	day := timeNow.Day()
 
-	// if day != 19 && day != 20 {
-	// 	log.Error().Msg("failed to update time sheet status, please only submit on 19 or 20")
-	// 	return errors.New("failed to update time sheet status, please only submit on 19 or 20")
-	// }
+	if day != 19 && day != 20 {
+		log.Error().Msg("failed to update time sheet status, please only submit on 19 or 20")
+		return errors.New("failed to update time sheet status, please only submit on 19 or 20")
+	}
 
 	err := timeSheetRepository.UpdateTimeSheetStatus(id)
 	if err != nil {
