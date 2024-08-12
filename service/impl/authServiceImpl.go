@@ -3,6 +3,7 @@ package impl
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 	"timesheet-app/dto/request"
 	"timesheet-app/dto/response"
@@ -24,6 +25,8 @@ func NewAuthService() *AuthService {
 }
 
 func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp response.RegisterAccountResponse, err error) {
+
+	req.Email = strings.ToLower(req.Email)
 
 	code, err := helper.GenerateCode()
 	if err != nil {
@@ -78,6 +81,9 @@ func (AuthService) RegisterAccount(req request.RegisterAccountRequest) (resp res
 }
 
 func (AuthService) Login(req request.LoginAccountRequest) (resp response.LoginResponse, err error) {
+
+	req.Email = strings.ToLower(req.Email)
+
 	resp, err = authRepository.Login(req)
 	if err != nil {
 		log.Error().Msg(err.Error())
