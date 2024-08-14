@@ -37,6 +37,15 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 
 	timeSheetDetails := make([]entity.TimeSheetDetail, 0)
 	for _, value := range req.TimeSheetDetails {
+		if value.EndTime.Minute() > 0 {
+			value.EndTime = value.EndTime.Truncate(time.Hour)
+		}
+
+		duration := int(value.EndTime.Sub(value.StartTime).Minutes())
+		if duration < 60 {
+			return nil, errors.New("invalid work duration")
+		}
+
 		timeSheetDetails = append(timeSheetDetails, entity.TimeSheetDetail{
 			Base:      entity.Base{ID: uuid.NewString()},
 			Date:      value.Date,
@@ -74,8 +83,8 @@ func (TimeSheetService) CreateTimeSheet(req request.TimeSheetRequest, authHeader
 			log.Error().Msg(err.Error())
 			return nil, err
 		}
-		duration := int(v.EndTime.Sub(v.StartTime).Hours())
-		if duration < 1 {
+		duration := int(v.EndTime.Sub(v.StartTime).Minutes())
+		if duration < 60 {
 			return nil, errors.New("invalid work duration")
 		}
 		if strings.Contains(strings.ToLower(work.Description), "interview") && duration >= 2 {
@@ -603,7 +612,7 @@ func (TimeSheetService) ApproveBenefitTimeSheet(id string, userID string) error 
 		return err
 	}
 
-	err = helper.SendNotificationToTrainer(detailAccount.Email, detailUser.Name, "Approved", "Manager")
+	err = helper.SendNotificationToTrainer(detailAccount.Email, detailUser.Name, "Approved", "Benefit")
 	if err != nil {
 		log.Error().Msgf("Failed to send approval email: %v", err)
 		return err
@@ -643,7 +652,7 @@ func (TimeSheetService) RejectBenefitTimeSheet(id string, userID string) error {
 		return err
 	}
 
-	err = helper.SendNotificationToTrainer(detailAccount.Email, detailUser.Name, "Rejected", "Manager")
+	err = helper.SendNotificationToTrainer(detailAccount.Email, detailUser.Name, "Rejected", "Benefit")
 	if err != nil {
 		log.Error().Msgf("Failed to send approval email: %v", err)
 		return err

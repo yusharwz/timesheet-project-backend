@@ -193,6 +193,8 @@ func (TimeSheetRepository) GetManagerEmails() ([]string, error) {
 		Select("email").
 		Joins("JOIN roles ON accounts.role_id = roles.id").
 		Where("roles.role_name = ?", "manager").
+		Where("accounts.deleted_at IS NULL").
+		Where("accounts.is_active = ?", true).
 		Pluck("email", &emails).Error
 
 	if err != nil {
@@ -209,6 +211,8 @@ func (TimeSheetRepository) GetBenefitEmails() ([]string, error) {
 		Select("email").
 		Joins("JOIN roles ON accounts.role_id = roles.id").
 		Where("roles.role_name = ?", "benefit").
+		Where("accounts.deleted_at IS NULL").
+		Where("accounts.is_active = ?", true).
 		Pluck("email", &emails).Error
 
 	if err != nil {
