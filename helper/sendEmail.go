@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"sync"
 
 	"gopkg.in/gomail.v2"
 )
@@ -66,7 +67,8 @@ func SendNotificationToTrainer(email, name, status, statusBy string) error {
 	return nil
 }
 
-func SendNotificationToManager(email, name string) error {
+func SendNotificationToManager(email, name string, wg *sync.WaitGroup, sem chan struct{}) error {
+	defer wg.Done()
 	emailPort, _ := strconv.Atoi(os.Getenv("EMAIL_PORT"))
 	link := fmt.Sprintf("%s/approvals/on-progress", os.Getenv("HOST_FRONTEND"))
 
@@ -84,7 +86,8 @@ func SendNotificationToManager(email, name string) error {
 	return nil
 }
 
-func SendNotificationToBenefit(email, name string) error {
+func SendNotificationToBenefit(email, name string, wg *sync.WaitGroup, sem chan struct{}) error {
+	defer wg.Done()
 	emailPort, _ := strconv.Atoi(os.Getenv("EMAIL_PORT"))
 	link := fmt.Sprintf("%s/approvals/on-progress", os.Getenv("HOST_FRONTEND"))
 

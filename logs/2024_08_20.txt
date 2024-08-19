@@ -1,0 +1,4 @@
+{"level":"error","time":"20-08-2024 01:11:23","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/timesheet-project/backend/repository/impl/authRepositoryImpl.go:97","message":"Account is not active"}
+{"level":"error","time":"20-08-2024 01:11:23","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/timesheet-project/backend/service/impl/authServiceImpl.go:83","message":"account is not active"}
+{"level":"error","time":"20-08-2024 01:11:37","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/timesheet-project/backend/service/impl/authServiceImpl.go:98","message":"Invalid email or password"}
+{"level":"error","time":"20-08-2024 01:11:51","caller":"C:/Users/YUSHAR/Documents/Golang/Golang-Fundamental/Incubation Enigma Camp/timesheet-project/backend/service/impl/authServiceImpl.go:98","message":"Invalid email or password"}
