@@ -68,6 +68,7 @@ func (*WorkController) UpdateWork(c *gin.Context) {
 	result, err := workService.UpdateWork(id, r)
 	if err != nil {
 		response.NewResponseError(c, err.Error())
+		return
 	}
 
 	response.NewResponseSuccess(c, result)
@@ -92,6 +93,7 @@ func (WorkController) DeleteWork(c *gin.Context) {
 	err := workService.DeleteWork(id)
 	if err != nil {
 		response.NewResponseError(c, err.Error())
+		return
 	}
 
 	response.NewResponseSuccess(c, nil)
