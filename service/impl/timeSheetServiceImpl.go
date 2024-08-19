@@ -2,8 +2,10 @@ package impl
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"timesheet-app/dto/request"
 	"timesheet-app/dto/response"
@@ -520,12 +522,19 @@ func (TimeSheetService) ApproveManagerTimeSheet(id string, userID string) error 
 		return err
 	}
 
+	var wg sync.WaitGroup
+	const maxConcurrent = 8
+	sem := make(chan struct{}, maxConcurrent)
 	for _, email := range emails {
-		err := helper.SendNotificationToBenefit(email, detailUser.Name)
-		if err != nil {
-			log.Error().Msg(err.Error())
-			continue
-		}
+		wg.Add(1)
+		sem <- struct{}{}
+
+		go func(e string) {
+			defer func() { <-sem }()
+			if err := helper.SendNotificationToBenefit(e, detailUser.Name, &wg, sem); err != nil {
+				fmt.Println("Error:", err)
+			}
+		}(email)
 	}
 
 	return nil
@@ -685,12 +694,19 @@ func (TimeSheetService) UpdateTimeSheetStatus(id string) error {
 		return err
 	}
 
+	var wg sync.WaitGroup
+	const maxConcurrent = 8
+	sem := make(chan struct{}, maxConcurrent)
 	for _, email := range emails {
-		err := helper.SendNotificationToManager(email, detailUser.Name)
-		if err != nil {
-			log.Error().Msg(err.Error())
-			continue
-		}
+		wg.Add(1)
+		sem <- struct{}{}
+
+		go func(e string) {
+			defer func() { <-sem }()
+			if err := helper.SendNotificationToManager(e, detailUser.Name, &wg, sem); err != nil {
+				fmt.Println("Error:", err)
+			}
+		}(email)
 	}
 
 	return nil
